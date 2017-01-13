@@ -8,6 +8,9 @@ project(simplicial CXX)
 #   * Boost
 # include_directories($ENV{USER_LIBS})
 
+set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
+include_directories(${EIGEN3_INCLUDE_DIR})
+
 include_directories("./lib")
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")

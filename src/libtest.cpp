@@ -97,8 +97,12 @@ int main() {
 
     auto g = sc.get_boundary(1);
     std::cout << g << std::endl;
+    g = sc.get_boundary(0);
+    std::cout << g << std::endl;
 
     g = sq.get_boundary(1);
+    std::cout << g << std::endl;
+    g = sq.get_boundary(0);
     std::cout << g << std::endl;
 
     return 0;

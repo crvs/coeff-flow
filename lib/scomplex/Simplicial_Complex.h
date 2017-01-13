@@ -3,9 +3,13 @@
 
 #include <string.h>
 
+/*
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/vector_sparse.hpp>
 #include <boost/numeric/ublas/io.hpp>
+*/
+
+#include <Eigen/Sparse>
 
 #include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
 #include <gudhi/Simplex_tree.h>
@@ -21,7 +25,7 @@
 template <typename point_t>
 class SimplicialComplex {
    private:
-    typedef typename boost::numeric::ublas::compressed_matrix<int> matrix_t;
+    typedef typename Eigen::SparseMatrix<double> matrix_t;
 
     struct SimpleOptions : Gudhi::Simplex_tree_options_full_featured {
         // simplex tree options
@@ -185,7 +189,7 @@ class SimplicialComplex {
             for (auto bs : simplices.boundary_simplex_range(s)) {
                 int i = simplices.key(bs);
                 int k = simplices.dimension(bs);
-                boundary_matrices.at(k)(i, j) =
+                boundary_matrices.at(k).coeffRef(i, j) =
                     boundary_inclusion_orientation(bs, s);
             }
         }
