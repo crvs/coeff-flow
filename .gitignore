@@ -1,0 +1,10 @@
+# build directory
+/build
+
+# vim files
+*~
+.*.swp
+.*.swp~
+.*.un
+.*.un~
+
