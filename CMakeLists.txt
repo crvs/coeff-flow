@@ -2,16 +2,13 @@ cmake_minimum_required(VERSION 2.8)
 project(simplicial CXX)
 
 
-# user libraries should include GUDHI
-# requirements:
+# requirements: CHANGE HERE!!!
 #   * Gudhi
-#   * Boost
-# include_directories($ENV{USER_LIBS})
-
+include_directories("./lib")
+#   * Eigen3
 set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
 include_directories(${EIGEN3_INCLUDE_DIR})
-
-include_directories("./lib")
+# end requirementes
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 

@@ -1,14 +1,6 @@
 #ifndef SIMPLICIAL_COMPLEX
 #define SIMPLICIAL_COMPLEX
 
-#include <string.h>
-
-/*
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <boost/numeric/ublas/vector_sparse.hpp>
-#include <boost/numeric/ublas/io.hpp>
-*/
-
 #include <Eigen/Sparse>
 
 #include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
@@ -22,9 +14,13 @@
 // further it needs a begin() function call. Mostly it needs to behave like a
 // std::vector
 
+namespace simplicial {
+typedef std::pair<int, std::vector<double>> chain_t;
+
 template <typename point_t>
 class SimplicialComplex {
    private:
+    // the type of matrix to be used
     typedef typename Eigen::SparseMatrix<double> matrix_t;
 
     struct SimpleOptions : Gudhi::Simplex_tree_options_full_featured {
@@ -35,18 +31,12 @@ class SimplicialComplex {
     typedef typename Gudhi::Simplex_tree<SimpleOptions>::Simplex_handle
         Simplex_handle;
 
-   public:
-    matrix_t get_boundary(int d) {
-        if (boundary_matrices.size() == 0) {
-            calculate_matrices();
-        }
-        if (d < boundary_matrices.size()) {
-            return boundary_matrices.at(d);
-        } else {
-            return matrix_t(0, 0);
-        }
-    }
+    typedef std::vector<Simplex_handle*> level_t;
+    typedef std::vector<level_t> levels_t;
 
+    // std::vector<std::vector<Simplex_handle&>> levels;
+
+   public:
     std::list<point_t> points;
     SimplexTree simplices;
 
@@ -75,15 +65,29 @@ class SimplicialComplex {
 
         // we need to count i--simplices in order to get a key for them
         std::vector<int> count = std::vector<int>(simplices.dimension() + 1, 0);
+        levels_t levels;
+        levels = levels_t(simplices.dimension() + 1, level_t());
 
         auto simplex_range = simplices.complex_simplex_range();
         for (auto s : simplex_range) {
             int d = simplices.dimension(s);
             simplices.assign_key(s, count.at(d)++);
+            levels.at(d).push_back(&s);
             auto v_range = simplices.simplex_vertex_range(s);
             auto sbd = simplices.boundary_simplex_range(s);
         }
         dimensions = count;
+    }
+
+    matrix_t get_boundary(int d) {
+        if (boundary_matrices.size() == 0) {
+            calculate_matrices();
+        }
+        if (d < boundary_matrices.size()) {
+            return boundary_matrices.at(d);
+        } else {
+            return matrix_t(0, 0);
+        }
     }
 
     SimplicialComplex<point_t> quotient(int f(point_t)) {
@@ -141,11 +145,6 @@ class SimplicialComplex {
      */
     bool is_geometric() { return geometric_q; }
 
-    std::string print_level(int level) {
-        std::string out;
-        return out;
-    }
-
    private:
     bool geometric_q;
     std::vector<int> dimensions;
@@ -161,19 +160,59 @@ class SimplicialComplex {
     }
 
     // need to do the boundary inclusion crap (you know what I mean)
-    int boundary_inclusion_orientation(Simplex_handle s_1, Simplex_handle s_2) {
-        // s1 includes into s2
+    int boundary_inclusion_orientation(Simplex_handle s_1, Simplex_handle s_2,
+                                       bool verify = false) {
+        // s1 has to include into s2
         auto it_1 = simplices.simplex_vertex_range(s_1).begin();
+        auto end_1 = simplices.simplex_vertex_range(s_1).end();
+
         auto it_2 = simplices.simplex_vertex_range(s_2).begin();
+        auto end_2 = simplices.simplex_vertex_range(s_2).end();
+
+        if (verify) {
+            assert(simplices.dimension(s_1) == simplices.dimension(s_2) - 1);
+        }
+
         int orient = 0;
-        for (int p = 0; p <= simplices.dimension(s_1); p++) {
-            if (it_1 != it_2) {
+        int unmatch = 0;
+
+        /*
+        std::cout << std::endl
+                  << "--> simplices: ";
+        auto v_range = simplices.simplex_vertex_range(s_1);
+        for (auto v : v_range) std::cout << v << " ";
+        std::cout << "; ";
+        v_range = simplices.simplex_vertex_range(s_2);
+        for (auto v : v_range) std::cout << v << " ";
+        std::cout << std::endl;
+        */
+
+        for (int p = 0; p <= simplices.dimension(s_2); p++) {
+            if (*it_1 != *it_2) {
+                /*
+                std::cout << "mismatch " << p << ": " << *it_1 << " " << *it_2;
                 it_2++;
-                orient = p;
+                */
+                orient = p++;
+                /*
+                std::cout << " after " << p << " " << *it_1 << " " << *it_2
+                          << std::endl;
+                          */
+                unmatch++;
+
             } else {
-                it_1++;
+                if (it_1 != end_1) {
+                    it_1++;
+                }
                 it_2++;
             }
+        }
+        if (true) {
+            /*
+                std::cout << "mismatch: " << unmatch << " ; "
+                          << "orientation: " << orient << " ; ";
+                //    assert(unmatch == 1);
+                */
         }
         return pow(-1, orient);
     }
@@ -190,7 +229,7 @@ class SimplicialComplex {
                 int i = simplices.key(bs);
                 int k = simplices.dimension(bs);
                 boundary_matrices.at(k).coeffRef(i, j) =
-                    boundary_inclusion_orientation(bs, s);
+                    boundary_inclusion_orientation(bs, s, true);
             }
         }
     }
@@ -203,6 +242,7 @@ class SimplicialComplex {
     }
 
     bool is_point(point_t pt) { return not(pt.size() == 0); }
+
     static std::list<int> dedupe_list(std::list<int> list) {
         // O(n log(n))
         std::set<int> no_reps;
@@ -215,6 +255,7 @@ class SimplicialComplex {
         }
         return no_reps_list;
     }
-};
+};  // class SimplicialComplex
 
-#endif
+};      // namespace simplicial
+#endif  // SIMPLICIAL_COMPLEX

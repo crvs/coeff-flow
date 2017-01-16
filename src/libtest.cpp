@@ -5,6 +5,7 @@
 
 typedef std::vector<float> point_t;
 typedef std::list<int> simp_t;
+typedef std::pair<int, std::vector<int>> chain_t;
 
 int f(point_t a) {
     int b;
@@ -25,7 +26,7 @@ int main() {
     simp_list.push_back(simp_t({0, 1, 2}));
     simp_list.push_back(simp_t({1, 2, 3}));
 
-    auto sc = SimplicialComplex<point_t>(point_list, simp_list);
+    auto sc = simplicial::SimplicialComplex<point_t>(point_list, simp_list);
 
     auto range = sc.simplices.complex_simplex_range();
     for (auto s : range) {
@@ -95,6 +96,7 @@ int main() {
         std::cout << std::endl;
     }
 
+    // checking the matrices
     auto g = sc.get_boundary(1);
     std::cout << g << std::endl;
     g = sc.get_boundary(0);
