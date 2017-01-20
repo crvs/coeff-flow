@@ -1,3 +1,27 @@
+/**
+ * @file Simplicial_Complex.h
+ * @brief  utilities to create and manipulate geometric simplicial complexes
+ * @author Joao Carvalho
+ * @version 0.1
+ * @date 2017-01-20
+ *
+ * Copyright (C)
+ * 2017 - Joao Carvalho
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ *
+ */
 #ifndef SIMPLICIAL_COMPLEX
 #define SIMPLICIAL_COMPLEX
 
@@ -34,11 +58,25 @@ class SimplicialComplex {
     typedef std::vector<Simplex_handle*> level_t;
     typedef std::vector<level_t> levels_t;
 
-    // std::vector<std::vector<Simplex_handle&>> levels;
-
    public:
-    std::list<point_t> points;
+    std::vector<std::vector<int>> get_level(int dimen) {
+        std::vector<std::vector<int>> level;
+        for (auto simp : simplices.complex_simplex_range()) {
+            if (simplices.dimension(simp) == dimen) {
+                std::vector<int> v_simp;
+                for (auto v : simplices.simplex_vertex_range(simp)) {
+                    v_simp.push_back(v);
+                }
+                level.push_back(v_simp);
+            }
+        }
+        return level;
+    }
+
+    std::vector<point_t> points;
     SimplexTree simplices;
+
+    int get_dimension(int level) { return dimensions.at(level); }
 
     SimplicialComplex<point_t>() { geometric_q = true; }
 
@@ -51,7 +89,10 @@ class SimplicialComplex {
     SimplicialComplex<point_t>(std::list<point_t> points_a,
                                std::list<std::list<int>> tris) {
         geometric_q = true;
-        points = points_a;
+        points = std::vector<point_t>();
+        for (auto pt : points_a) {
+            points.push_back(pt);
+        }
         for (auto s : tris) {
             // cant have simplices with repeated vertices so we dedupe the lists
             simplices.insert_simplex_and_subfaces(dedupe_list(s));
@@ -108,8 +149,8 @@ class SimplicialComplex {
                 if (geometric) {
                     // need to realize that it is not geometric, (flip geometric
                     // and add the virtual point
-                    auto pos = points.begin();
-                    points.insert(pos, point_t());
+                    auto pos = q_points.begin();
+                    q_points.insert(pos, point_t());
                     geometric = false;
                 }
                 corresp.push_back(0);
@@ -176,28 +217,9 @@ class SimplicialComplex {
         int orient = 0;
         int unmatch = 0;
 
-        /*
-        std::cout << std::endl
-                  << "--> simplices: ";
-        auto v_range = simplices.simplex_vertex_range(s_1);
-        for (auto v : v_range) std::cout << v << " ";
-        std::cout << "; ";
-        v_range = simplices.simplex_vertex_range(s_2);
-        for (auto v : v_range) std::cout << v << " ";
-        std::cout << std::endl;
-        */
-
         for (int p = 0; p <= simplices.dimension(s_2); p++) {
             if (*it_1 != *it_2) {
-                /*
-                std::cout << "mismatch " << p << ": " << *it_1 << " " << *it_2;
-                it_2++;
-                */
                 orient = p++;
-                /*
-                std::cout << " after " << p << " " << *it_1 << " " << *it_2
-                          << std::endl;
-                          */
                 unmatch++;
 
             } else {
@@ -206,13 +228,6 @@ class SimplicialComplex {
                 }
                 it_2++;
             }
-        }
-        if (true) {
-            /*
-                std::cout << "mismatch: " << unmatch << " ; "
-                          << "orientation: " << orient << " ; ";
-                //    assert(unmatch == 1);
-                */
         }
         return pow(-1, orient);
     }
@@ -234,11 +249,12 @@ class SimplicialComplex {
         }
     }
 
-    int quick_dim(Simplex_handle s) const {
+    int quick_dim(Simplex_handle s) {
         int s_dim = 0;
         for (auto v : simplices.simplex_vertex_range(s)) {
             s_dim++;
         }
+        return s_dim;
     }
 
     bool is_point(point_t pt) { return not(pt.size() == 0); }

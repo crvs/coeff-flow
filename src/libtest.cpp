@@ -1,9 +1,14 @@
 #include <scomplex/Simplicial_Complex.h>
+#include <scomplex/utils.h>
+#include <scomplex/trace.h>
+
+#include "boost/graph/dijkstra_shortest_paths.hpp"
 
 #include <iostream>
 #include <vector>
+#include <string>
 
-typedef std::vector<float> point_t;
+typedef std::vector<double> point_t;
 typedef std::list<int> simp_t;
 typedef std::pair<int, std::vector<int>> chain_t;
 
@@ -26,7 +31,10 @@ int main() {
     simp_list.push_back(simp_t({0, 1, 2}));
     simp_list.push_back(simp_t({1, 2, 3}));
 
-    auto sc = simplicial::SimplicialComplex<point_t>(point_list, simp_list);
+    simplicial::SimplicialComplex<point_t> sc(point_list, simp_list);
+    for (auto pt : sc.points) {
+        std::cout << pt.at(0) << " " << pt.at(1) << std::endl;
+    }
 
     auto range = sc.simplices.complex_simplex_range();
     for (auto s : range) {
@@ -57,9 +65,9 @@ int main() {
         std::cout << std::endl;
     }
 
-    auto sq = sc.quotient(f);
-    std::cout << std::endl;
     std::cout << "now quotient" << std::endl;
+    auto sq = sc.quotient(f);
+
     /* the points are working, what's up with the simplices??
     for (auto p : sq.points) {
         std::cout << "point: " << p.at(0) << " " << p.at(1) << std::endl;
@@ -95,6 +103,7 @@ int main() {
         }
         std::cout << std::endl;
     }
+    std::cout << "got this far" << std::endl;
 
     // checking the matrices
     auto g = sc.get_boundary(1);
@@ -106,6 +115,17 @@ int main() {
     std::cout << g << std::endl;
     g = sq.get_boundary(0);
     std::cout << g << std::endl;
+
+    std::cout << "printing level: " << std::endl;
+    for (auto s : sq.get_level(1)) {
+        std::cout << s.size() << ": ";
+        std::cout << s.at(0) << " ";
+        std::cout << s.at(1) << " ";
+        std::cout << std::endl;
+    }
+
+    auto G = get_one_skelleton_graph(sc);
+    // boost::graph::dijkstra_shortest_path(0, 1);
 
     return 0;
 }
