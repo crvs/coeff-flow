@@ -1,11 +1,31 @@
+/**
+ * @file Simplicial_Complex.h
+ * @brief  utilities to create and manipulate geometric simplicial complexes
+ * @author Joao Carvalho
+ * @version 0.1
+ * @date 2017-01-20
+ *
+ * Copyright (C)
+ * 2017 - Joao Carvalho
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ *
+ */
 #ifndef SIMPLICIAL_COMPLEX
 #define SIMPLICIAL_COMPLEX
 
-#include <string.h>
-
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <boost/numeric/ublas/vector_sparse.hpp>
-#include <boost/numeric/ublas/io.hpp>
+#include <Eigen/Sparse>
 
 #include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
 #include <gudhi/Simplex_tree.h>
@@ -18,10 +38,14 @@
 // further it needs a begin() function call. Mostly it needs to behave like a
 // std::vector
 
+namespace simplicial {
+typedef std::pair<int, std::vector<double>> chain_t;
+
 template <typename point_t>
 class SimplicialComplex {
    private:
-    typedef typename boost::numeric::ublas::compressed_matrix<int> matrix_t;
+    // the type of matrix to be used
+    typedef typename Eigen::SparseMatrix<double> matrix_t;
 
     struct SimpleOptions : Gudhi::Simplex_tree_options_full_featured {
         // simplex tree options
@@ -31,20 +55,28 @@ class SimplicialComplex {
     typedef typename Gudhi::Simplex_tree<SimpleOptions>::Simplex_handle
         Simplex_handle;
 
+    typedef std::vector<Simplex_handle*> level_t;
+    typedef std::vector<level_t> levels_t;
+
    public:
-    matrix_t get_boundary(int d) {
-        if (boundary_matrices.size() == 0) {
-            calculate_matrices();
+    std::vector<std::vector<int>> get_level(int dimen) {
+        std::vector<std::vector<int>> level;
+        for (auto simp : simplices.complex_simplex_range()) {
+            if (simplices.dimension(simp) == dimen) {
+                std::vector<int> v_simp;
+                for (auto v : simplices.simplex_vertex_range(simp)) {
+                    v_simp.push_back(v);
+                }
+                level.push_back(v_simp);
+            }
         }
-        if (d < boundary_matrices.size()) {
-            return boundary_matrices.at(d);
-        } else {
-            return matrix_t(0, 0);
-        }
+        return level;
     }
 
-    std::list<point_t> points;
+    std::vector<point_t> points;
     SimplexTree simplices;
+
+    int get_dimension(int level) { return dimensions.at(level); }
 
     SimplicialComplex<point_t>() { geometric_q = true; }
 
@@ -57,7 +89,10 @@ class SimplicialComplex {
     SimplicialComplex<point_t>(std::list<point_t> points_a,
                                std::list<std::list<int>> tris) {
         geometric_q = true;
-        points = points_a;
+        points = std::vector<point_t>();
+        for (auto pt : points_a) {
+            points.push_back(pt);
+        }
         for (auto s : tris) {
             // cant have simplices with repeated vertices so we dedupe the lists
             simplices.insert_simplex_and_subfaces(dedupe_list(s));
@@ -71,15 +106,29 @@ class SimplicialComplex {
 
         // we need to count i--simplices in order to get a key for them
         std::vector<int> count = std::vector<int>(simplices.dimension() + 1, 0);
+        levels_t levels;
+        levels = levels_t(simplices.dimension() + 1, level_t());
 
         auto simplex_range = simplices.complex_simplex_range();
         for (auto s : simplex_range) {
             int d = simplices.dimension(s);
             simplices.assign_key(s, count.at(d)++);
+            levels.at(d).push_back(&s);
             auto v_range = simplices.simplex_vertex_range(s);
             auto sbd = simplices.boundary_simplex_range(s);
         }
         dimensions = count;
+    }
+
+    matrix_t get_boundary(int d) {
+        if (boundary_matrices.size() == 0) {
+            calculate_matrices();
+        }
+        if (d < boundary_matrices.size()) {
+            return boundary_matrices.at(d);
+        } else {
+            return matrix_t(0, 0);
+        }
     }
 
     SimplicialComplex<point_t> quotient(int f(point_t)) {
@@ -100,8 +149,8 @@ class SimplicialComplex {
                 if (geometric) {
                     // need to realize that it is not geometric, (flip geometric
                     // and add the virtual point
-                    auto pos = points.begin();
-                    points.insert(pos, point_t());
+                    auto pos = q_points.begin();
+                    q_points.insert(pos, point_t());
                     geometric = false;
                 }
                 corresp.push_back(0);
@@ -137,11 +186,6 @@ class SimplicialComplex {
      */
     bool is_geometric() { return geometric_q; }
 
-    std::string print_level(int level) {
-        std::string out;
-        return out;
-    }
-
    private:
     bool geometric_q;
     std::vector<int> dimensions;
@@ -157,17 +201,31 @@ class SimplicialComplex {
     }
 
     // need to do the boundary inclusion crap (you know what I mean)
-    int boundary_inclusion_orientation(Simplex_handle s_1, Simplex_handle s_2) {
-        // s1 includes into s2
+    int boundary_inclusion_orientation(Simplex_handle s_1, Simplex_handle s_2,
+                                       bool verify = false) {
+        // s1 has to include into s2
         auto it_1 = simplices.simplex_vertex_range(s_1).begin();
+        auto end_1 = simplices.simplex_vertex_range(s_1).end();
+
         auto it_2 = simplices.simplex_vertex_range(s_2).begin();
+        auto end_2 = simplices.simplex_vertex_range(s_2).end();
+
+        if (verify) {
+            assert(simplices.dimension(s_1) == simplices.dimension(s_2) - 1);
+        }
+
         int orient = 0;
-        for (int p = 0; p <= simplices.dimension(s_1); p++) {
-            if (it_1 != it_2) {
-                it_2++;
-                orient = p;
+        int unmatch = 0;
+
+        for (int p = 0; p <= simplices.dimension(s_2); p++) {
+            if (*it_1 != *it_2) {
+                orient = p++;
+                unmatch++;
+
             } else {
-                it_1++;
+                if (it_1 != end_1) {
+                    it_1++;
+                }
                 it_2++;
             }
         }
@@ -185,20 +243,22 @@ class SimplicialComplex {
             for (auto bs : simplices.boundary_simplex_range(s)) {
                 int i = simplices.key(bs);
                 int k = simplices.dimension(bs);
-                boundary_matrices.at(k)(i, j) =
-                    boundary_inclusion_orientation(bs, s);
+                boundary_matrices.at(k).coeffRef(i, j) =
+                    boundary_inclusion_orientation(bs, s, true);
             }
         }
     }
 
-    int quick_dim(Simplex_handle s) const {
+    int quick_dim(Simplex_handle s) {
         int s_dim = 0;
         for (auto v : simplices.simplex_vertex_range(s)) {
             s_dim++;
         }
+        return s_dim;
     }
 
     bool is_point(point_t pt) { return not(pt.size() == 0); }
+
     static std::list<int> dedupe_list(std::list<int> list) {
         // O(n log(n))
         std::set<int> no_reps;
@@ -211,6 +271,7 @@ class SimplicialComplex {
         }
         return no_reps_list;
     }
-};
+};  // class SimplicialComplex
 
-#endif
+};      // namespace simplicial
+#endif  // SIMPLICIAL_COMPLEX
