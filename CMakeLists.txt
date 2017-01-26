@@ -12,6 +12,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 
 # header files
 
+set(CMAKE_BUILD_TYPE Debug)
 include_directories("./lib")
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 

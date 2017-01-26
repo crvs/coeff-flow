@@ -2,7 +2,7 @@
 #include <scomplex/utils.h>
 #include <scomplex/trace.h>
 
-#include "boost/graph/dijkstra_shortest_paths.hpp"
+#include "boost/graph/graph_traits.hpp"
 
 #include <iostream>
 #include <vector>
@@ -12,11 +12,7 @@ typedef std::vector<double> point_t;
 typedef std::list<int> simp_t;
 typedef std::pair<int, std::vector<int>> chain_t;
 
-int f(point_t a) {
-    int b;
-    b = a.at(0) < .5 ? 0 : 1;
-    return b;
-}
+int f(point_t a) { return a.at(0) < .5 ? 0 : 1; }
 
 int main() {
     std::list<point_t> point_list;
@@ -124,8 +120,10 @@ int main() {
         std::cout << std::endl;
     }
 
-    auto G = get_one_skelleton_graph(sc);
-    // boost::graph::dijkstra_shortest_path(0, 1);
+    auto G = calculate_one_skelleton_graph(sc);
+    auto zero = Vertex(0, G);
+    auto one = Vertex(1, G);
+    auto shortest_path(G, zero, one)
 
-    return 0;
+        return 0;
 }
