@@ -20,7 +20,7 @@ int main() {
     // ---
 
     point_list.push_back(point_t({0, 0}));
-    point_list.push_back(point_t({0, 1}));
+    point_list.push_back(point_t({0, 5}));
     point_list.push_back(point_t({1, 0}));
     point_list.push_back(point_t({1, 1}));
 
@@ -121,9 +121,14 @@ int main() {
     }
 
     auto G = calculate_one_skelleton_graph(sc);
-    auto zero = Vertex(0, G);
-    auto one = Vertex(1, G);
-    auto shortest_path(G, zero, one)
+    auto p = shortest_path(G, 0, 3);
 
-        return 0;
+    typedef typename decltype(G)::vertex_descriptor vertex_t;
+
+    std::cout << '\n';
+    std::copy(p.begin(), p.end(),
+              std::ostream_iterator<vertex_t>{std::cout, " "});
+    std::cout << '\n';
+
+    return 0;
 }

@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "boost/array.hpp"
+//#include "boost/container/scoped_array.hpp"
 #include "boost/graph/visitors.hpp"
 #include "boost/graph/adjacency_list.hpp"
 #include "boost/graph/named_function_params.hpp"
@@ -75,7 +76,8 @@ int main() {
     }
     std::cout << p << '\n';
 
-    boost::array<int, 4> directions;
+    const int N = 4;
+    boost::array<int, N> directions;
     boost::dijkstra_shortest_paths(  //
         g,                           //
         1,                           //
