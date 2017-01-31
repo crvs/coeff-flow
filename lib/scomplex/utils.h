@@ -62,7 +62,7 @@ Graph calculate_one_skelleton_graph(
 typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
 
 // calculate shortest paths:
-std::vector<Vertex> shortest_path(Graph g, Vertex s, Vertex t) {
+std::vector<Vertex> shortest_path(const Graph& g, Vertex s, Vertex t) {
     boost::vector_property_map<Vertex> predecessors(num_vertices(g));
 
     dijkstra_shortest_paths(g, s, predecessor_map(&predecessors[0]));
@@ -78,6 +78,35 @@ std::vector<Vertex> shortest_path(Graph g, Vertex s, Vertex t) {
     return s_t_path;
 
     // std::cout << "I'm calculating shortest paths\n";
+}
+
+std::vector<Vertex> complete_path(const Graph& g, std::vector<Vertex> vec) {
+    std::vector<Vertex>::iterator s{vec.begin()};
+    std::list<Vertex> full_path{*s};
+    while (s != vec.end()) {
+        std::vector<Vertex>::iterator t = std::next(s);
+        // calculate the path between s and t
+        std::vector<Vertex> path_portion{shortest_path(g, *s, *t)};
+
+        // add the path between s and t to the full path
+        for (Vertex vert : path_portion) {
+            // allways skip the first element since we are calculating the paths
+            // between s,t then s',t' where s' = t and that would make use of a
+            // non-existing edge.
+            if (vert != *path_portion.begin()) {
+                full_path.push_back(vert);
+            }
+        }
+
+        std::advance(s, 1);
+    }
+    // initialize with size so we don't have to relocate
+    std::vector<Vertex> full_path_vect(full_path.size());
+    for (Vertex vert : full_path) {
+        full_path_vect.push_back(vert);
+    }
+
+    return full_path_vect;
 }
 
 #endif
