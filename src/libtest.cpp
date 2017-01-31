@@ -130,5 +130,8 @@ int main() {
               std::ostream_iterator<vertex_t>{std::cout, " "});
     std::cout << '\n';
 
+    get_r_tree_from_points<2>(point_list);
+    // get_r_tree_from_points<2>(point_list);
+
     return 0;
 }
