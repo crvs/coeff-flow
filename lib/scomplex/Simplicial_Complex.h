@@ -22,23 +22,28 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
-#ifndef SIMPLICIAL_COMPLEX
-#define SIMPLICIAL_COMPLEX
+#ifndef QUOT_SIMPLICIAL_COMPLEX
+#define QUOT_SIMPLICIAL_COMPLEX
 
 #include <Eigen/Sparse>
 
 #include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
 #include <gudhi/Simplex_tree.h>
 
+#include <scomplex/base_utils.hpp>
+
 #include <math.h>
 #include <vector>
 #include <set>
+
+#include <typeinfo>
 
 // point_t needs to have an empty constructor, and a size() function call,
 // further it needs a begin() function call. Mostly it needs to behave like a
 // std::vector
 
 namespace simplicial {
+
 typedef std::pair<int, std::vector<double>> chain_t;
 
 template <typename point_t>
@@ -55,7 +60,7 @@ class SimplicialComplex {
     typedef typename Gudhi::Simplex_tree<SimpleOptions>::Simplex_handle
         Simplex_handle;
 
-    typedef std::vector<Simplex_handle*> level_t;
+    typedef std::vector<Simplex_handle *> level_t;
     typedef std::vector<level_t> levels_t;
 
    public:
@@ -201,18 +206,50 @@ class SimplicialComplex {
     }
 
     // need to do the boundary inclusion crap (you know what I mean)
-    int boundary_inclusion_orientation(Simplex_handle s_1, Simplex_handle s_2,
-                                       bool verify = false) {
+    int boundary_index(Simplex_handle s_1, Simplex_handle s_2) {
         // s1 has to include into s2
+
+        /*
+        int dim1 = simplices.dimension(s_1);
+        int dim2 = simplices.dimension(s_2);
+        decltype(s_1) bdry_h;
+        decltype(s_2) simp_h;
+        if (dim2 == dim1 - 1) {
+            simp_h = decltype(s_1)(s_1);
+            bdry_h = decltype(s_2)(s_2);
+        } else if (dim1 == dim2 - 1) {
+            simp_h = decltype(s_2)(s_2);
+            bdry_h = decltype(s_1)(s_1);
+        } else {
+            std::cerr << "CAN'T BE A BOUNDARY RELATION";
+            throw;
+        }
+
+        bool found = false;
+        int index = dim1;
+
+        // <--- this is not working need to find the parent!!
+        // simp_h = simp_h.parent();
+
+        auto someth = simp_h->second.children()->parent();
+        auto someth2 = someth.first;
+
+        std::cout << "simp_h: " << typeid(simp_h).name() << std::endl;
+        std::cout << "simp_h-fst: " << someth2 << std::endl;
+        std::cout << "someth: " << typeid(someth).name() << std::endl;
+        // std::cout << "someth-fst: " << someth2 << std::endl;
+
+        while (not found) { // <-- this is not working yet
+        if (simp_h == bdry_h) {found = true; index--;} else {index--;simp_h =
+        simp_h->parent;bdry_h=bdry_h->parent;}
+        }
+        */
+
         auto it_1 = simplices.simplex_vertex_range(s_1).begin();
         auto end_1 = simplices.simplex_vertex_range(s_1).end();
 
         auto it_2 = simplices.simplex_vertex_range(s_2).begin();
         auto end_2 = simplices.simplex_vertex_range(s_2).end();
-
-        if (verify) {
-            assert(simplices.dimension(s_1) == simplices.dimension(s_2) - 1);
-        }
 
         int orient = 0;
         int unmatch = 0;
@@ -243,34 +280,13 @@ class SimplicialComplex {
             for (auto bs : simplices.boundary_simplex_range(s)) {
                 int i = simplices.key(bs);
                 int k = simplices.dimension(bs);
-                boundary_matrices.at(k).coeffRef(i, j) =
-                    boundary_inclusion_orientation(bs, s, true);
+                boundary_matrices.at(k).coeffRef(i, j) = boundary_index(bs, s);
             }
         }
     }
 
-    int quick_dim(Simplex_handle s) {
-        int s_dim = 0;
-        for (auto v : simplices.simplex_vertex_range(s)) {
-            s_dim++;
-        }
-        return s_dim;
-    }
-
     bool is_point(point_t pt) { return not(pt.size() == 0); }
 
-    static std::list<int> dedupe_list(std::list<int> list) {
-        // O(n log(n))
-        std::set<int> no_reps;
-        std::list<int> no_reps_list;
-        for (int el : list) {
-            no_reps.insert(el);
-        }
-        for (int el : no_reps) {
-            no_reps_list.push_back(el);
-        }
-        return no_reps_list;
-    }
 };  // class SimplicialComplex
 
 };      // namespace simplicial

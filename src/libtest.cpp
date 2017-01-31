@@ -2,7 +2,7 @@
 #include <scomplex/utils.h>
 #include <scomplex/trace.h>
 
-#include "boost/graph/dijkstra_shortest_paths.hpp"
+#include "boost/graph/graph_traits.hpp"
 
 #include <iostream>
 #include <vector>
@@ -12,11 +12,7 @@ typedef std::vector<double> point_t;
 typedef std::list<int> simp_t;
 typedef std::pair<int, std::vector<int>> chain_t;
 
-int f(point_t a) {
-    int b;
-    b = a.at(0) < .5 ? 0 : 1;
-    return b;
-}
+int f(point_t a) { return a.at(0) < .5 ? 0 : 1; }
 
 int main() {
     std::list<point_t> point_list;
@@ -24,7 +20,7 @@ int main() {
     // ---
 
     point_list.push_back(point_t({0, 0}));
-    point_list.push_back(point_t({0, 1}));
+    point_list.push_back(point_t({0, 5}));
     point_list.push_back(point_t({1, 0}));
     point_list.push_back(point_t({1, 1}));
 
@@ -124,8 +120,15 @@ int main() {
         std::cout << std::endl;
     }
 
-    auto G = get_one_skelleton_graph(sc);
-    // boost::graph::dijkstra_shortest_path(0, 1);
+    auto G = calculate_one_skelleton_graph(sc);
+    auto p = shortest_path(G, 0, 3);
+
+    typedef typename decltype(G)::vertex_descriptor vertex_t;
+
+    std::cout << '\n';
+    std::copy(p.begin(), p.end(),
+              std::ostream_iterator<vertex_t>{std::cout, " "});
+    std::cout << '\n';
 
     return 0;
 }

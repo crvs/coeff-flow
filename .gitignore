@@ -1,10 +1,22 @@
-# build directory
+# ignore all files
+*
+
+# unignore directories
+!*/
+
+# ignore build directory
 /build
 
-# vim files
-*~
-.*.swp
-.*.swp~
-.*.un
-.*.un~
+# unignore source files
+!*.cpp
+!*.c
+!*.hpp
+!*.h
+!*.md
+
+# ignore all hidden files
+.*
+
+# unignore gitignore
+!/.gitignore
 
