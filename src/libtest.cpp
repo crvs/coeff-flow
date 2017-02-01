@@ -1,5 +1,6 @@
 #include <scomplex/Simplicial_Complex.h>
 #include <scomplex/utils.h>
+#include <scomplex/nn_utils.hpp>
 #include <scomplex/trace.h>
 
 #include "boost/graph/graph_traits.hpp"
@@ -125,10 +126,21 @@ int main() {
 
     typedef typename decltype(G)::vertex_descriptor vertex_t;
 
+    /*
     std::cout << '\n';
     std::copy(p.begin(), p.end(),
               std::ostream_iterator<vertex_t>{std::cout, " "});
     std::cout << '\n';
+    */
+
+    tree_t rt;
+    make_tree(rt, point_list);
+
+    point_t q{0.1, 0.2};
+    point_t q_prime = nearest_neighbour(rt, q);
+    // get_r_tree_from_points<2>(point_list);
+    std::ostream_iterator<double> outstr(std::cout, " ");
+    std::copy(q_prime.begin(), q_prime.end(), outstr);
 
     return 0;
 }

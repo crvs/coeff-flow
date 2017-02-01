@@ -1,19 +1,30 @@
 cmake_minimum_required(VERSION 2.8)
 project(simplicial CXX)
 
+# set(CMAKE_CXX_COMPILER_ID "Clang")
+# message("${CMAKE_CXX_COMPILER_ID}")
 
 # requirements: CHANGE LOCATIONS HERE!!!
-#   * Gudhi
-#   * Eigen3
+#   * Gudhi under /usr/include/gudhi
+#   * Eigen3 under /usr/include/eigen3
+#   * boost under /usr/include/boost
+#   * CGAL under /usr/include/CGAL
+#
 set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
 include_directories(${EIGEN3_INCLUDE_DIR})
-#   * boost
-# end requirementes
+set(CGAL_INCLUDE_DIR "/usr/local/include")
+include_directories(${CGAL_INCLUDE_DIR})
 
-# header files
+find_package(CGAL REQUIRED COMPONTENTS Core)
+include(${CGAL_USE_FILE})
+#
+# end_requirements
+
+
 
 set(CMAKE_BUILD_TYPE Debug)
 include_directories("./lib")
+
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
 set(STUPID_SOURCES "./src/main.cpp")
@@ -23,5 +34,6 @@ set(YOTHER_STUPID_SOURCES "./src/graphtest.cpp")
 add_executable(yother_stupid_test ${YOTHER_STUPID_SOURCES})
 
 # set(CMAKE_CXX_FLAGS "-lspatialindex_c -lspatialindex ${CMAKE_CXX_FLAGS}")
-set(OTHER_STUPID_SOURCES "./src/libtest.cpp")
+ set(OTHER_STUPID_SOURCES "./src/libtest.cpp")
 add_executable(my_other_stupid_test ${OTHER_STUPID_SOURCES})
+
