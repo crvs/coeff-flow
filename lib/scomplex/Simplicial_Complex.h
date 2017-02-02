@@ -31,6 +31,7 @@
 #include <gudhi/Simplex_tree.h>
 
 #include <scomplex/base_utils.hpp>
+// #include <scomplex/utils.h>
 
 #include <math.h>
 #include <vector>
@@ -43,7 +44,6 @@
 // std::vector
 
 namespace simplicial {
-
 typedef std::pair<int, std::vector<double>> chain_t;
 
 template <typename point_t>

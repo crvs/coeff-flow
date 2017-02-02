@@ -57,15 +57,15 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
         if (line_number == 0) {
             auto tokens = tokenize<int>(line);
             dimensionality = tokens.at(0);
-            std::cout << "found first line! dimensions == " << dimensionality
-                      << '\n';
+            // std::cout << "found first line! dimensions == " << dimensionality
+            //          << '\n';
         }
         // second line of the file (get number of points)
         if (line_number == 1) {
             auto tokens = tokenize<int>(line);
             total_points = tokens.at(0);
-            std::cout << "found second line! number of points == "
-                      << total_points << '\n';
+            // std::cout << "found second line! number of points == "
+            //          << total_points << '\n';
         }
         // lines pertaining to points
         if (line_number > 1 && line_number < total_points + 2) {
@@ -77,8 +77,9 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
         if (line_number == total_points + 2) {
             auto tokens = tokenize<int>(line);
             total_cells = tokens.at(0);
-            std::cout << "found cell count! number of cells == " << total_cells
-                      << '\n';
+            // std::cout << "found cell count! number of cells == " <<
+            // total_cells
+            //          << '\n';
         }
         // lines pertaining to cells
         if (line_number > total_points + 2 &&
