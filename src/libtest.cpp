@@ -2,12 +2,14 @@
 #include <scomplex/utils.h>
 #include <scomplex/nn_utils.hpp>
 #include <scomplex/trace.h>
+#include <scomplex/qhull_parsing.hpp>
 
 #include "boost/graph/graph_traits.hpp"
 
 #include <iostream>
 #include <vector>
 #include <string>
+#include <tuple>
 
 typedef std::vector<double> point_t;
 typedef std::list<int> simp_t;
@@ -142,5 +144,17 @@ int main() {
     std::ostream_iterator<double> outstr(std::cout, " ");
     std::copy(q_prime.begin(), q_prime.end(), outstr);
 
+    std::vector<point_t> points_v;
+    std::vector<cell_t> cells_v;
+    std::tie(points_v, cells_v) =
+        parse_qhull_file("/home/crvs/qhull-test/qh-test.dat");
+    std::list<point_t> points(points_v.begin(), points_v.end());
+    std::list<std::list<int>> cells;
+    for (auto cell_v : cells_v) {
+        std::list<int> cell(cell_v.begin(), cell_v.end());
+        cells.push_back(cell);
+    }
+
+    simplicial::SimplicialComplex<point_t> rsc(points, cells);
     return 0;
 }
