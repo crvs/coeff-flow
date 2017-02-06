@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <fstream>
@@ -32,6 +31,11 @@ void output_vector(std::vector<data_t> vec) {
 std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
     std::string filename) {
     std::ifstream file_stream(filename);
+
+    if (!file_stream.is_open()) {
+        throw std::runtime_error("failed to open \"" + filename + "\"\n");
+    }
+
     std::string line;
 
     int current_line_number{0};

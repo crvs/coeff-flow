@@ -1,8 +1,9 @@
 #include <scomplex/Simplicial_Complex.h>
 #include <scomplex/utils.h>
-#include <scomplex/nn_utils.hpp>
+//#include <scomplex/nn_utils.hpp>
 #include <scomplex/trace.h>
 #include <scomplex/qhull_parsing.hpp>
+#include <scomplex/path_snapper.hpp>
 
 #include "boost/graph/graph_traits.hpp"
 
@@ -128,18 +129,17 @@ int main() {
 
     typedef typename decltype(G)::vertex_descriptor vertex_t;
 
-    /*
     std::cout << '\n';
     std::copy(p.begin(), p.end(),
               std::ostream_iterator<vertex_t>{std::cout, " "});
     std::cout << '\n';
-    */
 
+    std::vector<point_t> point_vec{point_list.begin(), point_list.end()};
     tree_t rt;
-    make_tree(rt, point_list);
+    make_tree(rt, point_vec);
 
     point_t q{0.1, 0.2};
-    point_t q_prime = nearest_neighbour(rt, q);
+    point_t q_prime = nearest_neighbor(rt, q);
     // get_r_tree_from_points<2>(point_list);
     std::ostream_iterator<double> outstr(std::cout, " ");
     std::copy(q_prime.begin(), q_prime.end(), outstr);
@@ -147,7 +147,7 @@ int main() {
     std::vector<point_t> points_v;
     std::vector<cell_t> cells_v;
     std::tie(points_v, cells_v) =
-        parse_qhull_file("/home/crvs/qhull-test/qh-test.dat");
+        parse_qhull_file("/home/crvs/dev-cpp/examples/qhull-test/qh-test.dat");
     std::list<point_t> points(points_v.begin(), points_v.end());
     std::list<std::list<int>> cells;
     for (auto cell_v : cells_v) {
@@ -156,5 +156,12 @@ int main() {
     }
 
     simplicial::SimplicialComplex<point_t> rsc(points, cells);
+
+    snap::path_snapper snapper(rsc);
+
+    std::cout << "\n";
+    auto path = snapper.snap_path({{-1, -1}, {1, 1}});
+    std::copy(path.begin(), path.end(),
+              std::ostream_iterator<size_t>(std::cout, " "));
     return 0;
 }

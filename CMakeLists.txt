@@ -34,6 +34,8 @@ set(YOTHER_STUPID_SOURCES "./src/graphtest.cpp")
 add_executable(yother_stupid_test ${YOTHER_STUPID_SOURCES})
 
 # set(CMAKE_CXX_FLAGS "-lspatialindex_c -lspatialindex ${CMAKE_CXX_FLAGS}")
- set(OTHER_STUPID_SOURCES "./src/libtest.cpp")
+set(OTHER_STUPID_SOURCES "./src/libtest.cpp")
 add_executable(my_other_stupid_test ${OTHER_STUPID_SOURCES})
+
+add_executable(nn_test "./src/nn_test")
 
