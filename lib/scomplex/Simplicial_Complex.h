@@ -1,27 +1,3 @@
-/**
- * @file Simplicial_Complex.h
- * @brief  utilities to create and manipulate geometric simplicial complexes
- * @author Joao Carvalho
- * @version 0.1
- * @date 2017-01-20
- *
- * Copyright (C)
- * 2017 - Joao Carvalho
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
- */
 #pragma once
 
 #include <Eigen/Sparse>
@@ -182,6 +158,11 @@ class SimplicialComplex {
      */
     bool is_geometric() { return geometric_q; }
 
+    size_t get_simplex_index(simplex_t simp) {
+        auto sh = simplices.find(simp);
+        return simplices.key(sh);
+    }
+
    private:
     bool geometric_q;
     std::vector<int> dimensions;
@@ -196,7 +177,7 @@ class SimplicialComplex {
         return v_set;
     }
 
-    // need to do the boundary inclusion crap (you know what I mean)
+    // calculate the index of s_1 in the boundary of s_2
     int boundary_index(Simplex_handle s_1, Simplex_handle s_2) {
         auto it_1 = simplices.simplex_vertex_range(s_1).begin();
         auto end_1 = simplices.simplex_vertex_range(s_1).end();

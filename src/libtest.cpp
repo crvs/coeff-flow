@@ -1,6 +1,5 @@
 #include <scomplex/Simplicial_Complex.h>
 #include <scomplex/utils.h>
-//#include <scomplex/nn_utils.hpp>
 #include <scomplex/trace.h>
 #include <scomplex/qhull_parsing.hpp>
 #include <scomplex/path_snapper.hpp>
@@ -67,12 +66,6 @@ int main() {
 
     std::cout << "now quotient" << std::endl;
     auto sq = sc.quotient(f);
-
-    /* the points are working, what's up with the simplices??
-    for (auto p : sq.points) {
-        std::cout << "point: " << p.at(0) << " " << p.at(1) << std::endl;
-    }
-    */
 
     range = sq.simplices.complex_simplex_range();
     std::cout << "got this far" << std::endl;
