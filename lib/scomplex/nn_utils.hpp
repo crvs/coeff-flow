@@ -4,18 +4,18 @@
 #include <algorithm>
 
 #include <CGAL/Kd_tree.h>
-
 #include <CGAL/Search_traits_d.h>
 #include <CGAL/Search_traits_adapter.h>
 #include <CGAL/Cartesian_d.h>
 #include <CGAL/K_neighbor_search.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
+
 #include <boost/tuple/tuple.hpp>
 
 typedef std::vector<double> point_t;
 
-// kd-tree point type
-typedef CGAL::Cartesian_d<double>::Point_d point_d;  // d-dimensional point
+// kd-tree point type, d-dimensional point
+typedef CGAL::Cartesian_d<double>::Point_d point_d;
 
 typedef CGAL::Search_traits_d<CGAL::Cartesian_d<double>> cartesian_traits;
 
@@ -72,11 +72,13 @@ size_t nearest_neighbor_index(tree_t& tree, point_t point) {
     return ind;
 }
 
-std::vector<size_t> snap_points_to_indexes(tree_t& tree,
-                                           std::vector<point_t> points) {
+std::vector<size_t> snap_points_to_indexes(  //
+    tree_t& tree,                            //
+    std::vector<point_t> points) {
     std::vector<size_t> snapped_points;
     for (auto point : points) {
-        snapped_points.push_back(nearest_neighbor_index(tree, point));
+        snapped_points.push_back(  //
+            nearest_neighbor_index(tree, point));
     }
     return snapped_points;
 }

@@ -26,6 +26,7 @@ typedef typename boost::adjacency_list<             //
 typedef typename boost::graph_traits<Graph>::vertex_descriptor vertex_t;
 
 typedef std::vector<double> point_t;
+typedef std::vector<size_t> simplex_t;
 
 Graph calculate_one_skelleton_graph(
     simplicial::SimplicialComplex<point_t>& scomp  //
@@ -36,7 +37,7 @@ Graph calculate_one_skelleton_graph(
     std::vector<std::pair<int, int>> edges(num_edges);
     std::vector<double> weights(num_edges);
 
-    for (std::vector<int> edge : scomp.get_level(1)) {
+    for (simplex_t edge : scomp.get_level(1)) {
         int src_index = edge.at(0);
         int trg_index = edge.at(1);
 

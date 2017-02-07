@@ -1,5 +1,4 @@
-#ifndef BASE_UTILS
-#define BASE_UTILS
+#pragma once
 
 #include <vector>
 #include <list>
@@ -18,7 +17,7 @@ std::list<int> dedupe_list(std::list<int>& list) {
     return no_reps_list;
 }
 
-std::list<int> dedupe_list(std::vector<int> list) {
+std::list<int> dedupe_list(std::vector<int>& list) {
     // O(n log(n))
     std::set<int> no_reps;
     std::list<int> no_reps_list;
@@ -31,7 +30,7 @@ std::list<int> dedupe_list(std::vector<int> list) {
     return no_reps_list;
 }
 
-std::list<int> dedupe_list(std::initializer_list<int> list) {
+std::list<int> dedupe_list(std::initializer_list<int>& list) {
     // O(n log(n))
     std::set<int> no_reps;
     std::list<int> no_reps_list;
@@ -43,5 +42,3 @@ std::list<int> dedupe_list(std::initializer_list<int> list) {
     }
     return no_reps_list;
 }
-
-#endif

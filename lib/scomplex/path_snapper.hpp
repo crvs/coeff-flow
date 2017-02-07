@@ -11,6 +11,8 @@ class path_snapper {
     tree_t point_tree;   // defined in nn_utils.hpp
     Graph vertex_graph;  // defined in graph_utils.hpp
 
+    typedef std::vector<std::pair<std::vector<size_t>, int>> geo_chain_t;
+
    public:
     path_snapper(simplicial::SimplicialComplex<point_t>& sc) {
         make_tree(point_tree, sc.points);
@@ -27,6 +29,26 @@ class path_snapper {
         std::vector<size_t> snapped_path =
             complete_path(vertex_graph, way_points);
         return snapped_path;
-    };
+    }
+
+    geo_chain_t get_chain_rep(std::vector<point_t> path) {
+        auto vertex_path = snap_path(path);
+        geo_chain_t chain_rep;
+        for (                                    //
+            auto it = vertex_path.begin();       //
+            std::next(it) != vertex_path.end();  //
+            ++it) {
+            size_t s(*it), t(*(std::next(it)));
+            if (s < t) {
+                chain_rep.push_back(  //
+                    std::make_pair<std::vector<size_t>, int>(
+                        std::vector<size_t>{s, t}, 1));
+            } else {
+                chain_rep.push_back(  //
+                    std::make_pair<std::vector<size_t>, int>(
+                        std::vector<size_t>{s, t}, 1));
+            }
+        }
+    }
 };
 };

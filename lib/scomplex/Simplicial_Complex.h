@@ -22,39 +22,31 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
-#ifndef QUOT_SIMPLICIAL_COMPLEX
-#define QUOT_SIMPLICIAL_COMPLEX
+#pragma once
 
 #include <Eigen/Sparse>
 
-#include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
 #include <gudhi/Simplex_tree.h>
+#include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
 
 #include <scomplex/base_utils.hpp>
-// #include <scomplex/utils.h>
 
-#include <math.h>
-#include <vector>
 #include <set>
-
-#include <typeinfo>
-
-// point_t needs to have an empty constructor, and a size() function call,
-// further it needs a begin() function call. Mostly it needs to behave like a
-// std::vector
+#include <vector>
+#include <math.h>
 
 namespace simplicial {
-typedef std::pair<int, std::vector<double>> chain_t;
 
 template <typename point_t>
 class SimplicialComplex {
    private:
     // the type of matrix to be used
     typedef typename Eigen::SparseMatrix<double> matrix_t;
+    typedef typename Eigen::SparseVector<double> chain_t;
 
+    // simplex tree options
     struct SimpleOptions : Gudhi::Simplex_tree_options_full_featured {
-        // simplex tree options
-        typedef int Vertex_handle;
+        typedef size_t Vertex_handle;
     };
     typedef typename Gudhi::Simplex_tree<SimpleOptions> SimplexTree;
     typedef typename Gudhi::Simplex_tree<SimpleOptions>::Simplex_handle
@@ -62,13 +54,14 @@ class SimplicialComplex {
 
     typedef std::vector<Simplex_handle *> level_t;
     typedef std::vector<level_t> levels_t;
+    typedef std::vector<size_t> simplex_t;
 
    public:
-    std::vector<std::vector<int>> get_level(int dimen) {
-        std::vector<std::vector<int>> level;
+    std::vector<simplex_t> get_level(int dimen) {
+        std::vector<simplex_t> level;
         for (auto simp : simplices.complex_simplex_range()) {
             if (simplices.dimension(simp) == dimen) {
-                std::vector<int> v_simp;
+                simplex_t v_simp;
                 for (auto v : simplices.simplex_vertex_range(simp)) {
                     v_simp.push_back(v);
                 }
@@ -105,8 +98,6 @@ class SimplicialComplex {
             if (simplices.dimension() < d) {
                 simplices.set_dimension(d);
             }
-            // error (something is out-of-range)
-            // calculate_matrices();
         }
 
         // we need to count i--simplices in order to get a key for them
@@ -207,58 +198,19 @@ class SimplicialComplex {
 
     // need to do the boundary inclusion crap (you know what I mean)
     int boundary_index(Simplex_handle s_1, Simplex_handle s_2) {
-        // s1 has to include into s2
-
-        /*
-        int dim1 = simplices.dimension(s_1);
-        int dim2 = simplices.dimension(s_2);
-        decltype(s_1) bdry_h;
-        decltype(s_2) simp_h;
-        if (dim2 == dim1 - 1) {
-            simp_h = decltype(s_1)(s_1);
-            bdry_h = decltype(s_2)(s_2);
-        } else if (dim1 == dim2 - 1) {
-            simp_h = decltype(s_2)(s_2);
-            bdry_h = decltype(s_1)(s_1);
-        } else {
-            std::cerr << "CAN'T BE A BOUNDARY RELATION";
-            throw;
-        }
-
-        bool found = false;
-        int index = dim1;
-
-        // <--- this is not working need to find the parent!!
-        // simp_h = simp_h.parent();
-
-        auto someth = simp_h->second.children()->parent();
-        auto someth2 = someth.first;
-
-        std::cout << "simp_h: " << typeid(simp_h).name() << std::endl;
-        std::cout << "simp_h-fst: " << someth2 << std::endl;
-        std::cout << "someth: " << typeid(someth).name() << std::endl;
-        // std::cout << "someth-fst: " << someth2 << std::endl;
-
-        while (not found) { // <-- this is not working yet
-        if (simp_h == bdry_h) {found = true; index--;} else {index--;simp_h =
-        simp_h->parent;bdry_h=bdry_h->parent;}
-        }
-        */
-
         auto it_1 = simplices.simplex_vertex_range(s_1).begin();
         auto end_1 = simplices.simplex_vertex_range(s_1).end();
-
+        //
         auto it_2 = simplices.simplex_vertex_range(s_2).begin();
         auto end_2 = simplices.simplex_vertex_range(s_2).end();
-
+        //
         int orient = 0;
         int unmatch = 0;
-
+        //
         for (int p = 0; p <= simplices.dimension(s_2); p++) {
             if (*it_1 != *it_2) {
                 orient = p++;
                 unmatch++;
-
             } else {
                 if (it_1 != end_1) {
                     it_1++;
@@ -269,6 +221,9 @@ class SimplicialComplex {
         return pow(-1, orient);
     }
 
+    /**
+     * @brief  calculate the boundary matrices
+     */
     void calculate_matrices() {
         boundary_matrices = std::vector<matrix_t>();
         for (int k = 0; k < simplices.dimension(); k++) {
@@ -288,6 +243,4 @@ class SimplicialComplex {
     bool is_point(point_t pt) { return not(pt.size() == 0); }
 
 };  // class SimplicialComplex
-
-};      // namespace simplicial
-#endif  // SIMPLICIAL_COMPLEX
+};  // namespace simplicial
