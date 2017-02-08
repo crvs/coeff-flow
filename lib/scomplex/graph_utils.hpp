@@ -28,9 +28,8 @@ typedef typename boost::graph_traits<Graph>::vertex_descriptor vertex_t;
 typedef std::vector<double> point_t;
 typedef std::vector<size_t> simplex_t;
 
-Graph calculate_one_skelleton_graph(
-    simplicial::SimplicialComplex<point_t>& scomp  //
-    ) {
+Graph calculate_one_skelleton_graph(simplicial::SimplicialComplex& scomp  //
+                                    ) {
     int num_points{scomp.get_dimension(0)};
     int num_edges{scomp.get_dimension(1)};
 

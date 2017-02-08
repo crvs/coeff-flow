@@ -11,9 +11,9 @@
 #include <vector>
 #include <math.h>
 
+typedef std::vector<double> point_t;
 namespace simplicial {
 
-template <typename point_t>
 class SimplicialComplex {
    private:
     // the type of matrix to be used
@@ -52,7 +52,7 @@ class SimplicialComplex {
 
     int get_dimension(int level) { return dimensions.at(level); }
 
-    SimplicialComplex<point_t>() { geometric_q = true; }
+    SimplicialComplex() { geometric_q = true; }
 
     /**
      * @brief  builds a simplicial complex object out of points and "triangles"
@@ -60,8 +60,8 @@ class SimplicialComplex {
      * @param points_a  points
      * @param tris      the top dimensional simplicial complex structure
      */
-    SimplicialComplex<point_t>(std::list<point_t> points_a,
-                               std::list<std::list<int>> tris) {
+    SimplicialComplex(std::list<point_t> points_a,
+                      std::list<std::list<int>> tris) {
         geometric_q = true;
         points = std::vector<point_t>();
         for (auto pt : points_a) {
@@ -103,7 +103,7 @@ class SimplicialComplex {
         }
     }
 
-    SimplicialComplex<point_t> quotient(int f(point_t)) {
+    SimplicialComplex quotient(int f(point_t)) {
         int n_points = 1;
         auto corresp = std::vector<int>();
 
@@ -145,7 +145,7 @@ class SimplicialComplex {
             simp_list.push_back(dedupe_list(s_q));
         }
 
-        auto quotient_sc = SimplicialComplex<point_t>(q_points, simp_list);
+        auto quotient_sc = SimplicialComplex(q_points, simp_list);
         quotient_sc.geometric_q = geometric;
 
         return quotient_sc;
@@ -169,10 +169,10 @@ class SimplicialComplex {
 
     std::vector<matrix_t> boundary_matrices;
 
-    std::set<int> vertex_set(Simplex_handle s) {
-        std::set<int> v_set;
+    std::set<size_t> vertex_set(Simplex_handle s) {
+        std::set<size_t> v_set;
         for (auto v : simplices.simplex_vertex_range(s)) {
-            v_set.insert(s);
+            v_set.insert(v);
         }
         return v_set;
     }

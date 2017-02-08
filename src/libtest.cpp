@@ -30,7 +30,7 @@ int main() {
     simp_list.push_back(simp_t({0, 1, 2}));
     simp_list.push_back(simp_t({1, 2, 3}));
 
-    simplicial::SimplicialComplex<point_t> sc(point_list, simp_list);
+    simplicial::SimplicialComplex sc(point_list, simp_list);
     for (auto pt : sc.points) {
         std::cout << pt.at(0) << " " << pt.at(1) << std::endl;
     }
@@ -148,7 +148,7 @@ int main() {
         cells.push_back(cell);
     }
 
-    simplicial::SimplicialComplex<point_t> rsc(points, cells);
+    simplicial::SimplicialComplex rsc(points, cells);
 
     snap::path_snapper snapper(rsc);
 
