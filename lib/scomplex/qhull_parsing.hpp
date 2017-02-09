@@ -11,7 +11,7 @@
 #include <tuple>
 
 typedef std::vector<double> point_t;
-typedef std::vector<int> cell_t;
+typedef std::vector<size_t> cell_t;
 
 template <typename data_t>
 std::vector<data_t> tokenize(std::string str) {
@@ -59,14 +59,14 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
         std::getline(file_stream, line);
         // case of the first line of the file (get dimensions)
         if (line_number == 0) {
-            auto tokens = tokenize<int>(line);
+            auto tokens = tokenize<size_t>(line);
             dimensionality = tokens.at(0);
             // std::cout << "found first line! dimensions == " << dimensionality
             //          << '\n';
         }
         // second line of the file (get number of points)
         if (line_number == 1) {
-            auto tokens = tokenize<int>(line);
+            auto tokens = tokenize<size_t>(line);
             total_points = tokens.at(0);
             // std::cout << "found second line! number of points == "
             //          << total_points << '\n';
@@ -79,7 +79,7 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
         }
         // first line after points (get number of cells)
         if (line_number == total_points + 2) {
-            auto tokens = tokenize<int>(line);
+            auto tokens = tokenize<size_t>(line);
             total_cells = tokens.at(0);
             // std::cout << "found cell count! number of cells == " <<
             // total_cells
@@ -88,10 +88,11 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
         // lines pertaining to cells
         if (line_number > total_points + 2 &&
             line_number < total_points + total_cells + 3) {
-            auto cell = tokenize<int>(line);
+            auto cell = tokenize<size_t>(line);
             cells.push_back(cell);
         }
     }
+    file_stream.close();
     return std::make_pair(points, cells);
 }
 
@@ -109,7 +110,7 @@ int main() {
     }
     std::cout << cells.size() << '\n';
     for (cell_t cell : cells) {
-        output_vector<int>(cell);
+        output_vector<size_t>(cell);
     }
 
     return 0;

@@ -60,8 +60,8 @@ class SimplicialComplex {
      * @param points_a  points
      * @param tris      the top dimensional simplicial complex structure
      */
-    SimplicialComplex(std::list<point_t> points_a,
-                      std::list<std::list<int>> tris) {
+    SimplicialComplex(std::vector<point_t> points_a,
+                      std::vector<std::vector<size_t>> tris) {
         geometric_q = true;
         points = std::vector<point_t>();
         for (auto pt : points_a) {
@@ -110,7 +110,7 @@ class SimplicialComplex {
         // making the correspondence between points in the original complex and
         // points in the quotient. point index 0 corresponds to the "virtual"
         // point (in case it exists).
-        std::list<point_t> q_points;
+        std::vector<point_t> q_points;
         bool geometric = true;
 
         for (auto p : points) {
@@ -135,10 +135,10 @@ class SimplicialComplex {
         }
 
         // producing list of simplices
-        std::list<std::list<int>> simp_list;
+        std::vector<std::vector<size_t>> simp_list;
 
         for (auto s : simplices.complex_simplex_range()) {
-            std::list<int> s_q;
+            std::vector<size_t> s_q;
             for (int v : simplices.simplex_vertex_range(s)) {
                 s_q.push_back(corresp.at(v));
             }

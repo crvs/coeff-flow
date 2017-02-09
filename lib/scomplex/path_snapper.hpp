@@ -14,6 +14,7 @@ class path_snapper {
     tree_t point_tree;   // defined in nn_utils.hpp
     Graph vertex_graph;  // defined in graph_utils.hpp
     simplicial::SimplicialComplex* s_comp;
+    bool owner;
 
     typedef std::vector<std::pair<std::vector<size_t>, int>> geo_chain_t;
     geo_chain_t get_chain_rep(std::vector<point_t> path) {
@@ -38,9 +39,21 @@ class path_snapper {
 
    public:
     path_snapper(simplicial::SimplicialComplex& sc) {
-        make_tree(point_tree, sc.points);
-        vertex_graph = calculate_one_skelleton_graph(sc);
+        owner = false;
         s_comp = &sc;
+        make_tree(point_tree, s_comp->points);
+        vertex_graph = calculate_one_skelleton_graph(*s_comp);
+    }
+
+    path_snapper(std::vector<point_t>& pts, std::vector<cell_t>& cells) {
+        owner = true;
+        s_comp = new simplicial::SimplicialComplex(pts, cells);
+        make_tree(point_tree, s_comp->points);
+        vertex_graph = calculate_one_skelleton_graph(*s_comp);
+    }
+
+    ~path_snapper() {
+        if (owner) delete s_comp;
     }
 
     std::vector<size_t> snap_path(std::vector<point_t> path) {

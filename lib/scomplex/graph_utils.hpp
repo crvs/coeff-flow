@@ -99,15 +99,12 @@ std::vector<vertex_t> complete_path(const Graph& g, std::vector<vertex_t> vec) {
     full_path.push_back(*s);
     while (t != vec.end()) {
         // get the next vertex
-        std::cout << "looking at edge" << *s << ", " << *t << "\n";
-
         // calculate and add the path between s and t (contains vertices other
         // than s) to the full path
         std::vector<vertex_t> path_portion{shortest_path(g, *s, *t)};
         for (vertex_t vert : path_portion) {
             full_path.push_back(vert);
         }
-        std::cout << "\n";
         std::advance(s, 1);
         std::advance(t, 1);
     }
