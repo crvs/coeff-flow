@@ -23,19 +23,21 @@ include(${CGAL_USE_FILE})
 
 
 set(CMAKE_BUILD_TYPE Debug)
-include_directories("./lib")
+include_directories("./lib") # where the header files are
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-lspatialindex_c -lspatialindex ${CMAKE_CXX_FLAGS}")
+add_library(test SHARED "./lib/scomplex/simplicial_complex.cpp")
 
-set(STUPID_SOURCES "./src/main.cpp")
-add_executable(my_stupid_test ${STUPID_SOURCES})
+add_executable(impl_test "src/impl_test.cpp")
+target_link_libraries(impl_test test)
 
-set(YOTHER_STUPID_SOURCES "./src/graphtest.cpp")
-add_executable(yother_stupid_test ${YOTHER_STUPID_SOURCES})
+# set(STUPID_SOURCES "./src/main.cpp")
+# add_executable(my_stupid_test ${STUPID_SOURCES})
 
-# set(CMAKE_CXX_FLAGS "-lspatialindex_c -lspatialindex ${CMAKE_CXX_FLAGS}")
-set(OTHER_STUPID_SOURCES "./src/libtest.cpp")
-add_executable(my_other_stupid_test ${OTHER_STUPID_SOURCES})
+# set(YOTHER_STUPID_SOURCES "./src/graphtest.cpp")
+# add_executable(yother_stupid_test ${YOTHER_STUPID_SOURCES})
 
-add_executable(nn_test "./src/nn_test")
+# set(OTHER_STUPID_SOURCES "./src/libtest.cpp")
+# add_executable(my_other_stupid_test ${OTHER_STUPID_SOURCES})
 
