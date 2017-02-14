@@ -1,4 +1,5 @@
 #include <vector>
+#include <functional>
 #include <Eigen/Sparse>
 
 namespace gsimp {
@@ -12,4 +13,7 @@ typedef typename Eigen::SparseVector<double> vector_t;
 
 // chains
 typedef typename std::pair<int, vector_t> chain_t;
+
+// characteristic functions
+// typedef std::function<int(point_t)> char_fun_t;
 };

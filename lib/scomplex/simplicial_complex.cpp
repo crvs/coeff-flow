@@ -6,6 +6,7 @@
 #include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
 #include <Eigen/Sparse>
 #include <memory>
+#include <functional>
 #include <cmath>
 
 namespace gsimp {
@@ -121,6 +122,16 @@ simplicial_complex::simplicial_complex(std::vector<point_t>& arg_points,
     p_impl = std::shared_ptr<impl>(new impl(arg_points, arg_tris));
 }
 
+simplicial_complex::simplicial_complex(const simplicial_complex& other) {
+    p_impl = other.p_impl;
+}
+
+simplicial_complex& simplicial_complex::operator=(
+    const simplicial_complex& other) {
+    p_impl = other.p_impl;
+    return *this;
+}
+
 simplicial_complex::~simplicial_complex() {}
 
 std::vector<point_t> simplicial_complex::get_points() { return p_impl->points; }
@@ -131,16 +142,13 @@ std::vector<cell_t> simplicial_complex::get_level(int level) {
 
 matrix_t simplicial_complex::get_boundary_matrix(int d) {
     // uninstantiated boundary matrices
-    if (p_impl->boundary_matrices.size() == 0) {
-        p_impl->calculate_matrices();
-    }
+    if (p_impl->boundary_matrices.size() == 0) p_impl->calculate_matrices();
 
     // now they have to be instantiated, get them
-    if (0 <= d && d < p_impl->boundary_matrices.size()) {
+    if (0 <= d && d < p_impl->boundary_matrices.size())
         return p_impl->boundary_matrices.at(d);
-    } else {
+    else
         throw NoChain();
-    }
 }
 
 int simplicial_complex::dimension() { return p_impl->simplices.dimension(); }
@@ -152,6 +160,8 @@ size_t simplicial_complex::get_index_of_simplex(cell_t simp) {
 
 bool simplicial_complex::is_quotient() { return p_impl->quotient_q; }
 
+// TODO: get top dimensional cells from the simplicial complex to add to the
+// simplex tree (instead of all the simplices).
 simplicial_complex simplicial_complex::quotient(int char_fun(point_t)) {
     int n_points = 1;
     auto corresp = std::vector<size_t>();
@@ -171,17 +181,14 @@ simplicial_complex simplicial_complex::quotient(int char_fun(point_t)) {
                 // need to realize that it is not geometric, (flip
                 // quotient_q and add the virtual point
                 points.insert(points.begin(), point_t());
-                quotient_q = false;
+                quotient_q = true;
             }
             corresp.push_back(0);
         }
     }
 
-    if (not quotient_q) {
-        for (int i = 0; i < corresp.size(); i++) {
-            corresp.at(i) -= 1;
-        }
-    }
+    if (not quotient_q)
+        for (int i = 0; i < corresp.size(); i++) corresp.at(i) -= 1;
 
     // producing list of simplices
     std::vector<cell_t> simp_list;
@@ -193,7 +200,7 @@ simplicial_complex simplicial_complex::quotient(int char_fun(point_t)) {
         simp_list.push_back(s_q);
     }
 
-    auto quotient_sc = simplicial_complex(points, simp_list);
+    simplicial_complex quotient_sc(points, simp_list);
     quotient_sc.p_impl->quotient_q = quotient_q;
 
     return quotient_sc;
