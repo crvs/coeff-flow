@@ -35,6 +35,7 @@ class path_snapper {
                         std::vector<size_t>{s, t}, -1));
             }
         }
+        return chain_rep;
     }
 
    public:
@@ -73,6 +74,7 @@ class path_snapper {
             size_t index = s_comp->get_simplex_index(simp);
             vector_rep.coeffRef(index) = val;
         }
+        return vector_rep;
     }
 };
 };

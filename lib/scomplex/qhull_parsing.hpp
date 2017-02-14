@@ -16,7 +16,8 @@ typedef std::vector<size_t> cell_t;
 template <typename data_t>
 std::vector<data_t> tokenize(std::string str) {
     std::istringstream sstream(str);
-    std::vector<data_t> tokens{std::istream_iterator<data_t>{sstream},
+    std::vector<data_t> tokens{//
+                               std::istream_iterator<data_t>{sstream},
                                std::istream_iterator<data_t>{}};
     return tokens;
 }
@@ -38,18 +39,11 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
 
     std::string line;
 
-    int current_line_number{0};
-    int dimensionality;
-    //
-    int num_points;
-    int num_cells;
-    //
-    int cur_point_num;
-    int cur_cell_num;
+    int current_line_number{0}, dimensionality;
+    int num_points, num_cells;
+    int cur_point_num, cur_cell_num;
 
-    int line_number{0};
-    int total_points{0};
-    int total_cells{0};
+    int line_number{0}, total_points{0}, total_cells{0};
 
     std::vector<point_t> points;
     std::vector<cell_t> cells;
@@ -61,15 +55,11 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
         if (line_number == 0) {
             auto tokens = tokenize<size_t>(line);
             dimensionality = tokens.at(0);
-            // std::cout << "found first line! dimensions == " << dimensionality
-            //          << '\n';
         }
         // second line of the file (get number of points)
         if (line_number == 1) {
             auto tokens = tokenize<size_t>(line);
             total_points = tokens.at(0);
-            // std::cout << "found second line! number of points == "
-            //          << total_points << '\n';
         }
         // lines pertaining to points
         if (line_number > 1 && line_number < total_points + 2) {
@@ -81,9 +71,6 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
         if (line_number == total_points + 2) {
             auto tokens = tokenize<size_t>(line);
             total_cells = tokens.at(0);
-            // std::cout << "found cell count! number of cells == " <<
-            // total_cells
-            //          << '\n';
         }
         // lines pertaining to cells
         if (line_number > total_points + 2 &&
@@ -95,24 +82,3 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
     file_stream.close();
     return std::make_pair(points, cells);
 }
-
-/*
- * usage example
- *
-int main() {
-    std::vector<point_t> points;
-    std::vector<cell_t> cells;
-    std::tie(points, cells) = parse_qhull_file("qh-test.dat");
-
-    std::cout << points.size() << '\n';
-    for (point_t point : points) {
-        output_vector<double>(point);
-    }
-    std::cout << cells.size() << '\n';
-    for (cell_t cell : cells) {
-        output_vector<size_t>(cell);
-    }
-
-    return 0;
-}
-*/

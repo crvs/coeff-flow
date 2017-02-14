@@ -14,11 +14,13 @@
 typedef std::vector<double> point_t;
 namespace simplicial {
 
+class NoChain {};
+
 class SimplicialComplex {
    private:
     // the type of matrix to be used
     typedef typename Eigen::SparseMatrix<double> matrix_t;
-    typedef typename Eigen::SparseVector<double> chain_t;
+    typedef typename Eigen::SparseVector<double> vector_t;
 
     // simplex tree options
     struct SimpleOptions : Gudhi::Simplex_tree_options_full_featured {
@@ -52,7 +54,7 @@ class SimplicialComplex {
 
     int get_dimension(int level) { return dimensions.at(level); }
 
-    SimplicialComplex() { geometric_q = true; }
+    SimplicialComplex() : geometric_q(true) {}
 
     /**
      * @brief  builds a simplicial complex object out of points and "triangles"
@@ -61,12 +63,8 @@ class SimplicialComplex {
      * @param tris      the top dimensional simplicial complex structure
      */
     SimplicialComplex(std::vector<point_t> points_a,
-                      std::vector<std::vector<size_t>> tris) {
-        geometric_q = true;
-        points = std::vector<point_t>();
-        for (auto pt : points_a) {
-            points.push_back(pt);
-        }
+                      std::vector<std::vector<size_t>> tris)
+        : geometric_q(true), points(points_a) {
         for (auto s : tris) {
             // cant have simplices with repeated vertices so we dedupe the lists
             simplices.insert_simplex_and_subfaces(dedupe_list(s));
@@ -93,13 +91,16 @@ class SimplicialComplex {
     }
 
     matrix_t get_boundary(int d) {
+        // uninstantiated boundary matrices
         if (boundary_matrices.size() == 0) {
             calculate_matrices();
         }
-        if (d < boundary_matrices.size()) {
+
+        // now they have to be instantiated, get them
+        if (0 <= d && d < boundary_matrices.size()) {
             return boundary_matrices.at(d);
         } else {
-            return matrix_t(0, 0);
+            throw NoChain();
         }
     }
 
@@ -107,8 +108,10 @@ class SimplicialComplex {
         int n_points = 1;
         auto corresp = std::vector<int>();
 
-        // making the correspondence between points in the original complex and
-        // points in the quotient. point index 0 corresponds to the "virtual"
+        // making the correspondence between points in the original complex
+        // and
+        // points in the quotient. point index 0 corresponds to the
+        // "virtual"
         // point (in case it exists).
         std::vector<point_t> q_points;
         bool geometric = true;
@@ -119,7 +122,8 @@ class SimplicialComplex {
                 q_points.push_back(p);
             } else {
                 if (geometric) {
-                    // need to realize that it is not geometric, (flip geometric
+                    // need to realize that it is not geometric, (flip
+                    // geometric
                     // and add the virtual point
                     auto pos = q_points.begin();
                     q_points.insert(pos, point_t());
@@ -162,6 +166,8 @@ class SimplicialComplex {
         auto sh = simplices.find(simp);
         return simplices.key(sh);
     }
+
+    int dimension() { return simplices.dimension(); }
 
    private:
     bool geometric_q;
@@ -221,7 +227,9 @@ class SimplicialComplex {
         }
     }
 
-    bool is_point(point_t pt) { return not(pt.size() == 0); }
+    bool is_point(point_t pt) {
+        return (geometric_q ? true : not(pt.size() == 0));
+    }
 
 };  // class SimplicialComplex
 };  // namespace simplicial
