@@ -115,6 +115,12 @@ struct simplicial_complex::impl {
         return level_cells;
     }
 
+    simp_handle index_to_handle(int d, size_t tau) {
+        return *(levels.at(d)->at(tau));
+    }
+
+    size_t handle_to_index(simp_handle tau) { return simplices.key(tau); }
+
     simp_handle cell_to_handle(cell_t tau) {
         auto sh = simplices.find(tau);
         return sh;
@@ -126,6 +132,39 @@ struct simplicial_complex::impl {
         return cell;
     }
 };  // struct impl
+
+std::vector<size_t> simplicial_complex::cell_boundary_index(cell_t cell) {
+    impl::simp_handle simp = p_impl->cell_to_handle(cell);
+    auto c_boundary = p_impl->simplices.boundary_simplex_range(simp);
+    std::vector<size_t> s_boundary;
+    for (auto c : c_boundary) s_boundary.push_back(p_impl->handle_to_index(c));
+    return s_boundary;
+}
+
+std::vector<size_t> simplicial_complex::cell_boundary_index(int d,
+                                                            size_t cell) {
+    impl::simp_handle simp = p_impl->index_to_handle(d, cell);
+    auto c_boundary = p_impl->simplices.boundary_simplex_range(simp);
+    std::vector<size_t> s_boundary;
+    for (auto c : c_boundary) s_boundary.push_back(p_impl->handle_to_index(c));
+    return s_boundary;
+}
+
+std::vector<cell_t> simplicial_complex::cell_boundary(cell_t cell) {
+    impl::simp_handle simp = p_impl->cell_to_handle(cell);
+    auto c_boundary = p_impl->simplices.boundary_simplex_range(simp);
+    std::vector<cell_t> s_boundary;
+    for (auto c : c_boundary) s_boundary.push_back(p_impl->handle_to_cell(c));
+    return s_boundary;
+}
+
+std::vector<cell_t> simplicial_complex::cell_boundary(int d, size_t cell) {
+    impl::simp_handle simp = p_impl->index_to_handle(d, cell);
+    auto c_boundary = p_impl->simplices.boundary_simplex_range(simp);
+    std::vector<cell_t> s_boundary;
+    for (auto c : c_boundary) s_boundary.push_back(p_impl->handle_to_cell(c));
+    return s_boundary;
+}
 
 int simplicial_complex::boundary_inclusion_index(cell_t c1, cell_t c2) {
     return p_impl->boundary_index(p_impl->cell_to_handle(c1),   //

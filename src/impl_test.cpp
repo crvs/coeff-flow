@@ -34,14 +34,16 @@ int main(int argc, char* argv[]) {
     std::cout << "get 1-cell number: ";
     while (std::cin >> i) {
         std::vector<std::pair<int, size_t>> my_cofaces =
-            s_comp.get_cof_and_ind_index(1, i);
+            s_comp.get_cof_and_ind_index(2, i);
         for (auto s : my_cofaces) {
             std::cout << std::get<0>(s) << ", ";
             std::cout << std::get<1>(s) << " ,,  ";
         }
-
         std::cout << '\n';
-        std::cout << "get 1-cell number: ";
+        std::vector<size_t> faces = s_comp.cell_boundary_index(2, i);
+        std::copy(faces.begin(), faces.end(),
+                  std::ostream_iterator<size_t>(std::cout, " "));
+        std::cout << "\nget 1-cell number: ";
     }
     return 0;
 }

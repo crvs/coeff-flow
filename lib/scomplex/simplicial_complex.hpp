@@ -21,13 +21,20 @@ class simplicial_complex {
     simplicial_complex& operator=(const simplicial_complex&);
     // destructor
     ~simplicial_complex();
-    //
+    // basic info
     std::vector<point_t> get_points();
-    std::vector<cell_t> get_level(int);
     int dimension();
-    int get_level_size(int);
-    matrix_t get_boundary_matrix(int);
     bool is_quotient();
+    // level-wise info
+    std::vector<cell_t> get_level(int);
+    int get_level_size(int);
+    // cell boundaries
+    std::vector<size_t> cell_boundary_index(cell_t);
+    std::vector<size_t> cell_boundary_index(int, size_t);
+    std::vector<cell_t> cell_boundary(cell_t);
+    std::vector<cell_t> cell_boundary(int, size_t);
+    // boundary matrices
+    matrix_t get_boundary_matrix(int);
     // inclusion index
     int boundary_inclusion_index(cell_t, cell_t);
     int boundary_inclusion_index(int, size_t, int, size_t);
