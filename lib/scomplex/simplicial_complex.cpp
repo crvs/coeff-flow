@@ -2,10 +2,13 @@
 #include <scomplex/types.hpp>
 #include <scomplex/base_utils.hpp>
 
+#include <iterator>  // for debuging purposes
+
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
 #include <Eigen/Sparse>
-#include <memory>
+
+#include <tuple>
+#include <memory>  // smart pointers
 #include <functional>
 #include <cmath>
 
@@ -50,7 +53,7 @@ struct simplicial_complex::impl {
         for (auto s : simplex_range) {
             int d = simplices.dimension(s);
             simplices.assign_key(s, count.at(d)++);
-            levels.at(d)->push_back(&s);
+            levels.at(d)->push_back(new simp_handle(s));
         }
     }
 
@@ -111,7 +114,50 @@ struct simplicial_complex::impl {
         }
         return level_cells;
     }
+
+    simp_handle cell_to_handle(cell_t tau) {
+        auto sh = simplices.find(tau);
+        return sh;
+    }
+
+    cell_t handle_to_cell(simp_handle tau) {
+        cell_t cell;
+        for (auto v : simplices.simplex_vertex_range(tau)) cell.push_back(v);
+        return cell;
+    }
 };  // struct impl
+
+int simplicial_complex::boundary_inclusion_index(cell_t c1, cell_t c2) {
+    return p_impl->boundary_index(p_impl->cell_to_handle(c1),   //
+                                  p_impl->cell_to_handle(c2));  //
+};
+int simplicial_complex::boundary_inclusion_index(int d1, size_t s1,    //
+                                                 int d2, size_t s2) {  //
+    cell_t c1 = index_to_cell(d1, s1);
+    cell_t c2 = index_to_cell(d2, s2);
+    return p_impl->boundary_index(p_impl->cell_to_handle(c1),
+                                  p_impl->cell_to_handle(c2));
+};
+
+std::vector<std::pair<int, cell_t>> simplicial_complex::get_cof_and_ind(
+    cell_t cell) {
+    std::vector<std::pair<int, cell_t>> c_cofaces;
+    for (auto face : get_cofaces(cell))
+        c_cofaces.push_back(                                   //
+            std::make_pair(                                    //
+                boundary_inclusion_index(cell, face), face));  //
+    return c_cofaces;
+}
+
+std::vector<std::pair<int, size_t>> simplicial_complex::get_cof_and_ind_index(
+    int d, size_t c) {
+    std::vector<std::pair<int, size_t>> c_cofaces;
+    for (auto face : get_cofaces_index(d, c))
+        c_cofaces.push_back(                                          //
+            std::make_pair(                                           //
+                boundary_inclusion_index(d, c, d + 1, face), face));  //
+    return c_cofaces;
+}
 
 int simplicial_complex::get_level_size(int level) {
     return p_impl->get_level_size(level);
@@ -153,12 +199,35 @@ matrix_t simplicial_complex::get_boundary_matrix(int d) {
 
 int simplicial_complex::dimension() { return p_impl->simplices.dimension(); }
 
-size_t simplicial_complex::get_index_of_simplex(cell_t simp) {
+cell_t simplicial_complex::index_to_cell(int d, size_t ind) {
+    auto sh = p_impl->levels.at(d)->at(ind);
+    return p_impl->handle_to_cell(*sh);
+}
+size_t simplicial_complex::cell_to_index(cell_t simp) {
     auto sh = p_impl->simplices.find(simp);
     return p_impl->simplices.key(sh);
 }
 
 bool simplicial_complex::is_quotient() { return p_impl->quotient_q; }
+
+std::vector<size_t> simplicial_complex::get_cofaces_index(int d, size_t face) {
+    std::vector<size_t> s_cofaces;
+    impl::simp_handle face_h = *(p_impl->levels.at(d)->at(face));
+    cell_t my_cell = p_impl->handle_to_cell(face_h);
+    // codimension 1 faces
+    auto range = p_impl->simplices.cofaces_simplex_range(face_h, 1);
+    for (auto tau : range) s_cofaces.push_back(p_impl->simplices.key(tau));
+    return s_cofaces;
+}
+
+std::vector<cell_t> simplicial_complex::get_cofaces(cell_t face) {
+    std::vector<cell_t> s_cofaces;
+    auto face_h = p_impl->cell_to_handle(face);
+    // codimension 1 faces
+    auto range = p_impl->simplices.cofaces_simplex_range(face_h, 1);
+    for (auto tau : range) s_cofaces.push_back(p_impl->handle_to_cell(tau));
+    return s_cofaces;
+}
 
 // TODO: get top dimensional cells from the simplicial complex to add to the
 // simplex tree (instead of all the simplices).

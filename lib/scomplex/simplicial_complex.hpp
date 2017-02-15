@@ -28,7 +28,18 @@ class simplicial_complex {
     int get_level_size(int);
     matrix_t get_boundary_matrix(int);
     bool is_quotient();
-    size_t get_index_of_simplex(cell_t);
+    // inclusion index
+    int boundary_inclusion_index(cell_t, cell_t);
+    int boundary_inclusion_index(int, size_t, int, size_t);
+    // treating cofaces
+    std::vector<cell_t> get_cofaces(cell_t);
+    std::vector<size_t> get_cofaces_index(int, size_t);
+    // cofaces and indices jointly
+    std::vector<std::pair<int, cell_t>> get_cof_and_ind(cell_t);
+    std::vector<std::pair<int, size_t>> get_cof_and_ind_index(int, size_t);
+    // cells and indices back and forth
+    cell_t index_to_cell(int, size_t);
+    size_t cell_to_index(cell_t);
     //
     simplicial_complex quotient(int char_fun(point_t));
 };  // class simplicial_complex

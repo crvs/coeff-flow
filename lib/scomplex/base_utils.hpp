@@ -29,9 +29,3 @@ std::vector<size_t> dedupe_vec(std::vector<size_t>& vec) {
     }
     return no_reps_list;
 }
-
-template <typename T>
-std::unique_ptr<T> new_unique(T* t) {
-    T* tt = new T(t);
-    return std::unique_ptr<T>(tt);
-}

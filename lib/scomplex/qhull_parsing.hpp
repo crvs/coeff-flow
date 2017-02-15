@@ -22,10 +22,12 @@ std::vector<data_t> tokenize(std::string str) {
     return tokens;
 }
 
-template <typename data_t>
-void output_vector(std::vector<data_t> vec) {
-    std::copy(vec.begin(), vec.end(),
-              std::ostream_iterator<data_t>(std::cout, " "));
+template <typename Iterator>
+void cout_iterator(Iterator first, Iterator last) {
+    std::copy(first, last,
+              std::ostream_iterator<
+                  typename std::iterator_traits<Iterator>::value_type>(
+                  std::cout, " "));
     std::cout << '\n';
 }
 
