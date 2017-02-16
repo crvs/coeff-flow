@@ -1,0 +1,78 @@
+#pragma once
+
+#include <scomplex/simplicial_complex.hpp>
+#include <scomplex/types.hpp>
+
+namespace gsimp {
+
+#include <Eigen/Sparse>
+#include <scomplex/graph_utils.hpp>
+#include <scomplex/nn_utils.hpp>
+
+struct path_snapper::impl {
+    tree_t point_tree;   // defined in nn_utils.hpp
+    Graph vertex_graph;  // defined in graph_utils.hpp
+    simplicial::SimplicialComplex* s_comp;
+    bool owner;
+
+    typedef std::vector<std::pair<std::vector<size_t>, int>> geo_chain_t;
+    geo_chain_t get_chain_rep(std::vector<point_t> path) {
+        auto vertex_path = snap_path(path);
+        geo_chain_t chain_rep;
+        for (                                    //
+            auto it = vertex_path.begin();       //
+            std::next(it) != vertex_path.end();  //
+            ++it) {
+            size_t s(*it), t(*(std::next(it)));
+            if (s < t) {
+                chain_rep.push_back(  //
+                    std::make_pair<std::vector<size_t>, int>(
+                        std::vector<size_t>{s, t}, 1));
+            } else {
+                chain_rep.push_back(  //
+                    std::make_pair<std::vector<size_t>, int>(
+                        std::vector<size_t>{s, t}, -1));
+            }
+        }
+        return chain_rep;
+    }
+}
+
+public : path_snapper(simplicial::SimplicialComplex& sc) {
+    owner = false;
+    s_comp = &sc;
+    make_tree(point_tree, s_comp->points);
+    vertex_graph = calculate_one_skelleton_graph(*s_comp);
+}
+
+path_snapper(std::vector<point_t>& pts, std::vector<cell_t>& cells) {
+    owner = true;
+    s_comp = new simplicial::SimplicialComplex(pts, cells);
+    make_tree(point_tree, s_comp->points);
+    vertex_graph = calculate_one_skelleton_graph(*s_comp);
+}
+
+~path_snapper() {
+    if (owner) delete s_comp;
+}
+
+std::vector<size_t> snap_path(std::vector<point_t> path) {
+    std::vector<size_t> way_points = snap_points_to_indexes(point_tree, path);
+    std::vector<size_t> snapped_path = complete_path(vertex_graph, way_points);
+    return snapped_path;
+}
+
+vector_t get_chain_vector(std::vector<point_t> path) {
+    auto chain_rep = get_chain_rep(path);
+    vector_t vector_rep(s_comp->get_dimension(1));
+    for (auto chain_el : chain_rep) {
+        simplex_t simp = std::get<0>(chain_el);
+        int val = std::get<1>(chain_el);
+        size_t index = s_comp->get_simplex_index(simp);
+        vector_rep.coeffRef(index) = val;
+    }
+    return vector_rep;
+}
+};
+}
+;
