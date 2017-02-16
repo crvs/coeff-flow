@@ -1,6 +1,6 @@
-#include <vector>
-#include <functional>
 #include <Eigen/Sparse>
+#include <functional>
+#include <vector>
 
 namespace gsimp {
 // geometric types
