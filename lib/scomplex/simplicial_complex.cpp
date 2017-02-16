@@ -34,7 +34,7 @@ struct simplicial_complex::impl {
     impl() : quotient_q(false){};
 
     impl(std::vector<point_t>& arg_points, std::vector<cell_t>& arg_tris)
-        : quotient_q(false), points(arg_points) {
+        : points(arg_points), quotient_q(false) {
         // create the simplex tree
         for (auto tri : arg_tris) {
             simplices.insert_simplex_and_subfaces(dedupe_vec(tri));
@@ -70,7 +70,6 @@ struct simplicial_complex::impl {
         auto end_1 = simplices.simplex_vertex_range(s_1).end();
         //
         auto it_2 = simplices.simplex_vertex_range(s_2).begin();
-        auto end_2 = simplices.simplex_vertex_range(s_2).end();
         //
         int orient = 0;
         int unmatch = 0;
@@ -133,13 +132,31 @@ struct simplicial_complex::impl {
     }
 };  // struct impl
 
-std::vector<size_t> simplicial_complex::cell_boundary_index(cell_t cell) {
+std::vector<std::pair<int, cell_t>> simplicial_complex::get_bdry_and_ind(
+    cell_t cell) {
     impl::simp_handle simp = p_impl->cell_to_handle(cell);
     auto c_boundary = p_impl->simplices.boundary_simplex_range(simp);
-    std::vector<size_t> s_boundary;
-    for (auto c : c_boundary) s_boundary.push_back(p_impl->handle_to_index(c));
-    return s_boundary;
-}
+    std::vector<std::pair<int, cell_t>> boundary_and_indices;
+    for (auto face : c_boundary)
+        boundary_and_indices.push_back(              //
+            std::make_pair<int, cell_t>(             //
+                p_impl->boundary_index(face, simp),  //
+                p_impl->handle_to_cell(face)));      //
+    return boundary_and_indices;
+};
+
+std::vector<std::pair<int, size_t>> simplicial_complex::get_bdry_and_ind_index(
+    int d, size_t cell) {
+    impl::simp_handle simp = p_impl->index_to_handle(d, cell);
+    auto c_boundary = p_impl->simplices.boundary_simplex_range(simp);
+    std::vector<std::pair<int, size_t>> boundary_and_indices;
+    for (auto face : c_boundary)
+        boundary_and_indices.push_back(              //
+            std::make_pair<int, size_t>(             //
+                p_impl->boundary_index(face, simp),  //
+                p_impl->handle_to_index(face)));     //
+    return boundary_and_indices;
+};
 
 std::vector<size_t> simplicial_complex::cell_boundary_index(int d,
                                                             size_t cell) {
@@ -152,14 +169,6 @@ std::vector<size_t> simplicial_complex::cell_boundary_index(int d,
 
 std::vector<cell_t> simplicial_complex::cell_boundary(cell_t cell) {
     impl::simp_handle simp = p_impl->cell_to_handle(cell);
-    auto c_boundary = p_impl->simplices.boundary_simplex_range(simp);
-    std::vector<cell_t> s_boundary;
-    for (auto c : c_boundary) s_boundary.push_back(p_impl->handle_to_cell(c));
-    return s_boundary;
-}
-
-std::vector<cell_t> simplicial_complex::cell_boundary(int d, size_t cell) {
-    impl::simp_handle simp = p_impl->index_to_handle(d, cell);
     auto c_boundary = p_impl->simplices.boundary_simplex_range(simp);
     std::vector<cell_t> s_boundary;
     for (auto c : c_boundary) s_boundary.push_back(p_impl->handle_to_cell(c));

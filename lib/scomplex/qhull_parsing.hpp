@@ -41,11 +41,7 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
 
     std::string line;
 
-    int current_line_number{0}, dimensionality;
-    int num_points, num_cells;
-    int cur_point_num, cur_cell_num;
-
-    int line_number{0}, total_points{0}, total_cells{0};
+    int dimensionality, total_points{0}, total_cells{0};
 
     std::vector<point_t> points;
     std::vector<cell_t> cells;

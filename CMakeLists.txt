@@ -30,11 +30,13 @@ set(CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
 set(CMAKE_CXX_COMPILER             "/usr/bin/clang++")
-set(CMAKE_CXX_FLAGS                "-Wall")
+set(CMAKE_CXX_FLAGS                "-Wall -std=c++11")
 set(CMAKE_CXX_FLAGS_DEBUG          "-g")
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+# Linker flags for
+# set(CMAKE_CXX_FLAGS "-lspatialindex_c -lspatialindex ${CMAKE_CXX_FLAGS}")
 
 set(CMAKE_AR      "/usr/bin/llvm-ar")
 set(CMAKE_LINKER  "/usr/bin/llvm-ld")
@@ -43,14 +45,14 @@ set(CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
 set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
 set(CMAKE_BUILD_TYPE Debug)
+
 include_directories("./lib") # where the header files are
 
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-set(CMAKE_CXX_FLAGS "-lspatialindex_c -lspatialindex ${CMAKE_CXX_FLAGS}")
-add_library(test SHARED "./lib/scomplex/simplicial_complex.cpp")
+add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
+add_library(coeffflow SHARED "./lib/scomplex/coeff_flow.cpp")
 
 add_executable(impl_test "src/impl_test.cpp")
-target_link_libraries(impl_test test)
+target_link_libraries(impl_test scomplex)
 
 # set(STUPID_SOURCES "./src/main.cpp")
 # add_executable(my_stupid_test ${STUPID_SOURCES})

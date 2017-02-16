@@ -8,6 +8,8 @@
 
 int my_char(gsimp::point_t point) { return 1; }
 
+int& do_this(int& a) { return a; }
+
 int main(int argc, char* argv[]) {
     std::vector<point_t> points_v;
     std::vector<cell_t> cells_v;
@@ -45,5 +47,6 @@ int main(int argc, char* argv[]) {
                   std::ostream_iterator<size_t>(std::cout, " "));
         std::cout << "\nget 1-cell number: ";
     }
+
     return 0;
 }
