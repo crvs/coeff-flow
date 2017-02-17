@@ -1,10 +1,12 @@
 #include <iostream>
 #include <iterator>
 
-#include <scomplex/base_utils.hpp>
 #include <scomplex/types.hpp>
 #include <scomplex/simplicial_complex.hpp>
 #include <scomplex/qhull_parsing.hpp>
+#include <scomplex/graph_utils.hpp>
+#include <scomplex/nn_utils.hpp>
+#include<scomplex/chain_calc.hpp>
 
 int my_char(gsimp::point_t point) { return 1; }
 

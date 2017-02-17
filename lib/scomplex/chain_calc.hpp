@@ -1,6 +1,8 @@
 #pragma once
 
-#include <scomplex/Simplicial_Complex.h>
+#include <scomplex/simplicial_complex.hpp>
+#include <scomplex/types.hpp>
+
 #include <Eigen/IterativeLinearSolvers>
 #include <Eigen/Sparse>
 #include <cmath>
@@ -13,26 +15,23 @@
 #include <boost/geometry/geometries/polygon.hpp>
 #include <fstream>
 
-typedef Eigen::SparseVector<double> vector_t;
-typedef std::pair<int, vector_t> chain_t;
-typedef Eigen::SparseMatrix<double> matrix_t;
-// typedef std::vector<size_t> cell_t;
+namespace gsimp {
+
+class NonZeroChain : public std::exception {};
 
 class bounding_chain {
     std::vector<matrix_t*> boundary_matrices;
-    simplicial::SimplicialComplex* s_comp;
+    simplicial_complex* s_comp;
     bool owner;
     void populate_matrices();
 
    public:
-    bounding_chain(simplicial::SimplicialComplex& sc);
+    bounding_chain(simplicial_complex& sc);
     bounding_chain(std::vector<point_t>& points, std::vector<cell_t>& tris);
     ~bounding_chain();
     chain_t get_bounding_chain(chain_t&);
     void draw_chain(std::string, chain_t);
 };
-
-class NonZeroChain : public std::exception {};
 
 //---------------------------------------
 // implementation
@@ -45,7 +44,7 @@ bounding_chain::~bounding_chain() {
         delete this->boundary_matrices.at(i);
 }
 
-bounding_chain::bounding_chain(simplicial::SimplicialComplex& sc) {
+bounding_chain::bounding_chain(simplicial_complex& sc) {
     this->owner = false;
     this->s_comp = &sc;
     this->populate_matrices();
@@ -54,15 +53,14 @@ bounding_chain::bounding_chain(simplicial::SimplicialComplex& sc) {
 bounding_chain::bounding_chain(std::vector<point_t>& points,
                                std::vector<cell_t>& tris) {
     this->owner = true;
-    this->s_comp = new simplicial::SimplicialComplex(points, tris);
+    this->s_comp = new simplicial_complex(points, tris);
     this->populate_matrices();
 }
 
 void bounding_chain::populate_matrices() {
     for (int d = 0; d < this->s_comp->dimension(); ++d) {
-        auto my_matrix = this->s_comp->get_boundary(d);
-        this->boundary_matrices.push_back(new matrix_t(my_matrix));
-        matrix_t* put_matrix = this->boundary_matrices.at(d);
+        auto level_matrix = this->s_comp->get_boundary_matrix(d);
+        this->boundary_matrices.push_back(new matrix_t(level_matrix));
     }
 }
 //
@@ -100,7 +98,7 @@ void bounding_chain::draw_chain(std::string filename, chain_t chain) {
     for (auto tri : this->s_comp->get_level(2)) {
         std::vector<point_type> polygon_vec;
         for (auto k : tri) {
-            point_t pt = this->s_comp->points.at(k);
+            point_t pt = this->s_comp->get_points().at(k);
             point_type pt_g(pt[0], pt[1]);
             polygon_vec.push_back(pt_g);
         }
@@ -141,7 +139,7 @@ void bounding_chain::draw_chain(std::string filename, chain_t chain) {
                 if (chain_v.coeffRef(i) != 0) {
                     std::vector<point_type> line_vec;
                     for (auto k : lines.at(i)) {
-                        point_t pt = this->s_comp->points.at(k);
+                        point_t pt = this->s_comp->get_points().at(k);
                         point_type pt_g(pt[0], pt[1]);
                         line_vec.push_back(pt_g);
                     }
@@ -180,6 +178,7 @@ chain_t bounding_chain::get_bounding_chain(chain_t& chain) {
         std::cout << '\n';
         std::cout << result << '\n';
         std::cout << chain_v << '\n';
-        // throw NonZeroChain();
+        throw NonZeroChain();
     }
 }
+};

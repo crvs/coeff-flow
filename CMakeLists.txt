@@ -11,6 +11,7 @@ project(simplicial CXX)
 #   * CGAL under /usr/include/CGAL
 #
 set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen3")
+set(EIGEN3_INCLUDE_DIR "/home/crvs/eigen-3.3.2")
 include_directories(${EIGEN3_INCLUDE_DIR})
 set(CGAL_INCLUDE_DIR "/usr/local/include")
 include_directories(${CGAL_INCLUDE_DIR})
