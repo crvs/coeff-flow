@@ -53,8 +53,11 @@ add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
 add_library(coeffflow SHARED "./lib/scomplex/coeff_flow.cpp")
 add_library(pathsnap SHARED "./lib/scomplex/path_snapper.cpp")
 
-add_executable(impl_test "src/impl_test.cpp")
-target_link_libraries(impl_test scomplex)
+add_executable(test0 "src/test0.cpp")
+target_link_libraries(test0 scomplex)
+
+add_executable(test1 "src/test1.cpp")
+target_link_libraries(test1 scomplex pathsnap)
 
 # set(STUPID_SOURCES "./src/main.cpp")
 # add_executable(my_stupid_test ${STUPID_SOURCES})

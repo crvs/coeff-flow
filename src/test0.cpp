@@ -32,8 +32,6 @@ int main(int argc, char* argv[]) {
 
     gsimp::simplicial_complex s_comp(points_v, cells_v);
 
-    gsimp::simplicial_complex q_comp = s_comp.quotient(my_char);
-
     std::cout << "complex dimension: " << s_comp.dimension() << "\n";
     for (int i = 0; i <= s_comp.dimension(); ++i) {
         std::cout << "level " << i << " has " << s_comp.get_level_size(i)

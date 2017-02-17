@@ -13,6 +13,7 @@ class path_snapper {
    public:
     // constructors and such
     path_snapper(std::vector<point_t>&, std::vector<cell_t>&);
+    path_snapper(std::shared_ptr<simplicial_complex>);
     path_snapper(simplicial_complex&);
     ~path_snapper();
     path_snapper(path_snapper&);

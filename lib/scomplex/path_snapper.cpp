@@ -1,4 +1,5 @@
 #include <scomplex/path_snapper.hpp>
+#include <iostream>
 
 #include <Eigen/Sparse>
 #include <scomplex/types.hpp>
@@ -13,8 +14,15 @@ struct path_snapper::impl {
     graph_t vertex_graph;  // defined in graph_utils.hpp
     std::shared_ptr<simplicial_complex> s_comp;
 
+    impl(std::shared_ptr<simplicial_complex> p_sc) {
+        s_comp = p_sc;
+        auto points = s_comp->get_points();
+        make_tree(point_tree, points);
+        vertex_graph = calculate_one_skelleton_graph(*s_comp);
+    };
+
     impl(simplicial_complex& sc) {
-        s_comp.reset(&sc);
+        s_comp.reset(new simplicial_complex(sc));
         auto points = s_comp->get_points();
         make_tree(point_tree, points);
         vertex_graph = calculate_one_skelleton_graph(*s_comp);
@@ -55,6 +63,10 @@ struct path_snapper::impl {
         }
         return pair_seq;
     }
+};
+
+path_snapper::path_snapper(std::shared_ptr<simplicial_complex> sc) {
+    p_impl = std::shared_ptr<impl>(new impl(sc));
 };
 
 path_snapper::path_snapper(simplicial_complex& sc) {

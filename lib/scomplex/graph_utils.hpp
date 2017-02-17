@@ -81,6 +81,7 @@ std::vector<vertex_t> shortest_path(const graph_t& g, vertex_t s, vertex_t t) {
     std::vector<vertex_t> s_t_path{};
     do {
         s_t_path.push_back(it);
+        it = predecessors[it];
     } while (it != s);
     std::reverse(s_t_path.begin(), s_t_path.end());
     return s_t_path;
