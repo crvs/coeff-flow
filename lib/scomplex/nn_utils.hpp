@@ -1,18 +1,31 @@
 #pragma once
 
+#include <scomplex/types.hpp>
+
 #include <vector>
 #include <algorithm>
 
+// TODO: go through the includes and find out which ones are needed
 #include <CGAL/Kd_tree.h>
 #include <CGAL/Search_traits_d.h>
 #include <CGAL/Search_traits_adapter.h>
 #include <CGAL/Cartesian_d.h>
 #include <CGAL/K_neighbor_search.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
-
 #include <boost/tuple/tuple.hpp>
 
-typedef std::vector<double> point_t;
+namespace gsimp {
+
+/*
+types used outside:
+    tree_t
+functions provided:
+    make_tree(tree_t& tree, std::vector<point_t>& point_list);
+    nearest_neighbor(tree_t& tree, point_t point);
+    nearest_neighbor_index(tree_t& tree, point_t point);
+    snap_points(tree_t& tree, std::vector<point_t> points);
+    snap_points_to_indexes( tree_t& tree, std::vector<point_t> points);
+*/
 
 // kd-tree point type, d-dimensional point
 typedef CGAL::Cartesian_d<double>::Point_d point_d;
@@ -82,3 +95,4 @@ std::vector<size_t> snap_points_to_indexes(  //
     }
     return snapped_points;
 }
+};
