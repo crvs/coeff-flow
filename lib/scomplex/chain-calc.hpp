@@ -1,12 +1,12 @@
 #pragma once
 
+#include <scomplex/Simplicial_Complex.h>
+#include <Eigen/IterativeLinearSolvers>
+#include <Eigen/Sparse>
+#include <cmath>
 #include <exception>
 #include <tuple>
-#include <cmath>
 #include <vector>
-#include <Eigen/Sparse>
-#include <Eigen/IterativeLinearSolvers>
-#include <scomplex/Simplicial_Complex.h>
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
@@ -87,6 +87,10 @@ bool equals(vector_t vec1, vector_t vec2) {
     return true;
 }
 
+// TODO: drowing facilities
+//  - draw chain
+//  - draw 1-chain with arrows
+//  - put it into its own header file
 void bounding_chain::draw_chain(std::string filename, chain_t chain) {
     typedef boost::geometry::model::d2::point_xy<double> point_type;
     typedef boost::geometry::model::ring<point_type> polygon_type;
