@@ -24,6 +24,8 @@ class simplicial_complex {
     int dimension();
     bool is_quotient();
     // level-wise info
+    chain_t new_chain(int d);
+    // create chains
     std::vector<cell_t> get_level(int);
     int get_level_size(int);
     // inclusion index

@@ -12,10 +12,6 @@ typedef std::queue<q_elem_t> queue_t;
 class out_of_context : std::exception {};
 class no_bounding_chain : std::exception {};
 
-int& chain_dim(chain_t& p) { return std::get<0>(p); }
-vector_t& chain_rep(chain_t& p) { return std::get<1>(p); }
-double& chain_val(chain_t& p, size_t i) { return std::get<1>(p).coeffRef(i); }
-
 chain_t coeff_flow(simplicial_complex& s_comp,  //
                    chain_t p,                   //
                    cell_t sigma_0,              //

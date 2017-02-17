@@ -22,14 +22,14 @@ include(${CGAL_USE_FILE})
 
 
 # Using CLANG instead of gcc for reasons
-set(CMAKE_C_COMPILER             "/usr/bin/clang")
+set(CMAKE_C_COMPILER             "/usr/bin/clang-3.8")
 set(CMAKE_C_FLAGS                "-Wall -std=c99")
 set(CMAKE_C_FLAGS_DEBUG          "-g")
 set(CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 set(CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
-set(CMAKE_CXX_COMPILER             "/usr/bin/clang++")
+set(CMAKE_CXX_COMPILER             "/usr/bin/clang++-3.8")
 set(CMAKE_CXX_FLAGS                "-Wall -std=c++11")
 set(CMAKE_CXX_FLAGS_DEBUG          "-g")
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
@@ -50,6 +50,7 @@ include_directories("./lib") # where the header files are
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
 add_library(coeffflow SHARED "./lib/scomplex/coeff_flow.cpp")
+add_library(pathsnap SHARED "./lib/scomplex/path_snapper.cpp")
 
 add_executable(impl_test "src/impl_test.cpp")
 target_link_libraries(impl_test scomplex)

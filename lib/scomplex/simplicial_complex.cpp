@@ -1,6 +1,5 @@
 #include <scomplex/simplicial_complex.hpp>
 #include <scomplex/types.hpp>
-#include <scomplex/base_utils.hpp>
 
 #include <iterator>  // for debuging purposes
 
@@ -86,6 +85,18 @@ struct simplicial_complex::impl {
         return pow(-1, orient);
     }
 
+    std::vector<size_t> dedupe_vec(std::vector<size_t>& vec) {
+        std::set<size_t> no_reps;
+        std::vector<size_t> no_reps_list;
+        for (size_t el : vec) {
+            no_reps.insert(el);
+        }
+        for (size_t el : no_reps) {
+            no_reps_list.push_back(el);
+        }
+        return no_reps_list;
+    }
+
     void calculate_matrices() {
         boundary_matrices = std::vector<matrix_t>();
         for (int k = 0; k < simplices.dimension(); k++) {
@@ -144,6 +155,7 @@ std::vector<std::pair<int, cell_t>> simplicial_complex::get_bdry_and_ind(
                 p_impl->handle_to_cell(face)));      //
     return boundary_and_indices;
 };
+
 
 std::vector<std::pair<int, size_t>> simplicial_complex::get_bdry_and_ind_index(
     int d, size_t cell) {
@@ -276,6 +288,12 @@ std::vector<cell_t> simplicial_complex::get_cofaces(cell_t face) {
     for (auto tau : range) s_cofaces.push_back(p_impl->handle_to_cell(tau));
     return s_cofaces;
 }
+
+chain_t simplicial_complex::new_chain(int d) {
+    vector_t v(get_level_size(d));
+    return chain_t(d,v);
+}
+
 
 // TODO: get top dimensional cells from the simplicial complex to add to the
 // simplex tree (instead of all the simplices).
