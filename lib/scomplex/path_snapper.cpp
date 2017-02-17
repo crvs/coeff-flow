@@ -87,11 +87,6 @@ path_snapper& path_snapper::operator=(const path_snapper& other) {
     return *this;
 }
 
-std::vector<size_t> path_snapper::snap_path_to_indices(
-    std::vector<point_t> path) {
-    return p_impl->snap_path(path);
-}
-
 std::vector<point_t> path_snapper::snap_path_to_points(
     std::vector<point_t> path) {
     auto index_path = p_impl->snap_path(path);
@@ -101,7 +96,12 @@ std::vector<point_t> path_snapper::snap_path_to_points(
     return point_path;
 }
 
-chain_t path_snapper::get_chain(std::vector<point_t> path) {
+std::vector<size_t> path_snapper::snap_path_to_indices(
+    std::vector<point_t> path) {
+    return p_impl->snap_path(path);
+}
+
+chain_t path_snapper::snap_path_to_chain(std::vector<point_t> path) {
     auto pair_seq = p_impl->index_pairs(path);
     chain_t rep = p_impl->s_comp->new_chain(1);
     for (auto pair : pair_seq) {
@@ -111,21 +111,30 @@ chain_t path_snapper::get_chain(std::vector<point_t> path) {
     return rep;
 }
 
-vector_t get_chain_vector(std::vector<point_t>);
-};
-/*
-    chain_t snap_path_to_chain(std::vector<point_t>);
-    // interconversion
-    std::vector<point_t> index_sequence_to_point(std::vector<size_t>);
-    std::vector<size_t> point_sequence_to_index(std::vector<point_t>);
-    chain_t index_sequence_to_chain(std::vector<size_t>);
-    chain_t point_sequence_to_chain(std::vector<point_t>);
-*/
-/*
-
-
-};
+std::vector<point_t> path_snapper::index_sequence_to_point(
+    std::vector<size_t> ind_path) {
+    std::vector<point_t> pt_path;
+    for (size_t ind : ind_path)
+        pt_path.push_back(p_impl->s_comp->get_points().at(ind));
+    return pt_path;
 }
-;
 
-*/
+std::vector<size_t> path_snapper::point_sequence_to_index(
+    std::vector<point_t> pt_path) {
+    std::vector<size_t> ind_path =
+        snap_points_to_indexes(p_impl->point_tree, pt_path);
+    return ind_path;
+}
+
+chain_t path_snapper::index_sequence_to_chain(std::vector<size_t> ind_path) {
+    chain_t chain = p_impl->s_comp->new_chain(1);
+    auto it = ind_path.begin();
+    for (; std::next(it) != ind_path.end(); ++it)
+        chain_val(chain, p_impl->s_comp->cell_to_index({*it, *std::next(it)}));
+    return chain;
+}
+
+chain_t path_snapper::point_sequence_to_chain(std::vector<point_t> pt_path) {
+    return index_sequence_to_chain(point_sequence_to_index(pt_path));
+}
+};

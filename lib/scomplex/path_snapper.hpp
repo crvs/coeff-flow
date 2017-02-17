@@ -21,7 +21,6 @@ class path_snapper {
     // the things we want to do
     std::vector<point_t> snap_path_to_points(std::vector<point_t>);
     std::vector<size_t> snap_path_to_indices(std::vector<point_t>);
-    chain_t get_chain(std::vector<point_t>);
     chain_t snap_path_to_chain(std::vector<point_t>);
     // interconversion
     std::vector<point_t> index_sequence_to_point(std::vector<size_t>);
