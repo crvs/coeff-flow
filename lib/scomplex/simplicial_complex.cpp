@@ -157,6 +157,7 @@ std::vector<std::pair<int, cell_t>> simplicial_complex::get_bdry_and_ind(
 };
 
 
+
 std::vector<std::pair<int, size_t>> simplicial_complex::get_bdry_and_ind_index(
     int d, size_t cell) {
     impl::simp_handle simp = p_impl->index_to_handle(d, cell);
@@ -263,6 +264,7 @@ cell_t simplicial_complex::index_to_cell(int d, size_t ind) {
     auto sh = p_impl->levels.at(d)->at(ind);
     return p_impl->handle_to_cell(*sh);
 }
+
 size_t simplicial_complex::cell_to_index(cell_t simp) {
     auto sh = p_impl->simplices.find(simp);
     return p_impl->simplices.key(sh);

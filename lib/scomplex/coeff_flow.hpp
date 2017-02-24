@@ -1,8 +1,8 @@
 #include <tuple>
+#include <iostream>
 #include <queue>
-#include <utility>
-#include <scomplex/simplicial_complex.hpp>
 #include <scomplex/types.hpp>
+#include <scomplex/simplicial_complex.hpp>
 
 namespace gsimp {
 
@@ -19,12 +19,13 @@ chain_t coeff_flow(simplicial_complex& s_comp,  //
 
     if (chain_dim(p) != s_comp.dimension() - 1) throw out_of_context();
     // 01
-    chain_t c_chain(s_comp.dimension(),
-                    vector_t(s_comp.get_level_size(s_comp.dimension())));
-    std::vector<bool> seen_sigma(s_comp.get_level_size(s_comp.dimension()),
-                                 false);
-    std::vector<bool> seen_tau(s_comp.get_level_size(s_comp.dimension() - 1),
-                               false);
+    chain_t c_chain = s_comp.new_chain(s_comp.dimension());
+
+    std::vector<bool> seen_sigma(
+        (size_t)s_comp.get_level_size(s_comp.dimension()), false);
+
+    std::vector<bool> seen_tau(
+        (size_t)s_comp.get_level_size(s_comp.dimension() - 1), false);
 
     // 04
     size_t tau_i, sigma_i(s_comp.cell_to_index(sigma_0));
@@ -38,7 +39,8 @@ chain_t coeff_flow(simplicial_complex& s_comp,  //
 
     // 08
     while (not queue.empty()) {
-        cell_t sigma, tau;
+        cell_t sigma;
+        cell_t tau;
         double c;
         std::tie(sigma, tau, c) = queue.front();
         queue.pop();
@@ -48,7 +50,7 @@ chain_t coeff_flow(simplicial_complex& s_comp,  //
         // 10
         if (seen_sigma.at(sigma_i) && chain_val(c_chain, sigma_i) != c)
             throw no_bounding_chain();
-        else if (not seen_sigma.at(sigma_i)) {
+        else if (not(seen_tau.at(tau_i) && seen_sigma.at(sigma_i))) {
             // 14
             seen_tau.at(tau_i) = true;
             seen_sigma.at(sigma_i) = true;
@@ -71,19 +73,32 @@ chain_t coeff_flow(simplicial_complex& s_comp,  //
                 int sigma_p_ind;
                 cell_t sigma_p;
                 std::tie(sigma_p_ind, sigma_p) = tau_cofaces[0];  // 20
-                double c_p =
-                    (sigma_p_ind *
-                     (chain_val(p, tau_i) -
-                      s_comp.boundary_inclusion_index(tau, sigma) * c));
-                for (cell_t tau_p : s_comp.cell_boundary(sigma_p)) {
-                    if (not seen_tau.at(s_comp.cell_to_index(tau_p))) {
+                double c_p = sigma_p_ind*(chain_val(p,tau_i)-s_comp.boundary_inclusion_index(tau, sigma)*c);
+                for (cell_t tau_p : s_comp.cell_boundary(sigma_p))
+                    if (not seen_tau.at(s_comp.cell_to_index(tau_p)))
                         queue.emplace(sigma_p, tau_p, c_p);
-                        seen_tau.at(tau_i) = true;
-                    }
-                }
             }
         }
     }
     return c_chain;
+}
+
+chain_t coeff_flow_embedded(simplicial_complex& s_comp, chain_t p) {
+    if (chain_dim(p) != s_comp.dimension() - 1) throw out_of_context();
+
+    cell_t sigma;
+    double c;
+    auto level = s_comp.get_level(s_comp.dimension() - 1);
+    for (auto tau : s_comp.get_level(s_comp.dimension() - 1)) {
+        if (s_comp.get_cofaces(tau).size() < 2) {
+            int sigma_ind;
+            size_t tau_i = s_comp.cell_to_index(tau);
+            std::tie(sigma_ind, sigma) = s_comp.get_cof_and_ind(tau)[0];
+            c = sigma_ind * chain_val(p, tau_i);
+            chain_t sol = coeff_flow(s_comp, p, sigma, c);
+            return sol;
+        }
+    }
+    throw out_of_context();
 }
 };  // namespace gsimp

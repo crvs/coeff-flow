@@ -106,7 +106,7 @@ chain_t path_snapper::snap_path_to_chain(std::vector<point_t> path) {
     chain_t rep = p_impl->s_comp->new_chain(1);
     for (auto pair : pair_seq) {
         size_t index = p_impl->s_comp->cell_to_index(std::get<0>(pair));
-        chain_val(rep, index) = std::get<1>(pair);
+        chain_val(rep, index) += std::get<1>(pair);
     }
     return rep;
 }
@@ -127,10 +127,12 @@ std::vector<size_t> path_snapper::point_sequence_to_index(
 }
 
 chain_t path_snapper::index_sequence_to_chain(std::vector<size_t> ind_path) {
-    chain_t chain = p_impl->s_comp->new_chain(1);
     auto it = ind_path.begin();
-    for (; std::next(it) != ind_path.end(); ++it)
-        chain_val(chain, p_impl->s_comp->cell_to_index({*it, *std::next(it)}));
+    chain_t chain = p_impl->s_comp->new_chain(1);
+    for (; std::next(it) != ind_path.end(); ++it) {
+        auto ind = p_impl->s_comp->cell_to_index({*it, *std::next(it)});
+        chain_val(chain, ind) += (*it < *std::next(it)) ? 1 : -1;
+    }
     return chain;
 }
 

@@ -1,11 +1,20 @@
 /**
+ * PATH SNAPPING TEST:
+ *     takes as argument a path to a file containing the description of a
+ *   triangulation as output by qhull (the last column of the point coordinates
+ *   is ignored).
+ *     comes up with a path in this complex (hard coded) and snaps it to the
+ *   complex, the only point of this is to test the libraries for errors.
  **/
+
 #include <iostream>
 #include <iterator>
 
 #include <scomplex/types.hpp>
 #include <scomplex/simplicial_complex.hpp>
 #include <scomplex/qhull_parsing.hpp>
+
+// testing
 #include <scomplex/path_snapper.hpp>
 
 int my_char(gsimp::point_t point) { return 1; }

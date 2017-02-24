@@ -7,20 +7,21 @@
  *   1-cell index, and outputs the cofaces of the given cell, (together with the
  *   boundary index) and the faces of the cell.
  **/
+#include <vector>
 #include <iostream>
 #include <iterator>
 
 #include <scomplex/types.hpp>
-#include <scomplex/simplicial_complex.hpp>
 #include <scomplex/qhull_parsing.hpp>
+#include <scomplex/simplicial_complex.hpp>
 
 int my_char(gsimp::point_t point) { return 1; }
 
 int& do_this(int& a) { return a; }
 
 int main(int argc, char* argv[]) {
-    std::vector<point_t> points_v;
-    std::vector<cell_t> cells_v;
+    std::vector<gsimp::point_t> points_v;
+    std::vector<gsimp::cell_t> cells_v;
 
     std::string filename;
     if (argc == 1) {

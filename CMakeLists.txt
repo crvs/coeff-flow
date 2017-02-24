@@ -59,6 +59,18 @@ target_link_libraries(test0 scomplex)
 add_executable(test1 "src/test1.cpp")
 target_link_libraries(test1 scomplex pathsnap)
 
+add_executable(test2 "src/test2.cpp")
+target_link_libraries(test2 scomplex pathsnap)
+
+add_executable(test3 "src/test3.cpp")
+target_link_libraries(test3 scomplex pathsnap)
+
+add_executable(test4 "src/test4.cpp")
+target_link_libraries(test4 scomplex pathsnap)
+
+add_executable(test5 "src/test5.cpp")
+target_link_libraries(test5 scomplex pathsnap)
+
 # set(STUPID_SOURCES "./src/main.cpp")
 # add_executable(my_stupid_test ${STUPID_SOURCES})
 
