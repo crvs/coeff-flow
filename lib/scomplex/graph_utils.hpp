@@ -1,13 +1,8 @@
 #pragma once
 
 #include <vector>
-// reverse
-#include <algorithm>
-
-// to compute norms
-#include "Eigen/Eigen"
-
-#include "scomplex/Simplicial_Complex.h"
+#include <scomplex/types.hpp>
+#include <scomplex/simplicial_complex.hpp>
 
 // graph libraries
 #include "boost/graph/adjacency_list.hpp"
@@ -15,97 +10,100 @@
 #include "boost/graph/named_function_params.hpp"
 #include "boost/property_map/vector_property_map.hpp"
 
+namespace gsimp {
+
+/*
+typedefs:
+    graph_t
+functions:
+    calculate_one_skelleton_graph(simplicial_complex& s_comp )
+    complete_path(const graph_t& g, std::vector<vertex_t> vec)
+    shortest_path(const graph_t& g, vertex_t s, vertex_t t)
+*/
+
 typedef typename boost::adjacency_list<             //
     boost::vecS,                                    //
     boost::vecS,                                    //
     boost::undirectedS,                             //
-    boost::no_property,                             //
+    boost::no_property,                             // vertex property
     boost::property<boost::edge_weight_t, double>>  //
-    Graph;
+    graph_t;
 
-typedef typename boost::graph_traits<Graph>::vertex_descriptor vertex_t;
+typedef typename boost::graph_traits<graph_t>::vertex_descriptor vertex_t;
 
-typedef std::vector<double> point_t;
-
-Graph calculate_one_skelleton_graph(
-    simplicial::SimplicialComplex<point_t>& scomp  //
-    ) {
-    int num_points{scomp.get_dimension(0)};
-    int num_edges{scomp.get_dimension(1)};
+graph_t calculate_one_skelleton_graph(simplicial_complex& s_comp  //
+                                      ) {
+    size_t num_points(s_comp.get_level_size(0));
+    size_t num_edges(s_comp.get_level_size(1));
 
     std::vector<std::pair<int, int>> edges(num_edges);
     std::vector<double> weights(num_edges);
 
-    for (std::vector<int> edge : scomp.get_level(1)) {
+    for (cell_t edge : s_comp.get_level(1)) {
         int src_index = edge.at(0);
         int trg_index = edge.at(1);
 
-        point_t src_point = scomp.points.at(edge.at(0));
-        point_t trg_point = scomp.points.at(edge.at(1));
+        point_t src_point = s_comp.get_points().at(edge.at(0));
+        point_t trg_point = s_comp.get_points().at(edge.at(1));
 
         edges.push_back(std::make_pair(src_index, trg_index));
 
-        Eigen::VectorXd diff(src_point.size());
-
-        for (int i = 0; i < src_point.size(); i++)
-            diff(i) = src_point.at(i) - trg_point.at(i);
-
-        weights.push_back(diff.norm());
+        double norm = 0;
+        for (int i = 0; i < src_point.size(); ++i)
+            norm += pow(src_point.at(i) - trg_point.at(i), 2);
+        weights.push_back(sqrt(norm));
     }
 
-    const Graph one_skelleton(edges.begin(),    //
-                              edges.end(),      //
-                              weights.begin(),  //
-                              num_points);      //
-
+    const graph_t one_skelleton(edges.begin(),    //
+                                edges.end(),      //
+                                weights.begin(),  //
+                                num_points);      //
     return one_skelleton;
 }
 
-// calculate shortest paths:
-std::vector<vertex_t> shortest_path(const Graph& g, vertex_t s, vertex_t t) {
+/**
+* @brief  find the shortest path between two vertices in a graph.
+*
+* @param g: graph (passed by ref)
+* @param s: source vertex (type: decltype(g)::vertex_descriptor)
+* @param t: source vertex (type: decltype(g)::vertex_descriptor)
+*
+* @returns: a vector of vertices
+*            (type: std::vector<decltype(g)::vertex_descriptor>)
+*/
+std::vector<vertex_t> shortest_path(const graph_t& g, vertex_t s, vertex_t t) {
+    // make a predecessor map
     boost::vector_property_map<vertex_t> predecessors(boost::num_vertices(g));
-
     boost::dijkstra_shortest_paths(g, s,
                                    boost::predecessor_map(&predecessors[0]));
-
+    // construct the path (going backwards from the target to the source)
     vertex_t it = t;
     std::vector<vertex_t> s_t_path{};
-    while (it != s) {
+    do {
         s_t_path.push_back(it);
         it = predecessors[it];
-    }
-    s_t_path.push_back(it);
+    } while (it != s);
     std::reverse(s_t_path.begin(), s_t_path.end());
     return s_t_path;
-
-    // std::cout << "I'm calculating shortest paths\n";
 }
 
-std::vector<vertex_t> complete_path(const Graph& g, std::vector<vertex_t> vec) {
+std::vector<vertex_t> complete_path(const graph_t& g,
+                                    std::vector<vertex_t> vec) {
     std::vector<vertex_t>::iterator s{vec.begin()};
-    std::list<vertex_t> full_path{*s};
-    while (s != vec.end()) {
-        std::vector<vertex_t>::iterator t = std::next(s);
-        // calculate the path between s and t
+    std::vector<vertex_t>::iterator t = std::next(s);
+
+    // start calculatinng the full path
+    std::vector<vertex_t> full_path;
+    full_path.push_back(*s);
+    while (t != vec.end()) {
+        // get the next vertex calculate and add the path between s and t
+        // (contains vertices other than s) to the full path
         std::vector<vertex_t> path_portion{shortest_path(g, *s, *t)};
-
-        // add the path between s and t to the full path
-        for (vertex_t vert : path_portion) {
-            // allways skip the first element since we are calculating the paths
-            // between s,t then s',t' where s' = t and that would make use of a
-            // non-existing edge.
-            if (vert != *path_portion.begin()) {
-                full_path.push_back(vert);
-            }
-        }
-
+        // quick vector merging
+        full_path.insert(full_path.end(),path_portion.begin(),path_portion.end());
         std::advance(s, 1);
+        std::advance(t, 1);
     }
-    // initialize with size so we don't have to relocate
-    std::vector<vertex_t> full_path_vect(full_path.size());
-    for (vertex_t vert : full_path) {
-        full_path_vect.push_back(vert);
-    }
-
-    return full_path_vect;
+    return full_path;
 }
+};
