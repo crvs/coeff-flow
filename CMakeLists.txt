@@ -50,7 +50,6 @@ set(CMAKE_BUILD_TYPE Debug)
 include_directories("./lib") # where the header files are
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
-add_library(coeffflow SHARED "./lib/scomplex/coeff_flow.cpp")
 add_library(pathsnap SHARED "./lib/scomplex/path_snapper.cpp")
 
 add_executable(test0 "src/test0.cpp")
