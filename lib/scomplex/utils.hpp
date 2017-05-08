@@ -1,3 +1,5 @@
+#pragma once
+
 #include <scomplex/types.hpp>
 #include <scomplex/drawing_utils.hpp>
 #include <scomplex/simplicial_complex.hpp>

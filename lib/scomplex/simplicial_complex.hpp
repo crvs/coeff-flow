@@ -41,6 +41,10 @@ class simplicial_complex {
     std::vector<size_t> get_cofaces_index(int, size_t);
     std::vector<std::pair<int, cell_t>> get_cof_and_ind(cell_t);
     std::vector<std::pair<int, size_t>> get_cof_and_ind_index(int, size_t);
+    // cell area calculations
+    double cell_area(cell_t);
+    double cell_index_area(int,size_t);
+    double chain_area(chain_t);
     // boundary matrices
     matrix_t get_boundary_matrix(int);
     // cells and indices back and forth

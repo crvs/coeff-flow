@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <Eigen/Sparse>
+#include <Eigen/Dense>
 #include <functional>
 #include <vector>
 
@@ -60,4 +61,10 @@ chain_t prod(double coef, chain_t chain) {
 }
 
 void prod_to(double coef, chain_t chain) { std::get<1>(chain) *= coef; }
+
+Eigen::VectorXd point_to_eigen(point_t pt) {
+    Eigen::VectorXd v0(pt.size());
+    for (int j = 0; j < pt.size(); ++j) v0(j) = pt[j];
+    return v0;
+}
 }  // namespace gsimp

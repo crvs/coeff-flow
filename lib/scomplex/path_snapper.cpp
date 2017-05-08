@@ -10,6 +10,8 @@
 namespace gsimp {
 
 struct path_snapper::impl {
+    friend class clusterer;
+
     tree_t point_tree;     // defined in nn_utils.hpp
     graph_t vertex_graph;  // defined in graph_utils.hpp
     std::shared_ptr<simplicial_complex> s_comp;
@@ -105,8 +107,11 @@ chain_t path_snapper::snap_path_to_chain(std::vector<point_t> path) {
     auto pair_seq = p_impl->index_pairs(path);
     chain_t rep = p_impl->s_comp->new_chain(1);
     for (auto pair : pair_seq) {
-        size_t index = p_impl->s_comp->cell_to_index(std::get<0>(pair));
-        chain_val(rep, index) += std::get<1>(pair);
+        auto cell = std::get<0>(pair);
+        if (cell[0] != cell[1]) {
+            size_t index = p_impl->s_comp->cell_to_index(std::get<0>(pair));
+            chain_val(rep, index) += std::get<1>(pair);
+        }
     }
     return rep;
 }
@@ -138,5 +143,9 @@ chain_t path_snapper::index_sequence_to_chain(std::vector<size_t> ind_path) {
 
 chain_t path_snapper::point_sequence_to_chain(std::vector<point_t> pt_path) {
     return index_sequence_to_chain(point_sequence_to_index(pt_path));
+}
+
+std::shared_ptr<simplicial_complex> path_snapper::get_underlying_complex() {
+    return p_impl->s_comp;
 }
 };

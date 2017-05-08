@@ -16,9 +16,9 @@ typedef std::vector<size_t> cell_t;
 template <typename data_t>
 std::vector<data_t> tokenize(std::string str) {
     std::istringstream sstream(str);
-    std::vector<data_t> tokens{//
-                               std::istream_iterator<data_t>{sstream},
-                               std::istream_iterator<data_t>{}};
+    std::vector<data_t> tokens;
+    data_t val;
+    while(sstream >> val) tokens.push_back(val);
     return tokens;
 }
 
@@ -79,4 +79,32 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
     }
     file_stream.close();
     return std::make_pair(points, cells);
+}
+
+std::vector<std::vector<point_t>> parse_track_file(std::string filename) {
+    std::ifstream file_stream(filename);
+
+    if (!file_stream.is_open()) {
+        throw std::runtime_error("failed to open \"" + filename + "\"\n");
+    }
+
+    std::vector<std::vector<point_t>> tracks;
+
+    std::vector<point_t> track;
+
+    for (std::string line; std::getline(file_stream, line);) {
+
+        auto tokens = tokenize<double>(line);
+
+        if (tokens.size() == 1) {
+            if (track.size() > 0) {tracks.push_back(track);}
+            track = std::vector<point_t>();
+        }
+        else
+            track.push_back(tokens);
+    }
+
+    file_stream.close();
+
+    return tracks;
 }

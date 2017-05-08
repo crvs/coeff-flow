@@ -5,6 +5,7 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <Eigen/Sparse>
+#include <Eigen/Dense>
 
 #include <tuple>
 #include <memory>  // smart pointers
@@ -29,6 +30,7 @@ struct simplicial_complex::impl {
     bool quotient_q;
     std::vector<matrix_t> boundary_matrices;
     levels_t levels;
+    std::vector<std::vector<double>> area_vectors;
 
     impl() : quotient_q(false){};
 
@@ -83,6 +85,15 @@ struct simplicial_complex::impl {
             }
         }
         return pow(-1, orient);
+    }
+
+    void calculate_area_vectors(simplicial_complex* sc) {
+        for (int d = 0; d <= simplices.dimension(); ++d) {
+            std::vector<double> d_area;
+            for (int i = 0; i < get_level_size(d); ++i)
+                d_area.push_back(sc->cell_index_area(d, i));
+            area_vectors.push_back(d_area);
+        }
     }
 
     std::vector<size_t> dedupe_vec(std::vector<size_t>& vec) {
@@ -155,8 +166,6 @@ std::vector<std::pair<int, cell_t>> simplicial_complex::get_bdry_and_ind(
                 p_impl->handle_to_cell(face)));      //
     return boundary_and_indices;
 };
-
-
 
 std::vector<std::pair<int, size_t>> simplicial_complex::get_bdry_and_ind_index(
     int d, size_t cell) {
@@ -293,9 +302,8 @@ std::vector<cell_t> simplicial_complex::get_cofaces(cell_t face) {
 
 chain_t simplicial_complex::new_chain(int d) {
     vector_t v(get_level_size(d));
-    return chain_t(d,v);
+    return chain_t(d, v);
 }
-
 
 // TODO: get top dimensional cells from the simplicial complex to add to the
 // simplex tree (instead of all the simplices).
@@ -343,24 +351,60 @@ simplicial_complex simplicial_complex::quotient(int char_fun(point_t)) {
     return quotient_sc;
 }
 
-};  // namespace gsimp
+size_t factorial(int n) {
+    size_t fact = 1;
+    for (int i = 1; i <= n; ++i) fact *= i;
+    return fact;
+}
 
-// DEPRECATED
+// area calculations
+// TODO: test simplex area
+double simplicial_complex::cell_area(cell_t cell) {
+    // TODO: get rid of the 1
+    // it will have to depend on the fact of wether or not it is a quotient
 
+    std::vector<Eigen::VectorXd> point_vs;
+    Eigen::VectorXd p0 = point_to_eigen(p_impl->points[cell[0]]);
+    for (auto i = 1; i < cell.size(); ++i)
+        point_vs.push_back(point_to_eigen(p_impl->points[i]) - p0);
+
+    // getting a frame for the cell
+    std::vector<Eigen::VectorXd> cell_frm;
+    for (auto i = 0; i < point_vs.size(); ++i) {
+        Eigen::VectorXd discounted = point_vs[i];
+        for (auto j = 0; j < i; ++j)
+            discounted = discounted -
+                         (discounted.transpose() * cell_frm[j]) * cell_frm[j];
+        cell_frm.push_back(discounted / discounted.norm());
+    }
+
+    Eigen::MatrixXd area_mat(cell.size() - 1, cell.size() - 1);
+    for (auto i = 0; i < cell.size() - 1; ++i) {
+        for (auto j = 0; j < cell.size() - 1; ++j)
+            area_mat(i, j) = cell_frm[i].transpose() * point_vs[j];
+    }
+
+    return std::abs(area_mat.determinant()) / factorial(cell.size() - 1);
+}
+
+double simplicial_complex::cell_index_area(int d, size_t c) {
+    return cell_area(index_to_cell(d, c));
+}
+
+double simplicial_complex::chain_area(chain_t chain) {
+    int d = chain_dim(chain);
+    Eigen::SparseVector<double>::InnerIterator it(chain_rep(chain));
+    if (p_impl->area_vectors.size() == 0) p_impl->calculate_area_vectors(this);
+    double c_area = 0;
+    for (; it; ++it)
+        c_area += it.value() * (p_impl->area_vectors.at(d).at(it.index()));
+    return c_area;
+}
+};
+
+// MAY BE INCLUDED AGAIN WHEN WE START DOING MORE WITH QUOTIENTS
 /*
- *std::set<size_t> vertex_set(simp_handle s) {
- *    std::set<size_t> v_set;
- *    for (auto v : simplices.simplex_vertex_range(s)) {
- *        v_set.insert(v);
- *    }
- *    return v_set;
- *}
- */
-
-/* MAY BE INCLUDED AGAIN WHEN WE START DOING MORE WITH QUOTIENTS
- *
  * bool is_point(point_t pt) {
  *     return (not quotient_q ? true : not(pt.size() == 0));
  * }
- *
  */
