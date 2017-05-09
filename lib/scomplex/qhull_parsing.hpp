@@ -33,8 +33,8 @@ void cout_iterator(Iterator first, Iterator last) {
 
 std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
     std::string filename) {
-    std::ifstream file_stream(filename);
 
+    std::ifstream file_stream(filename);
     if (!file_stream.is_open()) {
         throw std::runtime_error("failed to open \"" + filename + "\"\n");
     }
@@ -62,7 +62,6 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
         // lines pertaining to points
         if (line_number > 1 && line_number < total_points + 2) {
             auto point = tokenize<double>(line);
-            point.pop_back();
             points.push_back(point);
         }
         // first line after points (get number of cells)
