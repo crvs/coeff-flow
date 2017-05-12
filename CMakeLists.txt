@@ -47,6 +47,7 @@ set(CMAKE_NM      "/usr/bin/llvm-nm")
 set(CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
 set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
+# Build type
 #set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_BUILD_TYPE Release)
 
@@ -83,4 +84,4 @@ target_link_libraries(test7 scomplex pathsnap clusterer)
 
 find_library(HAVE_YAML NAME yaml-cpp)
 add_executable(yamltest "src/testing_facility.cpp")
-target_link_libraries(yamltest yaml-cpp)
+target_link_libraries(yamltest yaml-cpp scomplex pathsnap)
