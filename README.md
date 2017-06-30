@@ -1,7 +1,7 @@
 # Coefficient Flow algorithm
 
 ## Introduction
-This repository imelements the `Coefficient_Flow` algorithm presented in [1][1].
+This repository imelements the `Coefficient_Flow` algorithm presented in [^1].
 
 ## Compiling
 
@@ -9,4 +9,4 @@ This repository imelements the `Coefficient_Flow` algorithm presented in [1][1].
 
 
 
-[1]: J.F. Carvalho, M. Vejdemo-Johansson, D. Kragic, F.T. Pokorny; An algorithm for calculating top-dimensional bounding chains. Unpublished
+[^1]: J.F. Carvalho, M. Vejdemo-Johansson, D. Kragic, F.T. Pokorny; An algorithm for calculating top-dimensional bounding chains. 2017, Unpublished.
