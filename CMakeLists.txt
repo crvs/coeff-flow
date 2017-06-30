@@ -15,6 +15,8 @@ set(EIGEN3_INCLUDE_DIR "/home/crvs/eigen-3.3.2")
 include_directories(${EIGEN3_INCLUDE_DIR})
 set(CGAL_INCLUDE_DIR "/usr/local/include")
 include_directories(${CGAL_INCLUDE_DIR})
+set(CTPL_INCLUDE_DIR "../ctpl")
+include_directories(${CTPL_INCLUDE_DIR})
 
 
 find_package(CGAL REQUIRED COMPONTENTS Core)
@@ -33,7 +35,7 @@ set(CMAKE_C_FLAGS_RELEASE        "-O3 -DNDEBUG")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
 set(CMAKE_CXX_COMPILER             "/usr/bin/clang++-3.8")
-set(CMAKE_CXX_FLAGS                "-Wall -std=c++11")
+set(CMAKE_CXX_FLAGS                "-Wall -std=c++11 -lpthread")
 set(CMAKE_CXX_FLAGS_DEBUG          "-g")
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")# -fopenmp")
@@ -48,7 +50,7 @@ set(CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
 set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
 # Build type
-#set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_BUILD_TYPE Release)
 
 include_directories("./lib") # where the header files are
@@ -85,3 +87,9 @@ target_link_libraries(test7 scomplex pathsnap clusterer)
 find_library(HAVE_YAML NAME yaml-cpp)
 add_executable(yamltest "src/testing_facility.cpp")
 target_link_libraries(yamltest yaml-cpp scomplex pathsnap)
+
+add_executable(graphtest "src/graphtest.cpp")
+target_link_libraries(graphtest scomplex)
+
+add_executable(hasse_test "src/hasse_test.cpp")
+target_link_libraries(hasse_test scomplex)

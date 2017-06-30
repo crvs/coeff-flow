@@ -3,7 +3,10 @@
 #include <scomplex/types.hpp>
 #include <memory>
 
+#include <gudhi/Simplex_tree.h>
+
 namespace gsimp {
+
 
 class NoChain {};
 
@@ -13,6 +16,9 @@ class simplicial_complex {
     std::shared_ptr<impl> p_impl;
 
    public:
+
+    void calculate_hasse();
+
     // constructor (no default)
     simplicial_complex(std::vector<point_t>&, std::vector<cell_t>&);
     simplicial_complex(const simplicial_complex&);
@@ -21,10 +27,12 @@ class simplicial_complex {
     ~simplicial_complex();
     // basic info
     std::vector<point_t> get_points();
+    point_t get_point(size_t);
     int dimension();
     bool is_quotient();
     // level-wise info
     chain_t new_chain(int d);
+    chain_v new_v_chain(int d);
     // create chains
     std::vector<cell_t> get_level(int);
     int get_level_size(int);
