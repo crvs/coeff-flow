@@ -393,18 +393,4 @@ void simplicial_complex::calculate_hasse() {
     p_impl->has_hasse = true;
     p_impl->incidence = hasse_diag(*this);
 }
-
-double simplicial_complex::cell_index_area(int d, size_t c) {
-    return cell_area(index_to_cell(d, c));
-}
-
-double simplicial_complex::chain_area(chain_t chain) {
-    int d = chain_dim(chain);
-    Eigen::SparseVector<double>::InnerIterator it(chain_rep(chain));
-    if (p_impl->area_vectors.size() == 0) p_impl->calculate_area_vectors(this);
-    double c_area = 0;
-    for (; it; ++it)
-        c_area += it.value() * (p_impl->area_vectors[d][it.index()]);
-    return c_area;
-}
 };

@@ -9,7 +9,6 @@
 #include "simplicial_complex.hpp"
 
 namespace gsimp {
-
 using namespace std;
 
 typedef tuple<cell_t, cell_t, double> q_elem_t;
@@ -36,16 +35,15 @@ chain_v coeff_flow(simplicial_complex& s_comp,  //
     seen_sigma[s_comp.cell_to_index(sigma_0)] = true;
     size_t seen_sigmas = 1;
 
-    // 05
     queue_t queue;
     for (cell_t tau : s_comp.cell_boundary(sigma_0)) {
         queue.emplace(sigma_0, tau, c_0);
     }
 
-    // 08
     while (not queue.empty()) {
-        // DEBUG OUTPUT
         /*
+         * // useful debug output
+         *
          * size_t ind = 0;
          * if (ind % 1000 == 0) {
          *     cout << ind << ": ";
@@ -74,7 +72,6 @@ chain_v coeff_flow(simplicial_complex& s_comp,  //
             // found local incoherence
             if (c_vec[sigma_i] != c) throw no_bounding_chain();
         } else {
-            // 14
             seen_sigma[sigma_i] = true;
             c_vec[sigma_i] = c;
             seen_sigmas++;
@@ -84,7 +81,6 @@ chain_v coeff_flow(simplicial_complex& s_comp,  //
         seen_tau[tau_i] = true;
         seen_taus++;
 
-        // 15
         cell_t sigma_p;
         size_t sigma_p_i;
         bool is_boundary = true;
@@ -97,7 +93,6 @@ chain_v coeff_flow(simplicial_complex& s_comp,  //
             }
         }
 
-        // 16
         double predicted_bdry = s_comp.boundary_inclusion_index(tau, sigma) * c;
         if (is_boundary) {
             // sigma is the only coface of tau
@@ -118,7 +113,9 @@ chain_v coeff_flow(simplicial_complex& s_comp,  //
         }
     }
     }
+
     /*
+     * // useful live debugging info
      * cout << "sigmas seen: " << seen_sigmas << "/" << s_comp.get_level_size(s_comp.dimension());
      * cout << " taus seen: " << seen_taus << "/" << s_comp.get_level_size(s_comp.dimension() - 1);
      * cout << '\n';

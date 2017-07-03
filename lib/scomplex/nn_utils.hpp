@@ -6,13 +6,11 @@
 #include <iostream>
 #include <algorithm>
 
-// TODO: go through the includes and find out which ones are needed
-#include <CGAL/Kd_tree.h>
 #include <CGAL/Search_traits_d.h>
 #include <CGAL/Search_traits_adapter.h>
 #include <CGAL/Cartesian_d.h>
-#include <CGAL/K_neighbor_search.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
+
 #include <boost/tuple/tuple.hpp>
 
 namespace gsimp {
