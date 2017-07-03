@@ -8,7 +8,7 @@
 namespace gsimp {
 
 
-class NoChain {};
+class No_Boundary {};
 
 class simplicial_complex {
     // implementation details
@@ -29,7 +29,6 @@ class simplicial_complex {
     std::vector<point_t> get_points();
     point_t get_point(size_t);
     int dimension();
-    bool is_quotient();
     // level-wise info
     chain_t new_chain(int d);
     chain_v new_v_chain(int d);
@@ -49,16 +48,10 @@ class simplicial_complex {
     std::vector<size_t> get_cofaces_index(int, size_t);
     std::vector<std::pair<int, cell_t>> get_cof_and_ind(cell_t);
     std::vector<std::pair<int, size_t>> get_cof_and_ind_index(int, size_t);
-    // cell area calculations
-    double cell_area(cell_t);
-    double cell_index_area(int,size_t);
-    double chain_area(chain_t);
     // boundary matrices
     matrix_t get_boundary_matrix(int);
     // cells and indices back and forth
     cell_t index_to_cell(int, size_t);
     size_t cell_to_index(cell_t);
-    //
-    simplicial_complex quotient(int char_fun(point_t));
 };  // class simplicial_complex
 };  // namespace gsimp
