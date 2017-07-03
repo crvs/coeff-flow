@@ -10,23 +10,48 @@ project(simplicial CXX)
 #   * boost under /usr/include/boost
 #   * CGAL under /usr/include/CGAL
 #
-set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen3")
-set(EIGEN3_INCLUDE_DIR "/home/crvs/eigen-3.3.2")
-include_directories(${EIGEN3_INCLUDE_DIR})
-set(CGAL_INCLUDE_DIR "/usr/local/include")
-include_directories(${CGAL_INCLUDE_DIR})
-set(CTPL_INCLUDE_DIR "../ctpl")
-include_directories(${CTPL_INCLUDE_DIR})
+# in case Eigen, and/or CGAL, and/or GUDHI are not found by find_package
+# try setting the paths to them manually
 
-
-find_package(CGAL REQUIRED COMPONTENTS Core)
-include(${CGAL_USE_FILE})
 #
-# end_requirements
+# set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen3")
+# include_directories(${EIGEN3_INCLUDE_DIR})
+#
+# set(CGAL_INCLUDE_DIR "/usr/local/include/eigen3")
+# include_directories(${CGAL_INCLUDE_DIR})
+#
+# GUDHI is being included manually further down
+# version should be 1.3 or higher, provided they don't break anything being used
+#
+# you will also need to have libyaml-cpp installed
 
-#include_directories("/usr/lib/gcc/x86_65-linuxsgnu/4.8/include/omp")
+find_package(Boost REQUIRED)
+message(STATUS "Boost directory: ${Boost_INCLUDE_DIRS}")
+include_directories(${Boost_INCLUDE_DIRS})
 
-# Using CLANG instead of gcc for reasons
+find_package(Eigen3 3.1.2 REQUIRED)
+message(STATUS "Eigen3 version: ${EIGEN3_VERSION}")
+message(STATUS "Eigen3 directory: ${EIGEN3_INCLUDE_DIR}")
+include_directories(${EIGEN3_INCLUDE_DIR})
+
+find_package(CGAL REQUIRED)
+message(STATUS "CGAL version: ${CGAL_VERSION}")
+message(STATUS "CGAL directory: ${CGAL_INCLUDE_DIRS}")
+include_directories(${CGAL_INCLUDE_DIRS})
+
+set(GUDHI_INCLUDE_DIR "/usr/local/include/gudhi")
+if(EXISTS ${GUDHI_INCLUDE_DIR})
+    include_directories(${GUDHI_INCLUDE_DIR})
+else(EXISTS ${GUDHI_INCLUDE_DIR})
+    message(FATAL_ERROR "Gudhi not found")
+endif(EXISTS ${GUDHI_INCLUDE_DIR})
+
+if(NOT EXISTS "/usr/include/yaml-cpp")
+    message(FATAL_ERROR "libyaml (yaml-cpp) not found")
+endif(NOT EXISTS "/usr/include/yaml-cpp")
+
+# find_library(HAVE_YAML NAME YAML_CPP)
+
 set(CMAKE_C_COMPILER             "/usr/bin/clang-3.8")
 set(CMAKE_C_FLAGS                "-Wall -std=c99")
 set(CMAKE_C_FLAGS_DEBUG          "-g")
@@ -35,13 +60,11 @@ set(CMAKE_C_FLAGS_RELEASE        "-O3 -DNDEBUG")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
 set(CMAKE_CXX_COMPILER             "/usr/bin/clang++-3.8")
-set(CMAKE_CXX_FLAGS                "-Wall -std=c++11 -lpthread")
+set(CMAKE_CXX_FLAGS                "-Wall -std=c++11")
 set(CMAKE_CXX_FLAGS_DEBUG          "-g")
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")# -fopenmp")
+set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-# Linker flags for
-# set(CMAKE_CXX_FLAGS "-lspatialindex_c -lspatialindex ${CMAKE_CXX_FLAGS}")
 
 set(CMAKE_AR      "/usr/bin/llvm-ar")
 set(CMAKE_LINKER  "/usr/bin/llvm-ld")
@@ -49,47 +72,12 @@ set(CMAKE_NM      "/usr/bin/llvm-nm")
 set(CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
 set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
-# Build type
-# set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_BUILD_TYPE Release)
 
 include_directories("./lib") # where the header files are
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
 add_library(pathsnap SHARED "./lib/scomplex/path_snapper.cpp")
-add_library(clusterer SHARED "./lib/scomplex/clusterer.cpp")
-target_link_libraries(clusterer pathsnap)
 
-add_executable(test0 "src/test0.cpp")
-target_link_libraries(test0 scomplex)
-
-add_executable(test1 "src/test1.cpp")
-target_link_libraries(test1 scomplex pathsnap)
-
-add_executable(test2 "src/test2.cpp")
-target_link_libraries(test2 scomplex pathsnap)
-
-add_executable(test3 "src/test3.cpp")
-target_link_libraries(test3 scomplex pathsnap)
-
-add_executable(test4 "src/test4.cpp")
-target_link_libraries(test4 scomplex pathsnap)
-
-add_executable(test5 "src/test5.cpp")
-target_link_libraries(test5 scomplex pathsnap)
-
-add_executable(test6 "src/test6.cpp")
-target_link_libraries(test6 scomplex pathsnap)
-
-add_executable(test7 "src/test7.cpp")
-target_link_libraries(test7 scomplex pathsnap clusterer)
-
-find_library(HAVE_YAML NAME yaml-cpp)
 add_executable(yamltest "src/testing_facility.cpp")
 target_link_libraries(yamltest yaml-cpp scomplex pathsnap)
-
-add_executable(graphtest "src/graphtest.cpp")
-target_link_libraries(graphtest scomplex)
-
-add_executable(hasse_test "src/hasse_test.cpp")
-target_link_libraries(hasse_test scomplex)
