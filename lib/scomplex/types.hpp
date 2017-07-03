@@ -64,10 +64,6 @@ void add_to(chain_t chain1, chain_t chain2) {
     }
 }
 
-// chain_t to_sparse(chain_v chain) {}
-// 
-// chain_v to_vector(chain_t chain) {}
-
 chain_t subtract(chain_t chain1, chain_t chain2) {
     if (std::get<0>(chain1) == std::get<0>(chain2))
         return chain_t(std::get<0>(chain1),
