@@ -50,8 +50,6 @@ if(NOT EXISTS "/usr/include/yaml-cpp")
     message(FATAL_ERROR "libyaml (yaml-cpp) not found")
 endif(NOT EXISTS "/usr/include/yaml-cpp")
 
-# find_library(HAVE_YAML NAME YAML_CPP)
-
 set(CMAKE_C_COMPILER             "/usr/bin/clang-3.8")
 set(CMAKE_C_FLAGS                "-Wall -std=c99")
 set(CMAKE_C_FLAGS_DEBUG          "-g")
