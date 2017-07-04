@@ -13,9 +13,12 @@ In order to compile this repository you will need the following packages:
 - `Boost (v >= 1.54.0)`
 - `CGAL  (v >= 4.9.1)`
 - `Gudhi (v >= 1.3.1)`
+- `pcl   (v >= 1.8.0)`
 - `libyaml`
 
-**Note:** In case you are using a different version of `clang`, everything should still compile without problems, but you will need to change the appropriate lines in `CMakeLists.txt`.
+**Note:**
+- In case you are using a different version of `clang`, everything should still compile without problems, but you will need to change the appropriate lines in `CMakeLists.txt`.
+- pcl needs to be version 1.8 or higher because 1.7 does not support reading ply files into `pcl::PolygonMesh` elements.
 
 ## Running
 
