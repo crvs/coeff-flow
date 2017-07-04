@@ -1,54 +1,63 @@
 cmake_minimum_required(VERSION 2.8)
-project(simplicial CXX)
+project(simplicial)
 
 # set(CMAKE_CXX_COMPILER_ID "Clang")
 # message("${CMAKE_CXX_COMPILER_ID}")
 
-# requirements: CHANGE LOCATIONS HERE!!!
+# requirements:
 #   * Gudhi under /usr/include/gudhi
 #   * Eigen3 under /usr/include/eigen3
 #   * boost under /usr/include/boost
 #   * CGAL under /usr/include/CGAL
+#   * libyaml under /usr/local/include/libyaml
+#   * pcl 1.8 under /usr/include/pcl-1.8
 #
+
 # in case Eigen, and/or CGAL, and/or GUDHI are not found by find_package
 # try setting the paths to them manually
-
 #
 # set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen3")
 # include_directories(${EIGEN3_INCLUDE_DIR})
-#
 # set(CGAL_INCLUDE_DIR "/usr/local/include/eigen3")
 # include_directories(${CGAL_INCLUDE_DIR})
 #
-# GUDHI is being included manually further down
-# version should be 1.3 or higher, provided they don't break anything being used
+
+# GUDHI version should be 1.3 or higher, provided they don't break the
+# SimplexTree interface
 #
-# you will also need to have libyaml-cpp installed
+# libyaml-cpp this should actually be found in "/usr/include" so there is no
+# real need for the find_package, but it's always nice to make sure
+#
+# pcl-1.8 version 1.7 doesn't let one read ply files into meshes which is
+# rather strange, but it is a thing.
+#
 
-find_package(Boost REQUIRED)
-message(STATUS "Boost directory: ${Boost_INCLUDE_DIRS}")
-include_directories(${Boost_INCLUDE_DIRS})
+find_package(Boost REQUIRED QUIET)
+message(STATUS "Boost version: ${BOOST_VERSION}")
+message(STATUS "Boost directory: ${BOOST_INCLUDE_DIRS}")
 
-find_package(Eigen3 3.1.2 REQUIRED)
+find_package(Eigen3 3.1.2 REQUIRED QUIET)
 message(STATUS "Eigen3 version: ${EIGEN3_VERSION}")
 message(STATUS "Eigen3 directory: ${EIGEN3_INCLUDE_DIR}")
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-find_package(CGAL REQUIRED)
+find_package(CGAL REQUIRED QUIET)
 message(STATUS "CGAL version: ${CGAL_VERSION}")
 message(STATUS "CGAL directory: ${CGAL_INCLUDE_DIRS}")
-include_directories(${CGAL_INCLUDE_DIRS})
 
-set(GUDHI_INCLUDE_DIR "/usr/local/include/gudhi")
-if(EXISTS ${GUDHI_INCLUDE_DIR})
-    include_directories(${GUDHI_INCLUDE_DIR})
-else(EXISTS ${GUDHI_INCLUDE_DIR})
-    message(FATAL_ERROR "Gudhi not found")
-endif(EXISTS ${GUDHI_INCLUDE_DIR})
+find_package(yaml-cpp REQUIRED QUIET)
+message(STATUS "yaml-cpp version: ${YAML_CPP_VERSION}")
+message(STATUS "yaml-cpp directory: ${YAML_CPP_INCLUDE_DIR}")
+include_directories(${YAML_CPP_INCLUDE_DIR})
 
-if(NOT EXISTS "/usr/include/yaml-cpp")
-    message(FATAL_ERROR "libyaml (yaml-cpp) not found")
-endif(NOT EXISTS "/usr/include/yaml-cpp")
+find_package(PCL 1.8 REQUIRED QUIET)
+message(STATUS "PCL version: ${PCL_VERSION}")
+message(STATUS "PCL directory: ${PCL_INCLUDE_DIRS}")
+include_directories(${PCL_INCLUDE_DIRS})
+
+find_package(GUDHI 1.3 REQUIRED QUIET)
+message(STATUS "Gudhi version: ${GUDHI_VERSION}")
+message(STATUS "Gudhi directory: ${GUDHI_INCLUDE_DIRS}")
 
 set(CMAKE_C_COMPILER             "/usr/bin/clang-3.8")
 set(CMAKE_C_FLAGS                "-Wall -std=c99")
@@ -72,10 +81,18 @@ set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
 set(CMAKE_BUILD_TYPE Release)
 
-include_directories("./lib") # where the header files are
+include_directories("./lib") # where all the library files are
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
 add_library(pathsnap SHARED "./lib/scomplex/path_snapper.cpp")
+add_library(ply_io SHARED "./lib/ply_io.c")
 
 add_executable(yamltest "src/testing_facility.cpp")
-target_link_libraries(yamltest yaml-cpp scomplex pathsnap)
+target_link_libraries(yamltest yaml-cpp scomplex pathsnap ${PCL_LIBRARIES}) # ply_io)
+
+add_executable(pcltest "src/pcltest.cpp")
+target_link_libraries(pcltest ${PCL_LIBRARIES})
+
+add_executable(plytest "src/plytest.cpp")
+target_link_libraries(plytest ${PCL_IO_LIBRARIES})
+

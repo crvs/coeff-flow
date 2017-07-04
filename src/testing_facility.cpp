@@ -1,9 +1,12 @@
+#include <pcl/io/ply_io.h>
+
 #include <vector>
 #include <iostream>
 
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 
+#include <algorithm>
 #include <scomplex/types.hpp>
 #include <scomplex/simplicial_complex.hpp>
 #include <scomplex/qhull_parsing.hpp>
@@ -16,12 +19,15 @@
 
 void call_single_cycle_test(std::string, std::vector<size_t>,
                             std::vector<std::vector<double>>, size_t, bool);
+
 void call_single_cycle_test(std::string, std::vector<std::vector<double>>,
                             size_t, bool);
+
 void call_single_cycle_test(std::string, std::vector<std::vector<double>>,
                             size_t);
 
 void call_single_cycle_test(std::string, std::vector<size_t>, size_t, bool);
+
 void call_single_cycle_test(std::string, std::vector<size_t>, size_t);
 
 int main(int argc, char* argv[]) {
@@ -56,19 +62,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    /*
-    if( input[0]["complex_file"])
-        complex_file = input[0]["complex_file"].as<std::string>();
-
-    if( input[0]["paths_file"])
-        paths_file = input[0]["paths_file"].as<std::string>();
-
-    if(input[0]["cycle_points"]) {
-        cycle_points =
-    input[0]["cycle_points"].as<std::vector<std::vector<double>>>();
-        null_face = input[0]["null_face"];
-    }
-    */
 }
 
 void call_single_cycle_test(std::string complex_file,
@@ -96,7 +89,9 @@ void call_single_cycle_test(std::string complex_file,
     call_single_cycle_test(complex_file, cycle_indices, {}, null_face, false);
 }
 
-// mother of all
+//
+// mother of all single_cycle_tests
+//
 void call_single_cycle_test(std::string complex_file,
                             std::vector<size_t> cycle_indices,
                             std::vector<std::vector<double>> cycle_points,
@@ -119,7 +114,24 @@ void call_single_cycle_test(std::string complex_file,
 
     clock_t t0, t1;
     t0 = clock();
-    std::tie(points_v, cells_v) = parse_qhull_file(complex_file);
+    // PCL shenanigans
+
+    pcl::PolygonMesh::Ptr mesh(new pcl::PolygonMesh{});
+    pcl::PLYReader Reader;
+    Reader.read(complex_file, *mesh);
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>{});
+    pcl::fromPCLPointCloud2(mesh->cloud, *cloud);
+
+    for (auto poly : mesh->polygons) {
+        cells_v.push_back({poly.vertices[0], poly.vertices[1], poly.vertices[2]});
+    }
+
+    for (auto pt : cloud->points) {
+        points_v.push_back({pt.x,pt.y,pt.z});
+    }
+
+    // end PCL shenanigans
     t1 = clock();
     std::cout << "mesh has " << points_v.size() << " vertices and "
               << cells_v.size() << " faces\n";
@@ -155,6 +167,24 @@ void call_single_cycle_test(std::string complex_file,
     std::cout << "    number of faces: " << s_comp->get_level_size(2) << "\n";
     std::cout << "    number of edges: " << s_comp->get_level_size(1) << "\n";
     std::cout << "    number of vertices: " << s_comp->get_level_size(0) << "\n";
+
+    // re sort the triangles according to level 2
+    {
+    typedef std::pair<size_t,cell_t> sortable;
+    std::vector<sortable> pairing;
+    for (auto tri : cells_v)  {
+        // get index of the triangle
+        size_t ind;
+        ind = s_comp->cell_to_index(tri);
+        pairing.push_back({ind,tri});
+    }
+    std::sort(pairing.begin(),pairing.end(),[](const sortable& x,const sortable& y){return x.first < y.first;});
+    cells_v.clear();
+    for (auto el : pairing) {cells_v.push_back(el.second);}
+    }
+
+
+    // end sorting
     t0 = clock();
     std::shared_ptr<gsimp::path_snapper> p_snap(
         new gsimp::path_snapper(s_comp));
@@ -167,7 +197,6 @@ void call_single_cycle_test(std::string complex_file,
     if (cycle_indices.size() == 0)
         snapped = p_snap->snap_path_to_indices(cycle_points);
     else {
-        // std::cout << "already got the snapped points\n";
         snapped = cycle_indices;
     }
 
@@ -175,7 +204,6 @@ void call_single_cycle_test(std::string complex_file,
     std::cout << "snapped path in " << t1 - t0 << " clock cycles "
               << float(t1 - t0) / CLOCKS_PER_SEC << " seconds\n";
     std::cout << "computed path contains " << snapped.size() << " points\n";
-    //for (auto pt : snapped) std::cout << pt << '\n';
 
     t0 = clock();
     gsimp::chain_v cycle = p_snap->index_sequence_to_v_chain(snapped);
@@ -218,7 +246,7 @@ void call_single_cycle_test(std::string complex_file,
         edge_colors.push_back({0, 0, 255});
     }
 
-    make_ply(my_ply, s_comp->get_points(), s_comp->get_level(2), colors, edges,
+    make_ply(my_ply, s_comp->get_points(), cells_v, colors, edges,
              edge_colors);
     my_ply.close();
 
@@ -269,7 +297,7 @@ void call_single_cycle_test(std::string complex_file,
         edge_colors.push_back({0, 0, 255});
     }
 
-    make_ply(my_ply2, s_comp->get_points(), s_comp->get_level(2), colors, edges,
+    make_ply(my_ply2, s_comp->get_points(), cells_v, colors, edges,
              edge_colors);
     my_ply2.close();
 }
