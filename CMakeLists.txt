@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(simplicial)
+project(coefficient-flow CXX)
 
 # set(CMAKE_CXX_COMPILER_ID "Clang")
 # message("${CMAKE_CXX_COMPILER_ID}")
