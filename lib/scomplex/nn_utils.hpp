@@ -3,15 +3,14 @@
 #include <scomplex/types.hpp>
 
 #include <vector>
+#include <iostream>
 #include <algorithm>
 
-// TODO: go through the includes and find out which ones are needed
-#include <CGAL/Kd_tree.h>
 #include <CGAL/Search_traits_d.h>
 #include <CGAL/Search_traits_adapter.h>
 #include <CGAL/Cartesian_d.h>
-#include <CGAL/K_neighbor_search.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
+
 #include <boost/tuple/tuple.hpp>
 
 namespace gsimp {
@@ -47,10 +46,11 @@ typedef neighbor_search_t::Tree tree_t;
 
 void make_tree(tree_t& tree, std::vector<point_t>& point_list) {
     // tree.reserve(point_list.size());
-    for (size_t ind = 0; ind < point_list.size(); ++ind) {
-        auto pt = point_list.at(ind);
+    size_t ind = 0;
+    for (auto pt : point_list){
         point_d pt_d(pt.size(), pt.begin(), pt.end());
         tree.insert(boost::make_tuple(pt_d, ind));
+        ++ind;
     }
 }
 

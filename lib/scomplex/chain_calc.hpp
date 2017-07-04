@@ -11,15 +11,11 @@
 #include <vector>
 
 #include <memory>
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/geometries/polygon.hpp>
 #include <fstream>
 
 namespace gsimp {
 
 class non_zero_chain : public std::exception {};
-class cant_draw_dimension : public std::exception {};
 
 class bounding_chain {
     std::shared_ptr<simplicial_complex> s_comp;
@@ -32,7 +28,6 @@ class bounding_chain {
     bounding_chain(std::vector<point_t>& points, std::vector<cell_t>& tris);
     ~bounding_chain();
     chain_t get_bounding_chain(chain_t&);
-    // void draw_chain(std::string, chain_t);
 };
 
 //---------------------------------------
@@ -99,7 +94,7 @@ chain_t bounding_chain::get_bounding_chain(chain_t& chain) {
     vector_t result(round_vec(*(boundary_matrices.at(chain_d)) * bound_chain));
 
     if (equals(result, chain_v))
-        return chain_t(chain_d - 1, bound_chain);
+        return chain_t(chain_d + 1, bound_chain);
     else
         throw non_zero_chain();
 }

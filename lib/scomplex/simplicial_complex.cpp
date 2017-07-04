@@ -4,6 +4,7 @@
 #include <iterator>  // for debuging purposes
 
 #include <gudhi/Simplex_tree.h>
+#include <gudhi/Hasse_complex.h>
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 
@@ -12,13 +13,87 @@
 #include <functional>
 #include <cmath>
 
+#include <iostream>
 namespace gsimp {
+
+// hasse diagram structures
+struct hasse_node {
+    std::pair<int, size_t> handle;
+    std::vector<std::shared_ptr<hasse_node>> cofaces;
+
+    hasse_node(std::pair<int, size_t> _handle) { handle = _handle; }
+
+    void add_coface(std::shared_ptr<hasse_node>& node) {
+        cofaces.push_back(node);
+    }
+};
+
+struct hasse_diag {
+    std::vector<std::vector<std::shared_ptr<hasse_node>>> cells;
+    std::vector<std::vector<bool>> cells_c;
+
+    hasse_diag(){};
+
+    hasse_diag(simplicial_complex& s_comp) {
+        // vector of dimension d
+        for (int d = 0; d <= s_comp.dimension(); d++) {
+            size_t lv_s = s_comp.get_level_size(d);
+            std::vector<std::shared_ptr<hasse_node>> lv(lv_s);
+            cells.push_back(lv);
+
+            std::vector<bool> c(lv_s, false);
+            cells_c.push_back(c);
+        }
+
+        for (int d = s_comp.dimension(); d > 0; d--) {
+            for (size_t face_i = 0; face_i < s_comp.get_level_size(d);
+                 face_i++) {
+                std::shared_ptr<hasse_node> face_ptr =
+                    get_face(d, face_i, true);
+
+                std::vector<std::pair<int, size_t>> faces =
+                    s_comp.get_bdry_and_ind_index(d, face_i);
+                for (auto b_face_i : faces) {
+                    size_t b_face = std::get<1>(b_face_i);
+                    std::shared_ptr<hasse_node> b_face_ptr =
+                        get_face(d - 1, b_face, true);
+                    b_face_ptr->add_coface(face_ptr);
+                }
+            }
+        }
+        // no further need, free up the space
+        cells_c.clear();
+    }
+
+    std::shared_ptr<hasse_node> get_face(int d, size_t face_i,
+                                         bool building = false) {
+        std::shared_ptr<hasse_node> face;
+        if (building && cells_c[d][face_i])
+            face = cells[d][face_i];
+        else {
+            if (building) cells_c[d][face_i] = true;
+
+            cells[d][face_i] = std::shared_ptr<hasse_node>(
+                new hasse_node(std::pair<int, size_t>(d, face_i)));
+            face = cells[d][face_i];
+        }
+        return face;
+    }
+
+    std::vector<size_t> get_coface_i(int d, size_t face_i) {
+        auto node = cells[d][face_i];
+        std::vector<size_t> cofaces;
+        for (auto v : node->cofaces) cofaces.push_back(std::get<1>(v->handle));
+        return cofaces;
+    }
+};
 
 struct simplicial_complex::impl {
     // auxiliary types
     struct SimpleOptions : Gudhi::Simplex_tree_options_full_featured {
         typedef size_t Vertex_handle;
     };
+
     typedef Gudhi::Simplex_tree<SimpleOptions> simp_tree;
     typedef Gudhi::Simplex_tree<SimpleOptions>::Simplex_handle simp_handle;
     typedef std::vector<simp_handle*> level_t;
@@ -27,18 +102,20 @@ struct simplicial_complex::impl {
     // member variables
     std::vector<point_t> points;
     simp_tree simplices;
-    bool quotient_q;
     std::vector<matrix_t> boundary_matrices;
     levels_t levels;
-    std::vector<std::vector<double>> area_vectors;
 
-    impl() : quotient_q(false){};
+    bool has_hasse;
+    hasse_diag incidence;
+
 
     impl(std::vector<point_t>& arg_points, std::vector<cell_t>& arg_tris)
-        : points(arg_points), quotient_q(false) {
+        : points(arg_points) {
         // create the simplex tree
         for (auto tri : arg_tris) {
-            simplices.insert_simplex_and_subfaces(dedupe_vec(tri));
+            // removed deduping to try to make this a bit faster
+            // ... it did cut time down about 10%, so ...
+            simplices.insert_simplex_and_subfaces(tri);
             int d = tri.size() - 1;
             if (simplices.dimension() < d) simplices.set_dimension(d);
         }
@@ -53,17 +130,17 @@ struct simplicial_complex::impl {
         auto simplex_range = simplices.complex_simplex_range();
         for (auto s : simplex_range) {
             int d = simplices.dimension(s);
-            simplices.assign_key(s, count.at(d)++);
-            levels.at(d)->push_back(new simp_handle(s));
+            simplices.assign_key(s, count[d]++);
+            levels[d]->push_back(new simp_handle(s));
         }
     }
 
     ~impl() {
         // get rid of the levels so they won't dangle
-        for (int i = levels.size(); i <= 0; --i) levels.at(i).reset();
+        for (int i = levels.size(); i <= 0; --i) levels[i].reset();
     };
 
-    size_t get_level_size(int level) { return levels.at(level)->size(); }
+    size_t get_level_size(int level) { return levels[level]->size(); }
 
     // calculate the index of s_1 in the boundary of s_2
     int boundary_index(simp_handle s_1, simp_handle s_2) {
@@ -85,15 +162,6 @@ struct simplicial_complex::impl {
             }
         }
         return pow(-1, orient);
-    }
-
-    void calculate_area_vectors(simplicial_complex* sc) {
-        for (int d = 0; d <= simplices.dimension(); ++d) {
-            std::vector<double> d_area;
-            for (int i = 0; i < get_level_size(d); ++i)
-                d_area.push_back(sc->cell_index_area(d, i));
-            area_vectors.push_back(d_area);
-        }
     }
 
     std::vector<size_t> dedupe_vec(std::vector<size_t>& vec) {
@@ -119,14 +187,14 @@ struct simplicial_complex::impl {
             for (auto bs : simplices.boundary_simplex_range(s)) {
                 int i = simplices.key(bs);
                 int k = simplices.dimension(bs);
-                boundary_matrices.at(k).coeffRef(i, j) = boundary_index(bs, s);
+                boundary_matrices[k].coeffRef(i, j) = boundary_index(bs, s);
             }
         }
     }
 
     std::vector<cell_t> get_level(int level) {
         std::vector<cell_t> level_cells;
-        for (auto simp : *levels.at(level)) {
+        for (auto simp : *levels[level]) {
             cell_t v_simp;
             for (auto v : simplices.simplex_vertex_range(*simp)) {
                 v_simp.push_back(v);
@@ -137,7 +205,7 @@ struct simplicial_complex::impl {
     }
 
     simp_handle index_to_handle(int d, size_t tau) {
-        return *(levels.at(d)->at(tau));
+        return *(*(levels[d]))[tau];
     }
 
     size_t handle_to_index(simp_handle tau) { return simplices.key(tau); }
@@ -152,6 +220,7 @@ struct simplicial_complex::impl {
         for (auto v : simplices.simplex_vertex_range(tau)) cell.push_back(v);
         return cell;
     }
+
 };  // struct impl
 
 std::vector<std::pair<int, cell_t>> simplicial_complex::get_bdry_and_ind(
@@ -252,6 +321,10 @@ simplicial_complex::~simplicial_complex() {}
 
 std::vector<point_t> simplicial_complex::get_points() { return p_impl->points; }
 
+point_t simplicial_complex::get_point(size_t index) {
+    return p_impl->points[index];
+}
+
 std::vector<cell_t> simplicial_complex::get_level(int level) {
     return p_impl->get_level(level);
 }
@@ -262,15 +335,15 @@ matrix_t simplicial_complex::get_boundary_matrix(int d) {
 
     // now they have to be instantiated, get them
     if (0 <= d && d < p_impl->boundary_matrices.size())
-        return p_impl->boundary_matrices.at(d);
+        return p_impl->boundary_matrices[d];
     else
-        throw NoChain();
+        throw No_Boundary();
 }
 
 int simplicial_complex::dimension() { return p_impl->simplices.dimension(); }
 
 cell_t simplicial_complex::index_to_cell(int d, size_t ind) {
-    auto sh = p_impl->levels.at(d)->at(ind);
+    auto sh = (*(p_impl->levels[d]))[ind];
     return p_impl->handle_to_cell(*sh);
 }
 
@@ -279,132 +352,45 @@ size_t simplicial_complex::cell_to_index(cell_t simp) {
     return p_impl->simplices.key(sh);
 }
 
-bool simplicial_complex::is_quotient() { return p_impl->quotient_q; }
-
 std::vector<size_t> simplicial_complex::get_cofaces_index(int d, size_t face) {
-    std::vector<size_t> s_cofaces;
-    impl::simp_handle face_h = *(p_impl->levels.at(d)->at(face));
-    cell_t my_cell = p_impl->handle_to_cell(face_h);
     // codimension 1 faces
-    auto range = p_impl->simplices.cofaces_simplex_range(face_h, 1);
-    for (auto tau : range) s_cofaces.push_back(p_impl->simplices.key(tau));
+    if (!p_impl->has_hasse) {
+        calculate_hasse();
+        p_impl->has_hasse = true;
+    }
+    auto s_cofaces = p_impl->incidence.get_coface_i(d, face);
     return s_cofaces;
 }
 
 std::vector<cell_t> simplicial_complex::get_cofaces(cell_t face) {
+    if (!p_impl->has_hasse) {
+        calculate_hasse();
+        p_impl->has_hasse = true;
+    }
     std::vector<cell_t> s_cofaces;
-    auto face_h = p_impl->cell_to_handle(face);
+    auto face_i = cell_to_index(face);
+    int d = face.size() - 1;
     // codimension 1 faces
-    auto range = p_impl->simplices.cofaces_simplex_range(face_h, 1);
-    for (auto tau : range) s_cofaces.push_back(p_impl->handle_to_cell(tau));
+    auto coface_i_v = p_impl->incidence.get_coface_i(d, face_i);
+    for (auto v : coface_i_v) {
+        auto face_h = (*(p_impl->levels[d + 1]))[v];
+        s_cofaces.push_back(p_impl->handle_to_cell(*face_h));
+    }
     return s_cofaces;
 }
 
+chain_v simplicial_complex::new_v_chain(int d) {
+    std::vector<double> v(get_level_size(d),0);
+    return chain_v(d,v);
+
+}
 chain_t simplicial_complex::new_chain(int d) {
     vector_t v(get_level_size(d));
     return chain_t(d, v);
 }
 
-// TODO: get top dimensional cells from the simplicial complex to add to the
-// simplex tree (instead of all the simplices).
-simplicial_complex simplicial_complex::quotient(int char_fun(point_t)) {
-    int n_points = 1;
-    auto corresp = std::vector<size_t>();
-
-    // making the correspondence between points in the original complex
-    // and points in the quotient. point index 0 corresponds to the
-    // "virtual" point (in case it exists).
-    std::vector<point_t> points;
-    bool quotient_q = p_impl->quotient_q;
-
-    for (auto p : p_impl->points) {
-        if (char_fun(p) != 0) {
-            corresp.push_back(n_points++);
-            points.push_back(p);
-        } else {
-            if (not quotient_q) {
-                // need to realize that it is not geometric, (flip
-                // quotient_q and add the virtual point
-                points.insert(points.begin(), point_t());
-                quotient_q = true;
-            }
-            corresp.push_back(0);
-        }
-    }
-
-    if (not quotient_q)
-        for (int i = 0; i < corresp.size(); i++) corresp.at(i) -= 1;
-
-    // producing list of simplices
-    std::vector<cell_t> simp_list;
-
-    for (auto s : p_impl->simplices.complex_simplex_range()) {
-        cell_t s_q;
-        for (int v : p_impl->simplices.simplex_vertex_range(s))
-            s_q.push_back(corresp.at(v));
-        simp_list.push_back(s_q);
-    }
-
-    simplicial_complex quotient_sc(points, simp_list);
-    quotient_sc.p_impl->quotient_q = quotient_q;
-
-    return quotient_sc;
-}
-
-size_t factorial(int n) {
-    size_t fact = 1;
-    for (int i = 1; i <= n; ++i) fact *= i;
-    return fact;
-}
-
-// area calculations
-// TODO: test simplex area
-double simplicial_complex::cell_area(cell_t cell) {
-    // TODO: get rid of the 1
-    // it will have to depend on the fact of wether or not it is a quotient
-
-    std::vector<Eigen::VectorXd> point_vs;
-    Eigen::VectorXd p0 = point_to_eigen(p_impl->points[cell[0]]);
-    for (auto i = 1; i < cell.size(); ++i)
-        point_vs.push_back(point_to_eigen(p_impl->points[i]) - p0);
-
-    // getting a frame for the cell
-    std::vector<Eigen::VectorXd> cell_frm;
-    for (auto i = 0; i < point_vs.size(); ++i) {
-        Eigen::VectorXd discounted = point_vs[i];
-        for (auto j = 0; j < i; ++j)
-            discounted = discounted -
-                         (discounted.transpose() * cell_frm[j]) * cell_frm[j];
-        cell_frm.push_back(discounted / discounted.norm());
-    }
-
-    Eigen::MatrixXd area_mat(cell.size() - 1, cell.size() - 1);
-    for (auto i = 0; i < cell.size() - 1; ++i) {
-        for (auto j = 0; j < cell.size() - 1; ++j)
-            area_mat(i, j) = cell_frm[i].transpose() * point_vs[j];
-    }
-
-    return std::abs(area_mat.determinant()) / factorial(cell.size() - 1);
-}
-
-double simplicial_complex::cell_index_area(int d, size_t c) {
-    return cell_area(index_to_cell(d, c));
-}
-
-double simplicial_complex::chain_area(chain_t chain) {
-    int d = chain_dim(chain);
-    Eigen::SparseVector<double>::InnerIterator it(chain_rep(chain));
-    if (p_impl->area_vectors.size() == 0) p_impl->calculate_area_vectors(this);
-    double c_area = 0;
-    for (; it; ++it)
-        c_area += it.value() * (p_impl->area_vectors.at(d).at(it.index()));
-    return c_area;
+void simplicial_complex::calculate_hasse() {
+    p_impl->has_hasse = true;
+    p_impl->incidence = hasse_diag(*this);
 }
 };
-
-// MAY BE INCLUDED AGAIN WHEN WE START DOING MORE WITH QUOTIENTS
-/*
- * bool is_point(point_t pt) {
- *     return (not quotient_q ? true : not(pt.size() == 0));
- * }
- */

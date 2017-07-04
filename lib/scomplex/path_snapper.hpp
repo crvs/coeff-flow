@@ -22,10 +22,12 @@ class path_snapper {
     std::vector<point_t> snap_path_to_points(std::vector<point_t>);
     std::vector<size_t> snap_path_to_indices(std::vector<point_t>);
     chain_t snap_path_to_chain(std::vector<point_t>);
+    chain_v snap_path_to_v_chain(std::vector<point_t>);
     // interconversion
     std::vector<point_t> index_sequence_to_point(std::vector<size_t>);
     std::vector<size_t> point_sequence_to_index(std::vector<point_t>);
     chain_t index_sequence_to_chain(std::vector<size_t>);
+    chain_v index_sequence_to_v_chain(std::vector<size_t>);
     chain_t point_sequence_to_chain(std::vector<point_t>);
     std::shared_ptr<simplicial_complex> get_underlying_complex();
 };

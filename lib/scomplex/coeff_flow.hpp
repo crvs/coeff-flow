@@ -5,99 +5,138 @@
 #include <queue>
 #include <scomplex/types.hpp>
 #include <scomplex/simplicial_complex.hpp>
+#include "types.hpp"
+#include "simplicial_complex.hpp"
 
 namespace gsimp {
+using namespace std;
 
-typedef std::tuple<cell_t, cell_t, double> q_elem_t;
-typedef std::queue<q_elem_t> queue_t;
+typedef tuple<cell_t, cell_t, double> q_elem_t;
+typedef queue<q_elem_t> queue_t;
 
-class out_of_context : std::exception {};
-class no_bounding_chain : std::exception {};
+class out_of_context : exception {};
+class no_bounding_chain : exception {};
 
-chain_t coeff_flow(simplicial_complex& s_comp,  //
-                   chain_t p,                   //
+chain_v coeff_flow(simplicial_complex& s_comp,  //
+                   chain_v p,                   //
                    cell_t sigma_0,              //
                    double c_0) {                //
 
     if (chain_dim(p) != s_comp.dimension() - 1) throw out_of_context();
     // 01
-    chain_t c_chain = s_comp.new_chain(s_comp.dimension());
+    vector<double> c_vec(s_comp.get_level_size(s_comp.dimension()),0);
 
-    std::vector<bool> seen_sigma(
-        (size_t)s_comp.get_level_size(s_comp.dimension()), false);
+    vector<bool> seen_sigma((size_t)s_comp.get_level_size(s_comp.dimension()),
+                            false);
+    vector<bool> seen_tau((size_t)s_comp.get_level_size(s_comp.dimension() - 1),
+                          false);
 
-    std::vector<bool> seen_tau(
-        (size_t)s_comp.get_level_size(s_comp.dimension() - 1), false);
+    size_t seen_taus = 0;
+    seen_sigma[s_comp.cell_to_index(sigma_0)] = true;
+    size_t seen_sigmas = 1;
 
-    // 04
-    size_t tau_i, sigma_i(s_comp.cell_to_index(sigma_0));
-    chain_val(c_chain, sigma_i) = c_0;
-    seen_sigma.at(sigma_i) = true;
-
-    // 05
     queue_t queue;
-    for (cell_t tau : s_comp.cell_boundary(sigma_0))
+    for (cell_t tau : s_comp.cell_boundary(sigma_0)) {
         queue.emplace(sigma_0, tau, c_0);
+    }
 
-    // 08
     while (not queue.empty()) {
+        /*
+         * // useful debug output
+         *
+         * size_t ind = 0;
+         * if (ind % 1000 == 0) {
+         *     cout << ind << ": ";
+         *     cout << " taus visited: " << seen_taus << "/" <<
+         * seen_tau.size();
+         *     cout << " sigmas visited: " << seen_sigmas << "/" <<
+         * seen_sigma.size();
+         *     cout << " queue size: " << queue.size() << "\n";
+         *     cout.flush();
+         * }
+         * ind++;
+         */
+
+        // dequeue the first element
         cell_t sigma;
         cell_t tau;
         double c;
-        std::tie(sigma, tau, c) = queue.front();
+        tie(sigma, tau, c) = queue.front();
         queue.pop();
-        sigma_i = s_comp.cell_to_index(sigma);
-        tau_i = s_comp.cell_to_index(tau);
 
-        // 10
-        if (seen_sigma.at(sigma_i) && chain_val(c_chain, sigma_i) != c)
-            throw no_bounding_chain();
-        else if (not(seen_tau.at(tau_i) && seen_sigma.at(sigma_i))) {
-            // 14
-            seen_tau.at(tau_i) = true;
-            seen_sigma.at(sigma_i) = true;
-            chain_val(c_chain, sigma_i) = c;
+        // get the indices of the respective cells
+        size_t sigma_i = s_comp.cell_to_index(sigma);
+        size_t tau_i = s_comp.cell_to_index(tau);
 
-            // 15
-            std::vector<std::pair<int, cell_t>> tau_cofaces;
-            for (auto coface : s_comp.get_cof_and_ind(tau)) {
-                size_t coface_i = s_comp.cell_to_index(std::get<1>(coface));
-                if (coface_i != sigma_i) tau_cofaces.push_back(coface);
-            }
+        if (seen_sigma[sigma_i]) {
+            // found local incoherence
+            if (c_vec[sigma_i] != c) throw no_bounding_chain();
+        } else {
+            seen_sigma[sigma_i] = true;
+            c_vec[sigma_i] = c;
+            seen_sigmas++;
+        }
 
-            // 16
-            double predicted_bdry =
-                s_comp.boundary_inclusion_index(tau, sigma) * c;
-            if (tau_cofaces.size() == 0 &&              //
-                predicted_bdry != chain_val(p, tau_i))  //
-                throw no_bounding_chain();              // 18
-            else if (tau_cofaces.size() != 0) {
-                int sigma_p_ind;
-                cell_t sigma_p;
-                std::tie(sigma_p_ind, sigma_p) = tau_cofaces[0];  // 20
-                double c_p = sigma_p_ind*(chain_val(p,tau_i)-s_comp.boundary_inclusion_index(tau, sigma)*c);
-                for (cell_t tau_p : s_comp.cell_boundary(sigma_p))
-                    if (not seen_tau.at(s_comp.cell_to_index(tau_p)))
-                        queue.emplace(sigma_p, tau_p, c_p);
+        if (seen_tau[tau_i]) continue;
+        seen_tau[tau_i] = true;
+        seen_taus++;
+
+        cell_t sigma_p;
+        size_t sigma_p_i;
+        bool is_boundary = true;
+        for (auto coface : s_comp.get_cof_and_ind(tau)) {
+            size_t coface_i = s_comp.cell_to_index(get<1>(coface));
+            if (coface_i != sigma_i) {
+                is_boundary = false;
+                sigma_p_i = coface_i;
+                sigma_p = s_comp.index_to_cell(s_comp.dimension(), sigma_p_i);
             }
         }
+
+        double predicted_bdry = s_comp.boundary_inclusion_index(tau, sigma) * c;
+        if (is_boundary) {
+            // sigma is the only coface of tau
+            // check that we get the same value on tau
+            if (predicted_bdry != chain_val(p, tau_i))
+                throw no_bounding_chain();
+        } else {
+            // there is another coface we now focus on it
+            double c_p = s_comp.boundary_inclusion_index(tau, sigma_p) *
+                         (chain_val(p, tau_i) -
+                          s_comp.boundary_inclusion_index(tau, sigma) * c);
+            for (cell_t tau_p : s_comp.cell_boundary(sigma_p)) {
+                size_t tau_p_i = s_comp.cell_to_index(tau_p);
+                if (not seen_tau[tau_p_i]) {
+                    // each tau only needs to be processed once
+                    queue.emplace(sigma_p, tau_p, c_p);
+                }
+        }
     }
+    }
+
+    /*
+     * // useful live debugging info
+     * cout << "sigmas seen: " << seen_sigmas << "/" << s_comp.get_level_size(s_comp.dimension());
+     * cout << " taus seen: " << seen_taus << "/" << s_comp.get_level_size(s_comp.dimension() - 1);
+     * cout << '\n';
+     */
+
+    chain_v c_chain(s_comp.dimension(),c_vec);
     return c_chain;
 }
 
-chain_t coeff_flow_embedded(simplicial_complex& s_comp, chain_t p) {
+chain_v coeff_flow_embedded(simplicial_complex& s_comp, chain_v p) {
     if (chain_dim(p) != s_comp.dimension() - 1) throw out_of_context();
 
     cell_t sigma;
     double c;
-    auto level = s_comp.get_level(s_comp.dimension() - 1);
     for (auto tau : s_comp.get_level(s_comp.dimension() - 1)) {
         if (s_comp.get_cofaces(tau).size() < 2) {
             int sigma_ind;
             size_t tau_i = s_comp.cell_to_index(tau);
-            std::tie(sigma_ind, sigma) = s_comp.get_cof_and_ind(tau)[0];
+            tie(sigma_ind, sigma) = s_comp.get_cof_and_ind(tau)[0];
             c = sigma_ind * chain_val(p, tau_i);
-            chain_t sol = coeff_flow(s_comp, p, sigma, c);
+            chain_v sol = coeff_flow(s_comp, p, sigma, c);
             return sol;
         }
     }

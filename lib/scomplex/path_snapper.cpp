@@ -41,6 +41,14 @@ struct path_snapper::impl {
 
     std::vector<size_t> snap_path(std::vector<point_t> path) {
         auto way_points = snap_points_to_indexes(point_tree, path);
+        // std::cout << "processed path: \n";
+        // for (size_t i = 0 ; i < way_points.size() ; ++i ) {
+        //     for (auto c : path[i] ) std::cout << c << " ";
+        //     auto pt = s_comp->get_point( way_points[i] );
+        //     std::cout << " -> ";
+        //     for (auto c : pt ) std::cout << c << " ";
+        //     std::cout << "\n";
+        // }
         auto snapped_path = complete_path(vertex_graph, way_points);
         return snapped_path;
     }
@@ -103,6 +111,18 @@ std::vector<size_t> path_snapper::snap_path_to_indices(
     return p_impl->snap_path(path);
 }
 
+chain_v path_snapper::snap_path_to_v_chain(std::vector<point_t> path) {
+    auto pair_seq = p_impl->index_pairs(path);
+    chain_v rep = p_impl->s_comp->new_v_chain(1);
+    for (auto pair : pair_seq) {
+        auto cell = std::get<0>(pair);
+        if (cell[0] != cell[1]) {
+            size_t index = p_impl->s_comp->cell_to_index(std::get<0>(pair));
+            chain_val(rep, index) += std::get<1>(pair);
+        }
+    }
+    return rep;
+}
 chain_t path_snapper::snap_path_to_chain(std::vector<point_t> path) {
     auto pair_seq = p_impl->index_pairs(path);
     chain_t rep = p_impl->s_comp->new_chain(1);
@@ -129,6 +149,16 @@ std::vector<size_t> path_snapper::point_sequence_to_index(
     std::vector<size_t> ind_path =
         snap_points_to_indexes(p_impl->point_tree, pt_path);
     return ind_path;
+}
+
+chain_v path_snapper::index_sequence_to_v_chain(std::vector<size_t> ind_path) {
+    auto it = ind_path.begin();
+    chain_v chain = p_impl->s_comp->new_v_chain(1);
+    for (; std::next(it) != ind_path.end(); ++it) {
+        auto ind = p_impl->s_comp->cell_to_index({*it, *std::next(it)});
+        chain_val(chain, ind) += (*it < *std::next(it)) ? 1 : -1;
+    }
+    return chain;
 }
 
 chain_t path_snapper::index_sequence_to_chain(std::vector<size_t> ind_path) {
