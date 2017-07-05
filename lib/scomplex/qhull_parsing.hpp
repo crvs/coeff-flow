@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include <string>
+#include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <iterator>
@@ -62,6 +63,11 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
         // lines pertaining to points
         if (line_number > 1 && line_number < total_points + 2) {
             auto point = tokenize<double>(line);
+            while (dimensionality < point.size()) {
+                // in case qhull decides te hove put an extra coordinate for
+                // whatever reason it decides to do that from time to time
+                point.pop_back();
+            }
             points.push_back(point);
         }
         // first line after points (get number of cells)
@@ -78,32 +84,4 @@ std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
     }
     file_stream.close();
     return std::make_pair(points, cells);
-}
-
-std::vector<std::vector<point_t>> parse_track_file(std::string filename) {
-    std::ifstream file_stream(filename);
-
-    if (!file_stream.is_open()) {
-        throw std::runtime_error("failed to open \"" + filename + "\"\n");
-    }
-
-    std::vector<std::vector<point_t>> tracks;
-
-    std::vector<point_t> track;
-
-    for (std::string line; std::getline(file_stream, line);) {
-
-        auto tokens = tokenize<double>(line);
-
-        if (tokens.size() == 1) {
-            if (track.size() > 0) {tracks.push_back(track);}
-            track = std::vector<point_t>();
-        }
-        else
-            track.push_back(tokens);
-    }
-
-    file_stream.close();
-
-    return tracks;
 }
