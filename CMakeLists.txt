@@ -85,14 +85,8 @@ include_directories("./lib") # where all the library files are
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
 add_library(pathsnap SHARED "./lib/scomplex/path_snapper.cpp")
-add_library(ply_io SHARED "./lib/ply_io.c")
+
+add_executable(qhull2ply "src/make_mesh.cpp")
 
 add_executable(yamltest "src/testing_facility.cpp")
-target_link_libraries(yamltest yaml-cpp scomplex pathsnap ${PCL_LIBRARIES}) # ply_io)
-
-add_executable(pcltest "src/pcltest.cpp")
-target_link_libraries(pcltest ${PCL_LIBRARIES})
-
-add_executable(plytest "src/plytest.cpp")
-target_link_libraries(plytest ${PCL_IO_LIBRARIES})
-
+target_link_libraries(yamltest yaml-cpp scomplex pathsnap ${PCL_LIBRARIES})

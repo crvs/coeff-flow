@@ -1,4 +1,5 @@
 #include <pcl/io/ply_io.h>
+#include <pcl/io/obj_io.h>
 
 #include <vector>
 #include <iostream>
@@ -117,8 +118,19 @@ void call_single_cycle_test(std::string complex_file,
     // PCL shenanigans
 
     pcl::PolygonMesh::Ptr mesh(new pcl::PolygonMesh{});
-    pcl::PLYReader Reader;
-    Reader.read(complex_file, *mesh);
+
+    std::ifstream file(complex_file);
+    std::string meshtype;
+    std::getline(file,meshtype);
+    if (meshtype == "ply") {
+        pcl::PLYReader Reader;
+        Reader.read(complex_file, *mesh);
+    } else {
+        pcl::OBJReader Reader;
+        Reader.read(complex_file, *mesh);
+    }
+
+
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>{});
     pcl::fromPCLPointCloud2(mesh->cloud, *cloud);
