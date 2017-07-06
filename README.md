@@ -38,7 +38,7 @@ cp ../test/bunny2.yaml .
 ./yamltest bunny2.yaml
 ```
 
-This will output two `ply` files which contain a copy of the mesh `bunzipper.ply` and the bounding chain to the cycle specified by the path contained in the yaml file. One of them was computed by solving a large linear system using conjugate gradient descent, whereas the other was computed by employing `coefficient_flow`.
+This will output two `ply` files which contain a copy of the mesh `bunzipper.ply` and the bounding chain to the cycle specified by the path contained in the yaml file. One of them was computed by solving a large linear system using least squares conjugate gradient descent, whereas the other was computed by employing `coefficient_flow`.
 
 ### References
 
