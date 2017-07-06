@@ -29,7 +29,7 @@ mkdir build && cd build
 cmake .. && make
 make timing_test
 ```
-this will take a long time to run as it will run a test for a random mesh comprising (about) $x 10^y$ points, with $x\in\{1,\ldots,0}$ and $y\in\{1,\ldots,5\}$. The results of the test are output to the file `results.csv`.
+this will take a long time to run as it will run a test for a random mesh comprising (about) `x 1ey` points, with `x in [1..9]` and `y in [1..5]`. The results of the test are output to the file `results.csv`.
 
 
 ### References
