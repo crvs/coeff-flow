@@ -22,6 +22,16 @@ In order to compile this repository you will need the following packages:
 
 ## Running
 
+The timing tests presented in [1] can be run easily by simply performing
 
+```{bash}
+mkdir build && cd build
+cmake .. && make
+make timing_test
+```
+this will take a long time to run as it will run a test for a random mesh comprising (about) $x 10^y$ points, with $x\in\{1,\ldots,0}$ and $y\in\{1,\ldots,5\}$. The results of the test are output to the file `results.csv`.
+
+
+### References
 
 [1]: J.F. Carvalho, M. Vejdemo-Johansson, D. Kragic, F.T. Pokorny; An algorithm for calculating top-dimensional bounding chains. 2017, Unpublished.
