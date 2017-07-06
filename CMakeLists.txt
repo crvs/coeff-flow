@@ -90,3 +90,12 @@ add_executable(qhull2ply "src/make_mesh.cpp")
 
 add_executable(yamltest "src/testing_facility.cpp")
 target_link_libraries(yamltest yaml-cpp scomplex pathsnap ${PCL_LIBRARIES})
+
+message(INFO ${CMAKE_CURRENT_SOURCE_DIR})
+message(INFO ${CMAKE_CURRENT_BINARY_DIR})
+# TEST target
+add_custom_target(timing_test
+    COMMAND "cp" "${CMAKE_CURRENT_SOURCE_DIR}/test/run_dumb_tests.sh" "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMAND "cp" "${CMAKE_CURRENT_SOURCE_DIR}/test/dumbexample.yaml" "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMAND "${CMAKE_CURRENT_BINARY_DIR}/run_dumb_tests.sh" "1"
+    DEPENDS yamltest qhull2ply "test/run_dumb_tests.sh" "test/dumbexample.yaml")

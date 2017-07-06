@@ -1,0 +1,13 @@
+single_cycle_test:
+    complex_file: dummesh.ply
+    cycle_points:
+        - [-.2 , -.2]
+        - [ .2 , -.2]
+        - [ .2 ,  .2]
+        - [-.2 ,  .2]
+    null_face: 1319
+    in_plane: true
+
+
+
+
