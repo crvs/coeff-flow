@@ -19,7 +19,7 @@ std::vector<data_t> tokenize(std::string str) {
     std::istringstream sstream(str);
     std::vector<data_t> tokens;
     data_t val;
-    while(sstream >> val) tokens.push_back(val);
+    while (sstream >> val) tokens.push_back(val);
     return tokens;
 }
 
@@ -34,7 +34,6 @@ void cout_iterator(Iterator first, Iterator last) {
 
 std::pair<std::vector<point_t>, std::vector<cell_t>> parse_qhull_file(
     std::string filename) {
-
     std::ifstream file_stream(filename);
     if (!file_stream.is_open()) {
         throw std::runtime_error("failed to open \"" + filename + "\"\n");

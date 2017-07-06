@@ -9,8 +9,7 @@ using std::to_string;
 
 void make_ply(std::ofstream& outfile,               //
               const vector<vector<double>>& points,  //
-              const vector<vector<size_t>>& faces,  //
-              const vector<vector<size_t>>& edges //
+              const vector<vector<size_t>>& faces  //
               ) {
     // make the header
     outfile << "ply\n";
@@ -25,10 +24,6 @@ void make_ply(std::ofstream& outfile,               //
     outfile << "element face " + to_string(faces.size()) + "\n";
     outfile << "property list uchar int vertex_index\n";
 
-    outfile << "element edge " + to_string(edges.size()) + "\n";
-    outfile << "property int vertex1\n";
-    outfile << "property int vertex2\n";
-
     outfile << "end_header\n";
 
     // insert point list
@@ -40,16 +35,10 @@ void make_ply(std::ofstream& outfile,               //
         outfile << "\n";
     }
     // insert face list
-    for (size_t i = 0; i < faces.size(); ++i) {
-        outfile << "3 ";
+    for (auto face : faces) {
+        outfile << face.size() << " ";
         // face vertex index
-        for (size_t j : faces[i]) outfile << to_string(j) + " ";
-        outfile << "\n";
-    }
-    // insert edge list
-    for (size_t i = 0; i < edges.size(); ++i) {
-        // edge vertex index
-        for (size_t j : edges[i]) outfile << to_string(j) + " ";
+        for (size_t j : face) outfile << to_string(j) + " ";
         outfile << "\n";
     }
 }
@@ -123,12 +112,4 @@ void make_ply(std::ofstream& outfile,               //
         for (int k : edge_colors[i]) outfile << to_string(k) + " ";
         outfile << "\n";
     }
-}
-
-void make_ply(std::ofstream& outfile,               //
-              const vector<vector<double>>& points,  //
-              const vector<vector<size_t>>& faces  //
-              ) {
-    vector<vector<size_t>> edges;
-    make_ply(outfile,points,faces,edges);
 }
