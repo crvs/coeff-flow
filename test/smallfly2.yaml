@@ -1,5 +1,5 @@
 single_cycle_test:
-    complex_file: /home/crvs/meshes/eulaema_meriana_bee-scale_mm-small.ply
+    complex_file: eulaema_meriana_bee-scale_mm-small.obj
     cycle_points:
         - [25.543415 , 14.885782 , 3.547200]
         - [25.550842 , 14.680643 , 3.567653]

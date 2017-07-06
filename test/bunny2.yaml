@@ -1,5 +1,5 @@
 single_cycle_test:
-    complex_file: ../data/bun_zipper.ply
+    complex_file: bun_zipper.ply
     cycle_points:
         - [-0.056566 , 0.116930 , 0.037428]
         - [-0.043453 , 0.124910 , 0.021681]

@@ -1,5 +1,5 @@
 single_cycle_test:
-    complex_file: /home/crvs/dev-cpp/quotient/data/eulaema_meriana_bee-scale_mm-1M_triangle.obj
+    complex_file: eulaema_meriana_bee-scale_mm-1M_triangle.obj
     cycle_points:
         - [5.659029 , 16.726719 , 18.003393]
         - [7.103668 , 18.662739 , 19.283308]
