@@ -44,6 +44,6 @@ This will output two `ply` files which contain a copy of the mesh `bunzipper.ply
 
 [1]: J.F. Carvalho, M. Vejdemo-Johansson, D. Kragic, F.T. Pokorny; An algorithm for calculating top-dimensional bounding chains. 2017, Unpublished.
 
-[[2]]:(https://graphics.stanford.edu/data/3Dscanrep/#bunny) The Stanford 3D Scanning Repository
+[2]: The Stanford 3D Scanning Repository (https://graphics.stanford.edu/data/3Dscanrep/#bunny)
 
-[[3]]:(https://3d.si.edu/explorer/eulaema-bee#downloads) Smithsonian X3D
+[3]: Smithsonian X3D (https://3d.si.edu/explorer/eulaema-bee#downloads)
