@@ -31,7 +31,7 @@ make timing_test
 ```
 this will take a long time to run as it will run a test for a random mesh comprising (about) `x 1ey` points, with `x in [1..9]` and `y in [1..5]`. The results of the test are output to the file `results.csv`.
 
-For the other tests presented in [1] we only provide the `yaml` files needed to run them, as the meshes are provided by a third party and can be found in [here](https://graphics.stanford.edu/data/3Dscanrep/) and [here](https://3d.si.edu/explorer/eulaema-bee#downloads). The aforementioned `yaml` files are stored in the `/test` folder and can be run (after the project has been built, and starting from the build directory, and making sure that the proper mesh is located in the same folder)
+For the other tests presented in [1] we only provide the `yaml` files needed to run them, as the meshes are provided by a third party and can be found in [here[2]](https://graphics.stanford.edu/data/3Dscanrep/#bunny) and [here[3]](https://3d.si.edu/explorer/eulaema-bee#downloads). The aforementioned `yaml` files are stored in the `/test` folder and can be run (after the project has been built, and starting from the build directory, and making sure that the proper mesh is located in the same folder)
 
 ```{bash}
 cp ../test/bunny2.yaml .
@@ -40,6 +40,8 @@ cp ../test/bunny2.yaml .
 
 This will output two `ply` files which contain a copy of the mesh `bunzipper.ply` and the bounding chain to the cycle specified by the path contained in the yaml file. One of them was computed by solving a large linear system using least squares conjugate gradient descent, whereas the other was computed by employing `coefficient_flow`.
 
-### References
+### References/links
 
 [1]: J.F. Carvalho, M. Vejdemo-Johansson, D. Kragic, F.T. Pokorny; An algorithm for calculating top-dimensional bounding chains. 2017, Unpublished.
+[2](https://graphics.stanford.edu/data/3Dscanrep/#bunny): The Stanford 3D Scanning Repository
+[3](https://3d.si.edu/explorer/eulaema-bee#downloads): Smithsonian X3D
