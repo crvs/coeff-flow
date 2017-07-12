@@ -302,8 +302,8 @@ int simplicial_complex::get_level_size(int level) {
     return p_impl->get_level_size(level);
 }
 
-simplicial_complex::simplicial_complex(std::vector<point_t>& arg_points,
-                                       std::vector<cell_t>& arg_tris) {
+simplicial_complex::simplicial_complex(const std::vector<point_t>& arg_points,
+                                       const std::vector<cell_t>& arg_tris) {
     p_impl = std::shared_ptr<impl>(new impl(arg_points, arg_tris));
 }
 
