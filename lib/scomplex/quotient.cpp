@@ -13,7 +13,6 @@ struct quotient::impl {
     point_t base_point;
 
     impl(shared_ptr<simplicial_complex> s_comp, bool(f)(point_t)) {
-
         // translate point indices
 
         size_t i = 1;
@@ -28,14 +27,14 @@ struct quotient::impl {
             j++;
         }
 
-         // translate faces
-
-        i = 1;
+        // translate faces
+        i = 0;
         vector<cell_t> faces;
         while (s_comp->get_level_size(i) > 0) {
-            vector<cell_t> level;
+            vector<cell_t> level s_comp->get_level(i);
             faces.reserve(level.size());
             faces.insert(faces.end(), level.begin(), level.end());
+            i++;
         }
 
         vector<cell_t> q_faces;
@@ -48,7 +47,8 @@ struct quotient::impl {
             shared_ptr<simplicial_complex>(new simplicial_complex(q_faces));
     }
 
-    impl(shared_ptr<simplicial_complex> s_comp, bool(f)(point_t), point_t b_point) {
+    impl(shared_ptr<simplicial_complex> s_comp, bool(f)(point_t),
+         point_t b_point) {
         impl(s_comp, f);
         this->base_point = b_point;
     }
@@ -88,30 +88,43 @@ quotient::quotient(shared_ptr<simplicial_complex> s_comp, bool(quot)(point_t)) {
     unique_ptr<impl> p_impl(new impl(s_comp, quot));
 }
 
-quotient::quotient(const simplicial_complex &s_comp, bool(quot)(point_t),
+quotient::quotient(const simplicial_complex& s_comp, bool(quot)(point_t),
                    point_t pt) {
-    shared_ptr<simplicial_complex> comp_ptr = shared_ptr<simplicial_complex>(new simplicial_complex(s_comp));
+    shared_ptr<simplicial_complex> comp_ptr =
+        shared_ptr<simplicial_complex>(new simplicial_complex(s_comp));
     unique_ptr<impl> p_impl(new impl(comp_ptr, quot, pt));
 }
 
-quotient::quotient(const simplicial_complex &s_comp, bool(quot)(point_t)) {
-    shared_ptr<simplicial_complex> comp_ptr = shared_ptr<simplicial_complex>(new simplicial_complex(s_comp));
+quotient::quotient(const simplicial_complex& s_comp, bool(quot)(point_t)) {
+    shared_ptr<simplicial_complex> comp_ptr =
+        shared_ptr<simplicial_complex>(new simplicial_complex(s_comp));
     unique_ptr<impl> p_impl(new impl(comp_ptr, quot));
 }
 
-quotient::~quotient(){}
+quotient::~quotient() {}
 
-quotient::quotient(const quotient& quot){
+quotient::quotient(const quotient& other) { p_impl = other.p_impl; }
+
+quotient::quotient& operator=(const quotient& other) {
+    p_impl = other.p_iml;
+    return *this;
 }
 
-quotient::quotient& operator=(const quotient& quot){
+quotient::std::shared_ptr<simplicial_complex> base_complexi() {
+    return p_impl->base_comp;
+}
+
+quotient::std::shared_ptr<simplicial_complex> quotient_complex() {
+    return p_impl->quot_comp;
+}
+
+quotient::chain_t quotient_chain(chain_t chain)
+{
+
 }
 
 /* TODO
  * fill in details
-quotient::std::shared_ptr<simplicial_complex> base_complex;
-quotient::std::shared_ptr<simplicial_complex> quotient_complex;
-quotient::chain_t quotient_chain(chain_t);
 quotient::chain_v quotient_chain_v(chain_v);
 quotient::chain_t unquotient_chain(chain_t);
 quotient::chain_v unquotient_chain_v(chain_v);
