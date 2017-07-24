@@ -3,6 +3,7 @@
 
 #include <Eigen/Sparse>
 #include <scomplex/types.hpp>
+#include <scomplex/chains.hpp>
 #include <scomplex/simplicial_complex.hpp>
 #include <scomplex/nn_utils.hpp>
 #include <scomplex/graph_utils.hpp>
@@ -111,29 +112,34 @@ std::vector<size_t> path_snapper::snap_path_to_indices(
     return p_impl->snap_path(path);
 }
 
-chain_v path_snapper::snap_path_to_v_chain(std::vector<point_t> path) {
+chain path_snapper::snap_path_to_dense_chain(std::vector<point_t> path) {
     auto pair_seq = p_impl->index_pairs(path);
-    chain_v rep = p_impl->s_comp->new_v_chain(1);
+    chain rep = p_impl->s_comp->new_dense_chain(1);
     for (auto pair : pair_seq) {
         auto cell = std::get<0>(pair);
         if (cell[0] != cell[1]) {
             size_t index = p_impl->s_comp->cell_to_index(std::get<0>(pair));
-            chain_val(rep, index) += std::get<1>(pair);
+            rep[index] += std::get<1>(pair);
         }
     }
     return rep;
 }
-chain_t path_snapper::snap_path_to_chain(std::vector<point_t> path) {
+
+chain path_snapper::snap_path_to_sparse_chain(std::vector<point_t> path) {
     auto pair_seq = p_impl->index_pairs(path);
-    chain_t rep = p_impl->s_comp->new_chain(1);
+    chain rep = p_impl->s_comp->new_sparse_chain(1);
     for (auto pair : pair_seq) {
         auto cell = std::get<0>(pair);
         if (cell[0] != cell[1]) {
             size_t index = p_impl->s_comp->cell_to_index(std::get<0>(pair));
-            chain_val(rep, index) += std::get<1>(pair);
+            rep[index] += std::get<1>(pair);
         }
     }
     return rep;
+}
+
+chain path_snapper::snap_path_to_chain(std::vector<point_t> path) {
+    return snap_path_to_sparse_chain(path);
 }
 
 std::vector<point_t> path_snapper::index_sequence_to_point(
@@ -151,28 +157,28 @@ std::vector<size_t> path_snapper::point_sequence_to_index(
     return ind_path;
 }
 
-chain_v path_snapper::index_sequence_to_v_chain(std::vector<size_t> ind_path) {
+chain path_snapper::index_sequence_to_dense_chain(std::vector<size_t> ind_path) {
     auto it = ind_path.begin();
-    chain_v chain = p_impl->s_comp->new_v_chain(1);
+    chain rep = p_impl->s_comp->new_dense_chain(1);
     for (; std::next(it) != ind_path.end(); ++it) {
         auto ind = p_impl->s_comp->cell_to_index({*it, *std::next(it)});
-        chain_val(chain, ind) += (*it < *std::next(it)) ? 1 : -1;
+        rep[ind] += (*it < *std::next(it)) ? 1 : -1;
     }
-    return chain;
+    return rep;
 }
 
-chain_t path_snapper::index_sequence_to_chain(std::vector<size_t> ind_path) {
+chain path_snapper::index_sequence_to_sparse_chain(std::vector<size_t> ind_path) {
     auto it = ind_path.begin();
-    chain_t chain = p_impl->s_comp->new_chain(1);
+    chain rep = p_impl->s_comp->new_chain(1);
     for (; std::next(it) != ind_path.end(); ++it) {
         auto ind = p_impl->s_comp->cell_to_index({*it, *std::next(it)});
-        chain_val(chain, ind) += (*it < *std::next(it)) ? 1 : -1;
+        rep[ind] += (*it < *std::next(it)) ? 1 : -1;
     }
-    return chain;
+    return rep;
 }
 
-chain_t path_snapper::point_sequence_to_chain(std::vector<point_t> pt_path) {
-    return index_sequence_to_chain(point_sequence_to_index(pt_path));
+chain path_snapper::point_sequence_to_chain(std::vector<point_t> pt_path) {
+    return index_sequence_to_sparse_chain(point_sequence_to_index(pt_path));
 }
 
 std::shared_ptr<simplicial_complex> path_snapper::get_underlying_complex() {

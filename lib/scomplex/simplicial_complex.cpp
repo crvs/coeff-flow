@@ -1,4 +1,5 @@
 #include <scomplex/simplicial_complex.hpp>
+#include <scomplex/chains.hpp>
 #include <scomplex/types.hpp>
 
 #include <iterator>  // for debuging purposes
@@ -109,7 +110,7 @@ struct simplicial_complex::impl {
     hasse_diag incidence;
 
 
-    impl(std::vector<point_t>& arg_points, std::vector<cell_t>& arg_tris)
+    impl(const std::vector<point_t>& arg_points,const std::vector<cell_t>& arg_tris)
         : points(arg_points) {
         // create the simplex tree
         for (auto tri : arg_tris) {
@@ -379,14 +380,18 @@ std::vector<cell_t> simplicial_complex::get_cofaces(cell_t face) {
     return s_cofaces;
 }
 
-chain_v simplicial_complex::new_v_chain(int d) {
+chain simplicial_complex::new_dense_chain(int d) {
     std::vector<double> v(get_level_size(d),0);
-    return chain_v(d,v);
-
+    return chain(d,v);
 }
-chain_t simplicial_complex::new_chain(int d) {
+
+chain simplicial_complex::new_sparse_chain(int d) {
     vector_t v(get_level_size(d));
-    return chain_t(d, v);
+    return chain(d, v);
+}
+
+chain simplicial_complex::new_chain(int d) {
+    return new_sparse_chain(d);
 }
 
 void simplicial_complex::calculate_hasse() {

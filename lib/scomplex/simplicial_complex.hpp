@@ -1,6 +1,7 @@
 #pragma once
 
 #include <scomplex/types.hpp>
+#include <scomplex/chains.hpp>
 #include <memory>
 
 #include <gudhi/Simplex_tree.h>
@@ -31,8 +32,9 @@ class simplicial_complex {
     point_t get_point(size_t);
     int dimension();
     // level-wise info
-    chain_t new_chain(int d);
-    chain_v new_v_chain(int d);
+    chain new_sparse_chain(int d);
+    chain new_dense_chain(int d);
+    chain new_chain(int d);
     // create chains
     std::vector<cell_t> get_level(int);
     int get_level_size(int);
@@ -54,5 +56,12 @@ class simplicial_complex {
     // cells and indices back and forth
     cell_t index_to_cell(int, size_t);
     size_t cell_to_index(cell_t);
+    // TODO
+    // volume_chain(int d) {
+    // /* returns a cahin containing the volumes of all d--cells of the complex
+    //  * computes it once stores it in pimpl and retrieves it whenever it becomes necessary
+    //  * it returns a dense chain
+    //  */
+    // }
 };  // class simplicial_complex
 };  // namespace gsimp

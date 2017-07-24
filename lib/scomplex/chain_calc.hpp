@@ -1,5 +1,6 @@
 #pragma once
 
+#include <scomplex/chains.hpp>
 #include <scomplex/simplicial_complex.hpp>
 #include <scomplex/types.hpp>
 
@@ -27,7 +28,7 @@ class bounding_chain {
     bounding_chain(std::shared_ptr<simplicial_complex> sc);
     bounding_chain(std::vector<point_t>& points, std::vector<cell_t>& tris);
     ~bounding_chain();
-    chain_t get_bounding_chain(chain_t&);
+    chain get_bounding_chain(chain&);
 };
 
 //---------------------------------------
@@ -80,10 +81,9 @@ bool equals(vector_t vec1, vector_t vec2) {
     return true;
 }
 
-chain_t bounding_chain::get_bounding_chain(chain_t& chain) {
-    int chain_d;
-    vector_t chain_v;
-    std::tie<int, vector_t>(chain_d, chain_v) = chain;
+chain bounding_chain::get_bounding_chain(chain& rep) {
+    int chain_d = rep.dimension();
+    vector_t chain_v = rep.get_sparse();
 
     if (chain_d >= s_comp->dimension()) throw non_zero_chain();
 
@@ -94,7 +94,7 @@ chain_t bounding_chain::get_bounding_chain(chain_t& chain) {
     vector_t result(round_vec(*(boundary_matrices.at(chain_d)) * bound_chain));
 
     if (equals(result, chain_v))
-        return chain_t(chain_d + 1, bound_chain);
+        return chain(chain_d + 1, bound_chain);
     else
         throw non_zero_chain();
 }

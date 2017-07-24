@@ -17,12 +17,12 @@ typedef queue<q_elem_t> queue_t;
 class out_of_context : exception {};
 class no_bounding_chain : exception {};
 
-chain_v coeff_flow(simplicial_complex& s_comp,  //
-                   chain_v p,                   //
+chain coeff_flow(simplicial_complex& s_comp,  //
+                   chain p,                   //
                    cell_t sigma_0,              //
                    double c_0) {                //
 
-    if (chain_dim(p) != s_comp.dimension() - 1) throw out_of_context();
+    if (p.dimension() != s_comp.dimension() - 1) throw out_of_context();
     // 01
     vector<double> c_vec(s_comp.get_level_size(s_comp.dimension()),0);
 
@@ -97,12 +97,12 @@ chain_v coeff_flow(simplicial_complex& s_comp,  //
         if (is_boundary) {
             // sigma is the only coface of tau
             // check that we get the same value on tau
-            if (predicted_bdry != chain_val(p, tau_i))
+            if (predicted_bdry != p[tau_i])
                 throw no_bounding_chain();
         } else {
             // there is another coface we now focus on it
             double c_p = s_comp.boundary_inclusion_index(tau, sigma_p) *
-                         (chain_val(p, tau_i) -
+                         (p[tau_i] -
                           s_comp.boundary_inclusion_index(tau, sigma) * c);
             for (cell_t tau_p : s_comp.cell_boundary(sigma_p)) {
                 size_t tau_p_i = s_comp.cell_to_index(tau_p);
@@ -121,12 +121,12 @@ chain_v coeff_flow(simplicial_complex& s_comp,  //
      * cout << '\n';
      */
 
-    chain_v c_chain(s_comp.dimension(),c_vec);
+    chain c_chain(s_comp.dimension(),c_vec);
     return c_chain;
 }
 
-chain_v coeff_flow_embedded(simplicial_complex& s_comp, chain_v p) {
-    if (chain_dim(p) != s_comp.dimension() - 1) throw out_of_context();
+chain coeff_flow_embedded(simplicial_complex& s_comp, chain p) {
+    if (p.dimension() != s_comp.dimension() - 1) throw out_of_context();
 
     cell_t sigma;
     double c;
@@ -135,8 +135,8 @@ chain_v coeff_flow_embedded(simplicial_complex& s_comp, chain_v p) {
             int sigma_ind;
             size_t tau_i = s_comp.cell_to_index(tau);
             tie(sigma_ind, sigma) = s_comp.get_cof_and_ind(tau)[0];
-            c = sigma_ind * chain_val(p, tau_i);
-            chain_v sol = coeff_flow(s_comp, p, sigma, c);
+            c = sigma_ind * p[tau_i];
+            chain sol = coeff_flow(s_comp, p, sigma, c);
             return sol;
         }
     }

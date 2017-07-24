@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <scomplex/types.hpp>
+#include <scomplex/chains.hpp>
 #include <scomplex/simplicial_complex.hpp>
 #include <scomplex/qhull_parsing.hpp>
 #include <scomplex/path_snapper.hpp>
@@ -218,7 +219,7 @@ void call_single_cycle_test(std::string complex_file,
     std::cout << "computed path contains " << snapped.size() << " points\n";
 
     t0 = clock();
-    gsimp::chain_v cycle = p_snap->index_sequence_to_v_chain(snapped);
+    gsimp::chain cycle = p_snap->index_sequence_to_dense_chain(snapped);
     t1 = clock();
     std::cout << "produced chain from path in " << t1 - t0 << " clock cycles "
               << float(t1 - t0) / CLOCKS_PER_SEC << " seconds\n";
@@ -230,17 +231,18 @@ void call_single_cycle_test(std::string complex_file,
         << " clock cycles\
         " << float(t1 - t0) / CLOCKS_PER_SEC << " seconds\n";
 
-    gsimp::chain_t cycle2 = p_snap->index_sequence_to_chain(snapped);
+    gsimp::chain cycle2(cycle);
+    cycle2.to_sparse();
     t0 = clock();
-    gsimp::chain_t b_chain_0 = ch_calc.get_bounding_chain(cycle2);
+    gsimp::chain b_chain_0 = ch_calc.get_bounding_chain(cycle2);
     t1 = clock();
     std::cout << "calculated bounding chain (using Eigen) in " << t1 - t0 << "\
         clock cycles " << float(t1 - t0) / CLOCKS_PER_SEC << " seconds\n";
 
     std::vector<std::vector<int>> colors;
 
-    for (size_t i = 0; i < gsimp::chain_size(b_chain_0); i++) {
-        if (std::abs(gsimp::chain_val(b_chain_0, i)) > 10e-3)
+    for (size_t i = 0; i < b_chain_0.get_size(); i++) {
+        if (std::abs(b_chain_0[i]) > 10e-3)
             colors.push_back({255, 0, 0});
         else
             colors.push_back({255, 255, 255});
@@ -252,8 +254,8 @@ void call_single_cycle_test(std::string complex_file,
     std::vector<std::vector<size_t>> edges{};
     std::vector<std::vector<int>> edge_colors{};
 
-    for (size_t i = 0; i < gsimp::chain_size(cycle); i++) {
-        if (std::abs(gsimp::chain_val(cycle, i)) > 10e-3)
+    for (size_t i = 0; i < cycle.get_size(); i++) {
+        if (std::abs(cycle[i]) > 10e-3)
             edges.push_back(s_comp->index_to_cell(1, i));
         edge_colors.push_back({0, 0, 255});
     }
@@ -279,7 +281,7 @@ void call_single_cycle_test(std::string complex_file,
               << " seconds\n";
     t0 = clock();
 
-    gsimp::chain_v b_chain_1;
+    gsimp::chain b_chain_1 = s_comp->new_dense_chain(2);
     if (!in_plane)
         b_chain_1 = gsimp::coeff_flow(*s_comp, cycle, null_cell, 0);
     else
@@ -291,8 +293,8 @@ void call_single_cycle_test(std::string complex_file,
               << " seconds\n";
 
     colors = {};
-    for (size_t i = 0; i < gsimp::chain_size(b_chain_1); i++) {
-        if (std::abs(gsimp::chain_val(b_chain_1, i)) > 10e-3)
+    for (size_t i = 0; i < b_chain_1.get_size(); i++) {
+        if (std::abs(b_chain_1[i]) > 10e-3)
             colors.push_back({255, 0, 0});
         else
             colors.push_back({255, 255, 255});
@@ -303,8 +305,8 @@ void call_single_cycle_test(std::string complex_file,
 
     edges = {};
     edge_colors = {};
-    for (size_t i = 0; i < gsimp::chain_size(cycle); i++) {
-        if (std::abs(gsimp::chain_val(cycle, i)) > 10e-3)
+    for (size_t i = 0; i < cycle.get_size(); i++) {
+        if (std::abs(cycle[i]) > 10e-3)
             edges.push_back(s_comp->index_to_cell(1, i));
         edge_colors.push_back({0, 0, 255});
     }

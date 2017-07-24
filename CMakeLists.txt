@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(coefficient-flow CXX)
 
-# set(CMAKE_CXX_COMPILER_ID "Clang")
-# message("${CMAKE_CXX_COMPILER_ID}")
-
 # requirements:
 #   * Gudhi under /usr/include/gudhi
 #   * Eigen3 under /usr/include/eigen3
@@ -59,13 +56,6 @@ find_package(GUDHI 1.3 REQUIRED QUIET)
 message(STATUS "Gudhi version: ${GUDHI_VERSION}")
 message(STATUS "Gudhi directory: ${GUDHI_INCLUDE_DIRS}")
 
-set(CMAKE_C_COMPILER             "/usr/bin/clang-3.8")
-set(CMAKE_C_FLAGS                "-Wall -std=c99")
-set(CMAKE_C_FLAGS_DEBUG          "-g")
-set(CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
-set(CMAKE_C_FLAGS_RELEASE        "-O3 -DNDEBUG")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
-
 set(CMAKE_CXX_COMPILER             "/usr/bin/clang++-3.8")
 set(CMAKE_CXX_FLAGS                "-Wall -std=c++11")
 set(CMAKE_CXX_FLAGS_DEBUG          "-g")
@@ -99,3 +89,6 @@ add_custom_target(timing_test
     COMMAND "cp" "${CMAKE_CURRENT_SOURCE_DIR}/test/dumbexample.yaml" "${CMAKE_CURRENT_BINARY_DIR}"
     COMMAND "${CMAKE_CURRENT_BINARY_DIR}/run_dumb_tests.sh" "1"
     DEPENDS yamltest qhull2ply "test/run_dumb_tests.sh" "test/dumbexample.yaml")
+
+add_executable(chaintest "src/chaintest.cpp")
+
