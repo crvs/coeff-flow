@@ -7,13 +7,6 @@
 #include <vector>
 #include <Eigen/Sparse>
 
-// TODO:
-// * test
-// * integrate into existing code
-//      - start by ack-grep chain_[tv]
-//      - load into quickfix
-//      - check each hit
-
 using namespace std;
 
 namespace gsimp {

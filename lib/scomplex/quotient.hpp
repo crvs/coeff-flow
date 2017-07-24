@@ -26,12 +26,10 @@ class quotient{
         std::shared_ptr<simplicial_complex> quotient_complex;
 
         // push chains forward through quotient
-        chain_t quotient_chain(chain_t);
-        chain_v quotient_chain_v(chain_v);
+        chain quotient_chain(chain);
 
         // pull chains backward through quotient
-        chain_t unquotient_chain(chain_t);
-        chain_v unquotient_chain_v(chain_v);
+        chain unquotient_chain(chain);
 
 };
 

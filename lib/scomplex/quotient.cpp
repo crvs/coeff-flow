@@ -2,7 +2,7 @@
 
 #include <scomplex/quotient.hpp>
 #include <scomplex/simplicial_complex.hpp>
-#include <scomplex/types.hpp>
+#include <scomplex/chains.hpp>
 
 using namespace std;
 
@@ -118,14 +118,17 @@ quotient::std::shared_ptr<simplicial_complex> quotient_complex() {
     return p_impl->quot_comp;
 }
 
-quotient::chain_t quotient_chain(chain_t chain)
-{
+gsimp::chain_t quotient_chain(gsimp::chain rep) {
+    chain q_rep = p_impl->quot_comp->new_chain();
+    if (rep.is_dense())
+        q_rep.to_dense();
+
+    for (cell_t cell : p_impl->base_comp->get_level(rep.dimension())) {
+        size_t base_ind;
+        size_t quot_ind;
+    }
+
 
 }
 
-/* TODO
- * fill in details
-quotient::chain_v quotient_chain_v(chain_v);
-quotient::chain_t unquotient_chain(chain_t);
-quotient::chain_v unquotient_chain_v(chain_v);
-*/
+gsimp::chain quotient::unquotient_chain(gsimp::chain){}
