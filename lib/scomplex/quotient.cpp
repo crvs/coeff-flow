@@ -1,11 +1,10 @@
-#pragma once
-
 #include <scomplex/quotient.hpp>
 #include <scomplex/simplicial_complex.hpp>
 #include <scomplex/chains.hpp>
 
 using namespace std;
 
+namespace gsimp {
 struct quotient::impl {
     vector<size_t> point_map;
     vector<size_t> point_reverse_map;
@@ -17,12 +16,12 @@ struct quotient::impl {
 
         size_t i = 1;
         size_t j = 1;
-        for (auto pt : s_comp->points) {
+        for (auto pt : s_comp->get_points()) {
             if (f(pt)) {
                 point_map.push_back(0);
             } else {
                 point_map.push_back(i++);
-                point_reverse_map.push_back(j)
+                point_reverse_map.push_back(j);
             }
             j++;
         }
@@ -31,7 +30,7 @@ struct quotient::impl {
         i = 0;
         vector<cell_t> faces;
         while (s_comp->get_level_size(i) > 0) {
-            vector<cell_t> level s_comp->get_level(i);
+            vector<cell_t> level = s_comp->get_level(i);
             faces.reserve(level.size());
             faces.insert(faces.end(), level.begin(), level.end());
             i++;
@@ -53,6 +52,15 @@ struct quotient::impl {
         this->base_point = b_point;
     }
 
+    impl& operator=(const impl other) {
+        point_map = other.point_map;
+        point_reverse_map = other.point_reverse_map;
+        base_comp = other.base_comp;
+        quot_comp = other.quot_comp;
+        base_point = other.base_point;
+        return *this;
+    }
+
     /*
      * translate faces back and forth
      */
@@ -60,8 +68,11 @@ struct quotient::impl {
         cell_t q_face;
         bool zero = false;
         for (auto v : face) {
-            size_t qv = point_map[v] if (qv == 0) zero = true;
-            else q_face.push_back(qv);
+            size_t qv = point_map[v];
+            if (qv == 0)
+                zero = true;
+            else
+                q_face.push_back(qv);
         }
         if (zero) q_face.insert(q_face.begin(), 0);
         return q_face;
@@ -103,32 +114,48 @@ quotient::quotient(const simplicial_complex& s_comp, bool(quot)(point_t)) {
 
 quotient::~quotient() {}
 
-quotient::quotient(const quotient& other) { p_impl = other.p_impl; }
+quotient::quotient(const quotient& other) {
+    p_impl = unique_ptr<quotient::impl>(new impl(*(other.p_impl)));
+}
 
-quotient::quotient& operator=(const quotient& other) {
-    p_impl = other.p_iml;
+quotient& quotient::operator=(const quotient& other) {
+    p_impl = unique_ptr<quotient::impl>(new impl(*(other.p_impl)));
     return *this;
 }
 
-quotient::std::shared_ptr<simplicial_complex> base_complexi() {
+shared_ptr<simplicial_complex> quotient::base_complex() {
     return p_impl->base_comp;
 }
 
-quotient::std::shared_ptr<simplicial_complex> quotient_complex() {
+shared_ptr<simplicial_complex> quotient::quotient_complex() {
     return p_impl->quot_comp;
 }
 
-gsimp::chain_t quotient_chain(gsimp::chain rep) {
-    chain q_rep = p_impl->quot_comp->new_chain();
-    if (rep.is_dense())
-        q_rep.to_dense();
+chain quotient::quotient_chain(chain rep) {
+    chain q_rep = p_impl->quot_comp->new_chain(rep.dimension());
+    if (rep.is_dense()) q_rep.to_dense();
 
     for (cell_t cell : p_impl->base_comp->get_level(rep.dimension())) {
-        size_t base_ind;
-        size_t quot_ind;
+        cell_t q_cell = p_impl->to_q_face(cell);
+        if (cell.size() == q_cell.size()) {
+            size_t base_ind = p_impl->base_comp->cell_to_index(cell);
+            size_t quot_ind = p_impl->quot_comp->cell_to_index(q_cell);
+            q_rep[quot_ind] = rep[base_ind];
+        }
     }
-
-
+    return q_rep;
 }
 
-gsimp::chain quotient::unquotient_chain(gsimp::chain){}
+chain quotient::unquotient_chain(chain q_rep) {
+    chain rep = p_impl->base_comp->new_chain(q_rep.dimension());
+    if (q_rep.is_dense()) rep.to_dense();
+
+    for (cell_t q_cell : p_impl->quot_comp->get_level(q_rep.dimension())) {
+        cell_t cell = p_impl->to_b_face(q_cell);
+        size_t base_ind = p_impl->base_comp->cell_to_index(cell);
+        size_t quot_ind = p_impl->quot_comp->cell_to_index(q_cell);
+        rep[base_ind] = q_rep[quot_ind];
+    }
+    return q_rep;
+}
+};
