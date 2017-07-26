@@ -90,5 +90,6 @@ add_custom_target(timing_test
     COMMAND "${CMAKE_CURRENT_BINARY_DIR}/run_dumb_tests.sh" "1"
     DEPENDS yamltest qhull2ply "test/run_dumb_tests.sh" "test/dumbexample.yaml")
 
+add_library(quotient SHARED "./lib/scomplex/quotient.cpp")
 add_executable(chaintest "src/chaintest.cpp")
 

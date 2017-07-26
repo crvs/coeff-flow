@@ -398,4 +398,19 @@ void simplicial_complex::calculate_hasse() {
     p_impl->has_hasse = true;
     p_impl->incidence = hasse_diag(*this);
 }
+
+// takes a dimension d
+// returns a d-chain where the i-th entry is the volume of the i-th d-cell
+chain simplicial_complex::volume_chain(int d) {
+    vector<double> volume_chain=new_dense_chain(d);
+    for (cell_t cell : get_level(d)){ 
+        double volume;
+        // volume = 
+        // calculate volume of the cell
+        //
+    }
+    return volume_chain;
+}
+
 };
+
