@@ -92,4 +92,5 @@ add_custom_target(timing_test
 
 add_library(quotient SHARED "./lib/scomplex/quotient.cpp")
 add_executable(chaintest "src/chaintest.cpp")
+add_executable(exttest "src/exttest.cpp")
 

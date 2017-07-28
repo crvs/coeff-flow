@@ -56,9 +56,8 @@ class simplicial_complex {
     // cells and indices back and forth
     cell_t index_to_cell(int, size_t);
     size_t cell_to_index(cell_t);
-    // TODO
-    // volume_chain(int d) {
-    // /* returns a cahin containing the volumes of all d--cells of the complex
+    chain volume_chain(int);
+    // /* returns a chain containing the volumes of all d--cells of the complex
     //  * computes it once stores it in pimpl and retrieves it whenever it becomes necessary
     //  * it returns a dense chain
     //  */

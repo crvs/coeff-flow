@@ -1,4 +1,5 @@
 #include <scomplex/simplicial_complex.hpp>
+#include <scomplex/exterior_prod.hpp>
 #include <scomplex/chains.hpp>
 #include <scomplex/types.hpp>
 
@@ -109,8 +110,8 @@ struct simplicial_complex::impl {
     bool has_hasse;
     hasse_diag incidence;
 
-
-    impl(const std::vector<point_t>& arg_points,const std::vector<cell_t>& arg_tris)
+    impl(const std::vector<point_t>& arg_points,
+         const std::vector<cell_t>& arg_tris)
         : points(arg_points) {
         // create the simplex tree
         for (auto tri : arg_tris) {
@@ -381,8 +382,8 @@ std::vector<cell_t> simplicial_complex::get_cofaces(cell_t face) {
 }
 
 chain simplicial_complex::new_dense_chain(int d) {
-    std::vector<double> v(get_level_size(d),0);
-    return chain(d,v);
+    std::vector<double> v(get_level_size(d), 0);
+    return chain(d, v);
 }
 
 chain simplicial_complex::new_sparse_chain(int d) {
@@ -390,9 +391,7 @@ chain simplicial_complex::new_sparse_chain(int d) {
     return chain(d, v);
 }
 
-chain simplicial_complex::new_chain(int d) {
-    return new_sparse_chain(d);
-}
+chain simplicial_complex::new_chain(int d) { return new_sparse_chain(d); }
 
 void simplicial_complex::calculate_hasse() {
     p_impl->has_hasse = true;
@@ -402,15 +401,36 @@ void simplicial_complex::calculate_hasse() {
 // takes a dimension d
 // returns a d-chain where the i-th entry is the volume of the i-th d-cell
 chain simplicial_complex::volume_chain(int d) {
-    vector<double> volume_chain=new_dense_chain(d);
-    for (cell_t cell : get_level(d)){ 
+    chain volume_chain = new_dense_chain(d);
+    for (cell_t cell : get_level(d)) {
         double volume;
-        // volume = 
-        // calculate volume of the cell
-        //
+        if (d == 0)
+            volume = 1;
+        else {
+            point_t vec;
+            point_t b_point = p_impl->points[cell[0]];
+            vector<vector<double>> cell_edges;
+
+            for (int i = 1; i < cell.size(); i++) {
+                point_t i_point = p_impl->points[cell[i]];
+                point_t n_edge;
+                for (int j = 0; j < b_point.size(); j++) {
+                    double v = i_point[j] - b_point[j];
+                    n_edge.push_back(v);
+                }
+                cell_edges.push_back(n_edge);
+            }
+
+            ext_vector v(cell_edges[0]);
+            for (int i = 1; i < cell_edges.size(); i++) {
+                ext_vector w(cell_edges[i]);
+                v = v ^ w;
+            }
+            volume = v.norm() / factorial(v.algebraic_dimension());
+        }
+        size_t cell_ind = cell_to_index(cell);
+        volume_chain[cell_ind] = volume;
     }
     return volume_chain;
 }
-
 };
-
