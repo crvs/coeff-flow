@@ -33,6 +33,7 @@ chain_v coeff_flow(simplicial_complex& s_comp,  //
 
     size_t seen_taus = 0;
     seen_sigma[s_comp.cell_to_index(sigma_0)] = true;
+    c_vec[s_comp.cell_to_index(sigma_0)] = c_0;
     size_t seen_sigmas = 1;
 
     queue_t queue;
@@ -41,8 +42,7 @@ chain_v coeff_flow(simplicial_complex& s_comp,  //
     }
 
     while (not queue.empty()) {
-        /*
-         * // useful debug output
+        /* // useful debug output
          *
          * size_t ind = 0;
          * if (ind % 1000 == 0) {
