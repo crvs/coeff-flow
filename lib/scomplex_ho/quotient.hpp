@@ -1,19 +1,46 @@
+#pragma once
+
 #include <boost/function.hpp>
 
-#include <scomplex/quotient.hpp>
-#include <scomplex/simplicial_complex.hpp>
-#include <scomplex/chains.hpp>
+#include <scomplex_ho/simplicial_complex.hpp>
+#include <scomplex_ho/chains.hpp>
 
 using namespace std;
 
 namespace gsimp {
+class quotient{
+
+    struct impl;
+    std::unique_ptr<impl> p_impl;
+
+    public:
+        quotient(const simplicial_complex&, boost::function<bool(point_t)>);
+        quotient(const simplicial_complex&, boost::function<bool(point_t)>, point_t);
+        quotient(std::shared_ptr<simplicial_complex>, boost::function<bool(point_t)>);
+        quotient(std::shared_ptr<simplicial_complex>, boost::function<bool(point_t)>, point_t);
+        quotient(const quotient&);
+        quotient& operator=(const quotient&);
+
+        ~quotient();
+
+        std::shared_ptr<simplicial_complex> base_complex();
+        std::shared_ptr<simplicial_complex> quotient_complex();
+
+        // push chains forward through quotient
+        chain quotient_chain(chain);
+
+        // pull chains backward through quotient
+        chain unquotient_chain(chain);
+
+}; // quotient
+
 struct quotient::impl {
     vector<size_t> point_map;
     vector<size_t> point_reverse_map;
-    shared_ptr<simplicial_complex> base_comp, quot_comp;
+    std::shared_ptr<simplicial_complex> base_comp, quot_comp;
     point_t base_point;
 
-    impl(shared_ptr<simplicial_complex> s_comp, boost::function<bool(point_t)> f) {
+    impl(std::shared_ptr<simplicial_complex> s_comp, boost::function<bool(point_t)> f) {
         // translate point indices
         size_t i = 1;
         size_t j = 1;
@@ -44,10 +71,10 @@ struct quotient::impl {
 
         this->base_comp = s_comp;
         this->quot_comp =
-            shared_ptr<simplicial_complex>(new simplicial_complex(q_faces));
+            std::shared_ptr<simplicial_complex>(new simplicial_complex(q_faces));
     }
 
-    impl(shared_ptr<simplicial_complex> s_comp, boost::function<bool(point_t)> f,
+    impl(std::shared_ptr<simplicial_complex> s_comp, boost::function<bool(point_t)> f,
          point_t b_point) {
         impl(s_comp, f);
         this->base_point = b_point;
@@ -91,25 +118,25 @@ struct quotient::impl {
     }
 };
 
-quotient::quotient(shared_ptr<simplicial_complex> s_comp, boost::function<bool(point_t)> quot,
+quotient::quotient(std::shared_ptr<simplicial_complex> s_comp, boost::function<bool(point_t)> quot,
                    point_t pt) {
     unique_ptr<impl> p_impl(new impl(s_comp, quot, pt));
 }
 
-quotient::quotient(shared_ptr<simplicial_complex> s_comp, boost::function<bool(point_t)> quot) {
+quotient::quotient(std::shared_ptr<simplicial_complex> s_comp, boost::function<bool(point_t)> quot) {
     unique_ptr<impl> p_impl(new impl(s_comp, quot));
 }
 
 quotient::quotient(const simplicial_complex& s_comp, boost::function<bool(point_t)> quot,
                    point_t pt) {
-    shared_ptr<simplicial_complex> comp_ptr =
-        shared_ptr<simplicial_complex>(new simplicial_complex(s_comp));
+    std::shared_ptr<simplicial_complex> comp_ptr =
+        std::shared_ptr<simplicial_complex>(new simplicial_complex(s_comp));
     unique_ptr<impl> p_impl(new impl(comp_ptr, quot, pt));
 }
 
 quotient::quotient(const simplicial_complex& s_comp, boost::function<bool(point_t)> quot) {
-    shared_ptr<simplicial_complex> comp_ptr =
-        shared_ptr<simplicial_complex>(new simplicial_complex(s_comp));
+    std::shared_ptr<simplicial_complex> comp_ptr =
+        std::shared_ptr<simplicial_complex>(new simplicial_complex(s_comp));
     unique_ptr<impl> p_impl(new impl(comp_ptr, quot));
 }
 
@@ -124,11 +151,11 @@ quotient& quotient::operator=(const quotient& other) {
     return *this;
 }
 
-shared_ptr<simplicial_complex> quotient::base_complex() {
+std::shared_ptr<simplicial_complex> quotient::base_complex() {
     return p_impl->base_comp;
 }
 
-shared_ptr<simplicial_complex> quotient::quotient_complex() {
+std::shared_ptr<simplicial_complex> quotient::quotient_complex() {
     return p_impl->quot_comp;
 }
 

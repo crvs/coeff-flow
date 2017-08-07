@@ -30,34 +30,34 @@ project(coefficient-flow CXX)
 #
 
 find_package(Boost REQUIRED QUIET)
-message(STATUS "Boost version: ${BOOST_VERSION}")
-message(STATUS "Boost directory: ${BOOST_INCLUDE_DIRS}")
+# message(STATUS "Boost version: ${BOOST_VERSION}")
+# message(STATUS "Boost directory: ${BOOST_INCLUDE_DIRS}")
 
 find_package(Eigen3 3.1.2 REQUIRED QUIET)
-message(STATUS "Eigen3 version: ${EIGEN3_VERSION}")
-message(STATUS "Eigen3 directory: ${EIGEN3_INCLUDE_DIR}")
+# message(STATUS "Eigen3 version: ${EIGEN3_VERSION}")
+# message(STATUS "Eigen3 directory: ${EIGEN3_INCLUDE_DIR}")
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 find_package(CGAL REQUIRED QUIET)
-message(STATUS "CGAL version: ${CGAL_VERSION}")
-message(STATUS "CGAL directory: ${CGAL_INCLUDE_DIRS}")
+# message(STATUS "CGAL version: ${CGAL_VERSION}")
+# message(STATUS "CGAL directory: ${CGAL_INCLUDE_DIRS}")
 
 find_package(yaml-cpp REQUIRED QUIET)
-message(STATUS "yaml-cpp version: ${YAML_CPP_VERSION}")
-message(STATUS "yaml-cpp directory: ${YAML_CPP_INCLUDE_DIR}")
+# message(STATUS "yaml-cpp version: ${YAML_CPP_VERSION}")
+# message(STATUS "yaml-cpp directory: ${YAML_CPP_INCLUDE_DIR}")
 include_directories(${YAML_CPP_INCLUDE_DIR})
 
 find_package(PCL 1.8 REQUIRED QUIET)
-message(STATUS "PCL version: ${PCL_VERSION}")
-message(STATUS "PCL directory: ${PCL_INCLUDE_DIRS}")
+# message(STATUS "PCL version: ${PCL_VERSION}")
+# message(STATUS "PCL directory: ${PCL_INCLUDE_DIRS}")
 include_directories(${PCL_INCLUDE_DIRS})
 
 find_package(GUDHI 1.3 REQUIRED QUIET)
-message(STATUS "Gudhi version: ${GUDHI_VERSION}")
-message(STATUS "Gudhi directory: ${GUDHI_INCLUDE_DIRS}")
+# message(STATUS "Gudhi version: ${GUDHI_VERSION}")
+# message(STATUS "Gudhi directory: ${GUDHI_INCLUDE_DIRS}")
 
 set(CMAKE_CXX_COMPILER             "/usr/bin/clang++-3.8")
-set(CMAKE_CXX_FLAGS                "-Wall -std=c++11")
+set(CMAKE_CXX_FLAGS                " -std=c++11 -Wall")
 set(CMAKE_CXX_FLAGS_DEBUG          "-g")
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
@@ -70,19 +70,24 @@ set(CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
 set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
 set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Debug)
 
 include_directories("./lib") # where all the library files are
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
+
+set_source_files_properties("lib/scomplex/path_snapper.cpp" PROPERTIES COMPILE_FLAGS -DNDEBUG)
 add_library(pathsnap SHARED "./lib/scomplex/path_snapper.cpp")
+target_link_libraries(pathsnap scomplex ${CGAL_LIBRARY})
 
 add_executable(qhull2ply "src/make_mesh.cpp")
 
-add_executable(yamltest "src/testing_facility.cpp")
-target_link_libraries(yamltest yaml-cpp scomplex pathsnap ${PCL_LIBRARIES})
+# set_source_files_properties("lib/src/path_snapper.cpp" PROPERTIES COMPILE_FLAGS -DNDEBUG)
+# add_executable(yamltest "src/testing_facility.cpp")
+# target_link_libraries(yamltest yaml-cpp scomplex pathsnap ${PCL_LIBRARIES})
 
-message(INFO ${CMAKE_CURRENT_SOURCE_DIR})
-message(INFO ${CMAKE_CURRENT_BINARY_DIR})
+# message(INFO ${CMAKE_CURRENT_SOURCE_DIR})
+# message(INFO ${CMAKE_CURRENT_BINARY_DIR})
 # TEST target
 add_custom_target(timing_test
     COMMAND "cp" "${CMAKE_CURRENT_SOURCE_DIR}/test/run_dumb_tests.sh" "${CMAKE_CURRENT_BINARY_DIR}"
@@ -91,6 +96,19 @@ add_custom_target(timing_test
     DEPENDS yamltest qhull2ply "test/run_dumb_tests.sh" "test/dumbexample.yaml")
 
 add_library(quotient SHARED "./lib/scomplex/quotient.cpp")
+target_link_libraries(quotient scomplex)
 add_executable(chaintest "src/chaintest.cpp")
 add_executable(exttest "src/exttest.cpp")
+
+# python bindings
+
+find_package(PythonInterp REQUIRED)
+find_package(PythonLibs REQUIRED)
+find_package(Boost REQUIRED COMPONENTS python)
+
+include_directories(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} "/usr/include/python2.7/")
+python_add_module(gsimp python/bindings.cpp)
+#set(LINK_LIBS quotient pathsnap )
+target_link_libraries(gsimp  "python2.7" "boost_python" ${PYTHON_LIBRARIES} ${CGAL_LIBRARIES} ${Boost_LIBRARIES})
+
 

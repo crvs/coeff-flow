@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/function.hpp>
+
 #include <scomplex/types.hpp>
 #include <scomplex/simplicial_complex.hpp>
 
@@ -14,10 +16,10 @@ class quotient{
     std::unique_ptr<impl> p_impl;
 
     public:
-        quotient(const simplicial_complex&, bool(point_t));
-        quotient(const simplicial_complex&, bool(point_t), point_t);
-        quotient(std::shared_ptr<simplicial_complex>, bool(point_t));
-        quotient(std::shared_ptr<simplicial_complex>, bool(point_t), point_t);
+        quotient(const simplicial_complex&, boost::function<bool(point_t)>);
+        quotient(const simplicial_complex&, boost::function<bool(point_t)>, point_t);
+        quotient(std::shared_ptr<simplicial_complex>, boost::function<bool(point_t)>);
+        quotient(std::shared_ptr<simplicial_complex>, boost::function<bool(point_t)>, point_t);
         quotient(const quotient&);
         quotient& operator=(const quotient&);
 

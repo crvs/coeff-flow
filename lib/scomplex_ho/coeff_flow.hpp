@@ -3,15 +3,19 @@
 #include <tuple>
 #include <iostream>
 #include <queue>
-#include <scomplex/types.hpp>
-#include <scomplex/simplicial_complex.hpp>
+#include <scomplex_ho/types.hpp>
+#include <scomplex_ho/simplicial_complex.hpp>
 
-namespace gsimp {
 using namespace std;
 
+namespace gsimp {
+
+using std::tuple;
+using std::queue;
 typedef tuple<cell_t, cell_t, double> q_elem_t;
 typedef queue<q_elem_t> queue_t;
 
+using std::exception;
 class out_of_context : exception {};
 class no_bounding_chain : exception {};
 
@@ -21,15 +25,13 @@ chain coeff_flow(simplicial_complex& s_comp,  //
                  double c_0) {                //
     if (p.dimension() != s_comp.dimension() - 1) throw out_of_context();
     // 01
-    vector<double> c_vec(s_comp.get_level_size(s_comp.dimension()), 0);
-
-    vector<bool> seen_sigma((size_t)s_comp.get_level_size(s_comp.dimension()),
-                            false);
-    vector<bool> seen_tau((size_t)s_comp.get_level_size(s_comp.dimension() - 1),
-                          false);
+    vector<double> c_vec((size_t)s_comp.get_level_size(s_comp.dimension()), 0);
+    vector<bool> seen_sigma((size_t)s_comp.get_level_size(s_comp.dimension()), false);
+    vector<bool> seen_tau((size_t)s_comp.get_level_size(s_comp.dimension() - 1), false);
 
     size_t seen_taus = 0;
     seen_sigma[s_comp.cell_to_index(sigma_0)] = true;
+    c_vec[s_comp.cell_to_index(sigma_0)] = c_0;
     size_t seen_sigmas = 1;
 
     queue_t queue;
@@ -58,7 +60,7 @@ chain coeff_flow(simplicial_complex& s_comp,  //
         cell_t sigma;
         cell_t tau;
         double c;
-        tie(sigma, tau, c) = queue.front();
+        std::tie(sigma, tau, c) = queue.front();
         queue.pop();
 
         // get the indices of the respective cells
