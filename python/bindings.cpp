@@ -64,6 +64,7 @@ class path_clusterer {
     std::shared_ptr<quotient> quotient_ptr;
     std::shared_ptr<path_snapper> p_snap;
 
+    vector<vector<point_t>> paths;
     vector<chain> chains;
     vector<vector<chain>> gen_chains;
 
@@ -107,8 +108,7 @@ class path_clusterer {
 
    public:
     path_clusterer(const py::object& points,  //
-                   const py::object& cells,   //
-                   const py::object& paths) {
+                   const py::object& cells) {
         // decode points list
         vector<point_o> points_o = to_std_vector<py::object>(points);
         vector<point_t> points_v;
@@ -120,32 +120,46 @@ class path_clusterer {
         for (auto cell : cells_o)
             cells_v.push_back(to_std_vector<size_t>(cell));
 
-        // decode paths list
-        vector<path_o> paths_o = to_std_vector<py::object>(paths);
-        vector<vector<point_t>> paths_v;
-        for (path_o path_ : paths_o) {
-            vector<point_o> path_vo = to_std_vector<point_o>(path_);
-            vector<point_t> path_v;
-            for (point_o pt : path_vo)
-                path_v.push_back(to_std_vector<double>(pt));
-
-            paths_v.push_back(path_v);
-        }
-
         // construct simplicial complex
         s_comp = std::shared_ptr<simplicial_complex>(
             new simplicial_complex(points_v, cells_v));
 
         // construct path snapper
         p_snap = std::shared_ptr<path_snapper>(new path_snapper(s_comp));
+    }
 
-        // create the chains from the paths
-        for (auto path : paths_v)
-            chains.push_back(p_snap->snap_path_to_dense_chain(path));
+    path_clusterer(const py::object& points,  //
+                   const py::object& cells,   //
+                   const py::object& a_paths) {
+        *this = path_clusterer(points, cells);
+
+        for (size_t i = 0; i < py::len(a_paths); ++i) add_path(a_paths[i]);
 
         // cunstruct the clusters
         construct_clusters_and_chains();
     }
+
+    void add_path(const py::object& path) {
+        vector<point_t> path_v;
+        for (size_t i = 0; i < py::len(path); ++i)
+            path_v.push_back(to_std_vector<double>(path[i]));
+        chain path_chain = p_snap->snap_path_to_dense_chain(path_v);
+        bool added = false;
+        for (size_t i = 0; i < hom_clusters.size() ; i++) {
+            if (hom_clusters[i].size() > 0) try {
+                    chain b_chain =
+                        coeff_flow_embedded(*s_comp, chains[hom_clusters[i][0]] - path_chain);
+                    hom_clusters[i].push_back(paths.size());
+                    gen_chains[i].push_back(b_chain);
+                    added = true;
+                    break;
+                } catch (no_bounding_chain& e) {
+                }
+        }
+        if (!added) hom_clusters.push_back({paths.size()});
+        chains.push_back(path_chain);
+        paths.push_back(path_v);
+    };
 
     /*
     path_clusterer(const py::object& points,  //
@@ -241,8 +255,12 @@ class path_clusterer {
 };
 
 BOOST_PYTHON_MODULE(gsimp) {
-    py::class_<vector<py::list>>("vector_l")                  //
+    py::class_<vector<py::list>>("vector_l")                 //
         .def(py::vector_indexing_suite<vector<py::list>>())  //
+        ;
+
+    py::class_<vector<py::object>>("vector_o")                 //
+        .def(py::vector_indexing_suite<vector<py::object>>())  //
         ;
 
     py::class_<point_t>("vector_d")                        //
@@ -285,13 +303,14 @@ BOOST_PYTHON_MODULE(gsimp) {
 
     py::class_<path_clusterer>(                                        //
         "clusterer",                                                   //
-        py::init<py::object, py::object, py::object>())                //
-        .def(py::init<py::object, py::object, py::object>())           //
+        py::init<py::object, py::object>())                            //
+        .def(py::init<py::object, py::object>())                       //
         .def("homology_clusters", &path_clusterer::homology_clusters)  //
         .def("generating_chains", &path_clusterer::generating_chains)  //
         .def("get_chain", &path_clusterer::get_chain)                  //
         .def("get_g_chain", &path_clusterer::get_g_chain)              //
         .def("total_g_chains", &path_clusterer::total_g_chains)        //
+        .def("add_path", &path_clusterer::add_path)                    //
         .def("quotient", &path_clusterer::make_quotient_aux)           //
         ;
 }
