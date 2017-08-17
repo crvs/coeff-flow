@@ -42,7 +42,7 @@ This will output two `ply` files which contain a copy of the mesh `bunzipper.ply
 
 ### References/links
 
-[1]: Carvalho JF, Vejdemo-Johansson M, Kragic D, Pokorny FT. _An algorithm for calculating top-dimensional bounding chains._ [PeerJ Preprints 5:e3151v1](https://doi.org/10.7287/peerj.preprints.3151v1)
+[1]: Carvalho JF, Vejdemo-Johansson M, Kragic D, Pokorny FT. _An algorithm for calculating top-dimensional bounding chains._ 2017 [PeerJ Preprints 5:e3151v1](https://doi.org/10.7287/peerj.preprints.3151v1)
 
 [2]: The Stanford 3D Scanning Repository https://graphics.stanford.edu/data/3Dscanrep/#bunny
 
