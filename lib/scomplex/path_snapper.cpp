@@ -161,8 +161,10 @@ chain path_snapper::index_sequence_to_dense_chain(std::vector<size_t> ind_path) 
     auto it = ind_path.begin();
     chain rep = p_impl->s_comp->new_dense_chain(1);
     for (; std::next(it) != ind_path.end(); ++it) {
-        auto ind = p_impl->s_comp->cell_to_index({*it, *std::next(it)});
-        rep[ind] += (*it < *std::next(it)) ? 1 : -1;
+        if ( *it != *std::next(it) ) {
+            auto ind = p_impl->s_comp->cell_to_index({*it, *std::next(it)});
+            rep[ind] += (*it < *std::next(it)) ? 1 : -1;
+        }
     }
     return rep;
 }

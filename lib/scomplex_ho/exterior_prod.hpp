@@ -52,8 +52,8 @@ class ext_vector {
             int k = l_1.back();
             l_1.pop_back();
             auto merge = index_merge(k, l_2);
-            j *= get<0>(merge);
-            l_2 = get<1>(merge);
+            j *= std::get<0>(merge);
+            l_2 = std::get<1>(merge);
         }
 
         pair<int, vector<int>> ret_val(j, l_2);
@@ -95,15 +95,15 @@ class ext_vector {
         string str;
         for (auto el : index_map) {
             str += '[';
-            for (auto i : el.first) str += to_string(i) + ' ';
-            str += "\b]:" + to_string(el.second) + ' ';
+            for (auto i : el.first) str += std::to_string(i) + ' ';
+            str += "\b]:" + std::to_string(el.second) + ' ';
         }
         str += '\n';
         return str;
     }
 
     int algebraic_dimension() { return algebraic_dim; }
-    int dimension() {return dim;}
+    int dimension() { return dim; }
 
     /* TODO
      * poincare dual

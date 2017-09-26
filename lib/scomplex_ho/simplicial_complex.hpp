@@ -171,6 +171,7 @@ struct simplicial_complex::impl {
          const std::vector<cell_t>& arg_tris)
         : points(arg_points) {
         // create the simplex tree
+        has_hasse=false;
         for (auto tri : arg_tris) {
             // removed deduping to try to make this a bit faster
             // ... it did cut time down about 10%, so ...
@@ -199,7 +200,7 @@ struct simplicial_complex::impl {
         for (int i = levels.size(); i <= 0; --i) levels[i].reset();
     };
 
-    size_t get_level_size(int level) { return levels[level]->size(); }
+    size_t get_level_size(int level) { return level<levels.size() ? levels[level]->size() : 0; }
 
     // calculate the index of s_1 in the boundary of s_2
     int boundary_index(simp_handle s_1, simp_handle s_2) {
@@ -420,7 +421,6 @@ std::vector<size_t> simplicial_complex::get_cofaces_index(int d, size_t face) {
     // codimension 1 faces
     if (!p_impl->has_hasse) {
         calculate_hasse();
-        p_impl->has_hasse = true;
     }
     auto s_cofaces = p_impl->incidence.get_coface_i(d, face);
     return s_cofaces;
@@ -429,7 +429,6 @@ std::vector<size_t> simplicial_complex::get_cofaces_index(int d, size_t face) {
 std::vector<cell_t> simplicial_complex::get_cofaces(cell_t face) {
     if (!p_impl->has_hasse) {
         calculate_hasse();
-        p_impl->has_hasse = true;
     }
     std::vector<cell_t> s_cofaces;
     auto face_i = cell_to_index(face);
@@ -461,7 +460,7 @@ chain simplicial_complex::new_sparse_chain(int d) {
     return chain(d, v);
 }
 
-chain simplicial_complex::new_chain(int d) { return new_sparse_chain(d); }
+chain simplicial_complex::new_chain(int d) { return new_dense_chain(d); }
 
 void simplicial_complex::calculate_hasse() {
     p_impl->has_hasse = true;

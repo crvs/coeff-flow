@@ -23,6 +23,8 @@ class chain {
     vector<double> vd;
 
    public:
+    chain() {}
+
     chain(int d, vector<double> vec) {
         dim = d;
         type = VECTOR;

@@ -39,8 +39,8 @@ find_package(Eigen3 3.1.2 REQUIRED QUIET)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 find_package(CGAL REQUIRED QUIET)
-# message(STATUS "CGAL version: ${CGAL_VERSION}")
-# message(STATUS "CGAL directory: ${CGAL_INCLUDE_DIRS}")
+message(STATUS "CGAL version: ${CGAL_VERSION}")
+message(STATUS "CGAL directory: ${CGAL_INCLUDE_DIRS}")
 
 find_package(yaml-cpp REQUIRED QUIET)
 # message(STATUS "yaml-cpp version: ${YAML_CPP_VERSION}")
@@ -69,8 +69,8 @@ set(CMAKE_NM      "/usr/bin/llvm-nm")
 set(CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
 set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
-set(CMAKE_BUILD_TYPE Release)
-#set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Release)
 
 include_directories("./lib") # where all the library files are
 
@@ -83,8 +83,8 @@ target_link_libraries(pathsnap scomplex ${CGAL_LIBRARY})
 add_executable(qhull2ply "src/make_mesh.cpp")
 
 # set_source_files_properties("lib/src/path_snapper.cpp" PROPERTIES COMPILE_FLAGS -DNDEBUG)
-# add_executable(yamltest "src/testing_facility.cpp")
-# target_link_libraries(yamltest yaml-cpp scomplex pathsnap ${PCL_LIBRARIES})
+add_executable(yamltest "src/testing_facility.cpp")
+target_link_libraries(yamltest yaml-cpp scomplex pathsnap ${PCL_LIBRARIES})
 
 # message(INFO ${CMAKE_CURRENT_SOURCE_DIR})
 # message(INFO ${CMAKE_CURRENT_BINARY_DIR})
@@ -109,6 +109,7 @@ find_package(Boost REQUIRED COMPONENTS python)
 include_directories(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} "/usr/include/python2.7/")
 python_add_module(gsimp python/bindings.cpp)
 #set(LINK_LIBS quotient pathsnap )
-target_link_libraries(gsimp  "python2.7" "boost_python" ${PYTHON_LIBRARIES} ${CGAL_LIBRARIES} ${Boost_LIBRARIES})
+#target_compile_options(gsimp PRIVATE -E)
+target_link_libraries(gsimp  "python2.7" "boost_python" ${PYTHON_LIBRARIES} ${CGAL_LIBRARIES} ${CGAL_CORE} ${Boost_LIBRARIES})
 
 
