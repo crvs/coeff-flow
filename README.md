@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/78863905.svg)](https://zenodo.org/badge/latestdoi/78863905)
+
 # Coefficient Flow algorithm
 
 ## Introduction
