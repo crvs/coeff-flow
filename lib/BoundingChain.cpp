@@ -14,10 +14,9 @@
 
 namespace Gsimp {
 
-BoundingChain::~BoundingChain() {}
+BoundingChain::~BoundingChain() {} // all used pointer are smart
 
-BoundingChain::BoundingChain(std::shared_ptr< SimpComplex > sc) {
-    s_comp = sc;
+BoundingChain::BoundingChain(std::shared_ptr< SimpComplex > sc) : s_comp{sc} {
     populate_matrices();
 }
 
