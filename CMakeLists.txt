@@ -40,6 +40,10 @@ set(CMAKE_BUILD_TYPE DEBUG)
 
 include_directories("./lib") # where all the library files are
 
+# source available from
+# https://github.com/ddiakopoulos/tinyply
+add_library(tinyply SHARED "./lib/tinyply.cpp")
+
 add_library(scomplex SHARED "./lib/SimpComplex.cpp")
 
 add_library(pathsnap SHARED "./lib/path_snapper.cpp")
@@ -73,7 +77,7 @@ add_executable(chaintest "src/chaintest.cpp")
 add_executable(exttest "src/exttest.cpp")
 
 add_executable(yamltest "src/testing_facility.cpp")
-target_link_libraries(yamltest yaml-cpp scomplex boundchain pathsnap ${PCL_LIBRARIES})
+target_link_libraries(yamltest yaml-cpp scomplex boundchain pathsnap tinyply)
 
 include_directories(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} "/usr/include/python2.7/")
 add_library(gsimp SHARED python/bindings.cpp)
