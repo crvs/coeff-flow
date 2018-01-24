@@ -1,4 +1,4 @@
-
+[![DOI](https://zenodo.org/badge/78863905.svg)](https://zenodo.org/badge/latestdoi/78863905)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 # Coefficient Flow algorithm
