@@ -98,3 +98,17 @@ add_custom_target(timing_test
     COMMAND "cp" "${CMAKE_CURRENT_SOURCE_DIR}/test/dumbexample.yaml" "${CMAKE_CURRENT_BINARY_DIR}"
     COMMAND "${CMAKE_CURRENT_BINARY_DIR}/run_dumb_tests.sh" "1"
     DEPENDS yamltest qhull2ply "test/run_dumb_tests.sh" "test/dumbexample.yaml")
+
+
+
+
+
+find_package( PythonLibs 2.7 REQUIRED)
+include_directories(${PYTHON_INCLUDE_DIRS})
+
+add_library(coeffflow SHARED "python/bindings.cpp")
+target_link_libraries(coeffflow ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} scomplex yaml-cpp scomplex pathsnap ${PCL_LIBRARIES})
+
+
+
+
