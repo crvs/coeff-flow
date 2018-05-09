@@ -3,34 +3,34 @@
 
 #include <iterator>  // for debuging purposes
 
-#include <gudhi/Simplex_tree.h>
 #include <gudhi/Hasse_complex.h>
-#include <Eigen/Sparse>
+#include <gudhi/Simplex_tree.h>
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 
-#include <tuple>
-#include <memory>  // smart pointers
-#include <functional>
 #include <cmath>
+#include <functional>
+#include <memory>  // smart pointers
+#include <tuple>
 
 #include <iostream>
 namespace gsimp {
 
 // hasse diagram structures
 struct hasse_node {
-    std::pair<int, size_t> handle;
-    std::vector<std::shared_ptr<hasse_node>> cofaces;
+    std::pair< int, size_t > handle;
+    std::vector< std::shared_ptr< hasse_node > > cofaces;
 
-    hasse_node(std::pair<int, size_t> _handle) { handle = _handle; }
+    hasse_node(std::pair< int, size_t > _handle) { handle = _handle; }
 
-    void add_coface(std::shared_ptr<hasse_node>& node) {
+    void add_coface(std::shared_ptr< hasse_node >& node) {
         cofaces.push_back(node);
     }
 };
 
 struct hasse_diag {
-    std::vector<std::vector<std::shared_ptr<hasse_node>>> cells;
-    std::vector<std::vector<bool>> cells_c;
+    std::vector< std::vector< std::shared_ptr< hasse_node > > > cells;
+    std::vector< std::vector< bool > > cells_c;
 
     hasse_diag(){};
 
@@ -38,24 +38,24 @@ struct hasse_diag {
         // vector of dimension d
         for (int d = 0; d <= s_comp.dimension(); d++) {
             size_t lv_s = s_comp.get_level_size(d);
-            std::vector<std::shared_ptr<hasse_node>> lv(lv_s);
+            std::vector< std::shared_ptr< hasse_node > > lv(lv_s);
             cells.push_back(lv);
 
-            std::vector<bool> c(lv_s, false);
+            std::vector< bool > c(lv_s, false);
             cells_c.push_back(c);
         }
 
         for (int d = s_comp.dimension(); d > 0; d--) {
             for (size_t face_i = 0; face_i < s_comp.get_level_size(d);
                  face_i++) {
-                std::shared_ptr<hasse_node> face_ptr =
+                std::shared_ptr< hasse_node > face_ptr =
                     get_face(d, face_i, true);
 
-                std::vector<std::pair<int, size_t>> faces =
+                std::vector< std::pair< int, size_t > > faces =
                     s_comp.get_bdry_and_ind_index(d, face_i);
                 for (auto b_face_i : faces) {
-                    size_t b_face = std::get<1>(b_face_i);
-                    std::shared_ptr<hasse_node> b_face_ptr =
+                    size_t b_face = std::get< 1 >(b_face_i);
+                    std::shared_ptr< hasse_node > b_face_ptr =
                         get_face(d - 1, b_face, true);
                     b_face_ptr->add_coface(face_ptr);
                 }
@@ -65,25 +65,26 @@ struct hasse_diag {
         cells_c.clear();
     }
 
-    std::shared_ptr<hasse_node> get_face(int d, size_t face_i,
-                                         bool building = false) {
-        std::shared_ptr<hasse_node> face;
+    std::shared_ptr< hasse_node > get_face(int d, size_t face_i,
+                                           bool building = false) {
+        std::shared_ptr< hasse_node > face;
         if (building && cells_c[d][face_i])
             face = cells[d][face_i];
         else {
             if (building) cells_c[d][face_i] = true;
 
-            cells[d][face_i] = std::shared_ptr<hasse_node>(
-                new hasse_node(std::pair<int, size_t>(d, face_i)));
+            cells[d][face_i] = std::shared_ptr< hasse_node >(
+                new hasse_node(std::pair< int, size_t >(d, face_i)));
             face = cells[d][face_i];
         }
         return face;
     }
 
-    std::vector<size_t> get_coface_i(int d, size_t face_i) {
+    std::vector< size_t > get_coface_i(int d, size_t face_i) {
         auto node = cells[d][face_i];
-        std::vector<size_t> cofaces;
-        for (auto v : node->cofaces) cofaces.push_back(std::get<1>(v->handle));
+        std::vector< size_t > cofaces;
+        for (auto v : node->cofaces)
+            cofaces.push_back(std::get< 1 >(v->handle));
         return cofaces;
     }
 };
@@ -94,22 +95,21 @@ struct simplicial_complex::impl {
         typedef size_t Vertex_handle;
     };
 
-    typedef Gudhi::Simplex_tree<SimpleOptions> simp_tree;
-    typedef Gudhi::Simplex_tree<SimpleOptions>::Simplex_handle simp_handle;
-    typedef std::vector<simp_handle*> level_t;
-    typedef std::vector<std::unique_ptr<level_t>> levels_t;
+    typedef Gudhi::Simplex_tree< SimpleOptions > simp_tree;
+    typedef Gudhi::Simplex_tree< SimpleOptions >::Simplex_handle simp_handle;
+    typedef std::vector< simp_handle* > level_t;
+    typedef std::vector< std::unique_ptr< level_t > > levels_t;
 
     // member variables
-    std::vector<point_t> points;
+    std::vector< point_t > points;
     simp_tree simplices;
-    std::vector<matrix_t> boundary_matrices;
+    std::vector< matrix_t > boundary_matrices;
     levels_t levels;
 
     bool has_hasse;
     hasse_diag incidence;
 
-
-    impl(std::vector<point_t>& arg_points, std::vector<cell_t>& arg_tris)
+    impl(std::vector< point_t >& arg_points, std::vector< cell_t >& arg_tris)
         : points(arg_points) {
         // create the simplex tree
         for (auto tri : arg_tris) {
@@ -121,10 +121,10 @@ struct simplicial_complex::impl {
         }
 
         // assign a key to each simplex in each level
-        std::vector<size_t> count(simplices.dimension() + 1, 0);
+        std::vector< size_t > count(simplices.dimension() + 1, 0);
         for (int i = 0; i < simplices.dimension() + 1; ++i) {
             level_t* level = new level_t();
-            levels.push_back(std::unique_ptr<level_t>(level));
+            levels.push_back(std::unique_ptr< level_t >(level));
         }
 
         auto simplex_range = simplices.complex_simplex_range();
@@ -164,9 +164,9 @@ struct simplicial_complex::impl {
         return pow(-1, orient);
     }
 
-    std::vector<size_t> dedupe_vec(std::vector<size_t>& vec) {
-        std::set<size_t> no_reps;
-        std::vector<size_t> no_reps_list;
+    std::vector< size_t > dedupe_vec(std::vector< size_t >& vec) {
+        std::set< size_t > no_reps;
+        std::vector< size_t > no_reps_list;
         for (size_t el : vec) {
             no_reps.insert(el);
         }
@@ -177,7 +177,7 @@ struct simplicial_complex::impl {
     }
 
     void calculate_matrices() {
-        boundary_matrices = std::vector<matrix_t>();
+        boundary_matrices = std::vector< matrix_t >();
         for (int k = 0; k < simplices.dimension(); k++) {
             boundary_matrices.push_back(
                 matrix_t(get_level_size(k), get_level_size(k + 1)));
@@ -192,8 +192,8 @@ struct simplicial_complex::impl {
         }
     }
 
-    std::vector<cell_t> get_level(int level) {
-        std::vector<cell_t> level_cells;
+    std::vector< cell_t > get_level(int level) {
+        std::vector< cell_t > level_cells;
         for (auto simp : *levels[level]) {
             cell_t v_simp;
             for (auto v : simplices.simplex_vertex_range(*simp)) {
@@ -223,45 +223,45 @@ struct simplicial_complex::impl {
 
 };  // struct impl
 
-std::vector<std::pair<int, cell_t>> simplicial_complex::get_bdry_and_ind(
+std::vector< std::pair< int, cell_t > > simplicial_complex::get_bdry_and_ind(
     cell_t cell) {
     impl::simp_handle simp = p_impl->cell_to_handle(cell);
     auto c_boundary = p_impl->simplices.boundary_simplex_range(simp);
-    std::vector<std::pair<int, cell_t>> boundary_and_indices;
+    std::vector< std::pair< int, cell_t > > boundary_and_indices;
     for (auto face : c_boundary)
         boundary_and_indices.push_back(              //
-            std::make_pair<int, cell_t>(             //
+            std::make_pair< int, cell_t >(           //
                 p_impl->boundary_index(face, simp),  //
                 p_impl->handle_to_cell(face)));      //
     return boundary_and_indices;
 };
 
-std::vector<std::pair<int, size_t>> simplicial_complex::get_bdry_and_ind_index(
-    int d, size_t cell) {
+std::vector< std::pair< int, size_t > >
+simplicial_complex::get_bdry_and_ind_index(int d, size_t cell) {
     impl::simp_handle simp = p_impl->index_to_handle(d, cell);
     auto c_boundary = p_impl->simplices.boundary_simplex_range(simp);
-    std::vector<std::pair<int, size_t>> boundary_and_indices;
+    std::vector< std::pair< int, size_t > > boundary_and_indices;
     for (auto face : c_boundary)
         boundary_and_indices.push_back(              //
-            std::make_pair<int, size_t>(             //
+            std::make_pair< int, size_t >(           //
                 p_impl->boundary_index(face, simp),  //
                 p_impl->handle_to_index(face)));     //
     return boundary_and_indices;
 };
 
-std::vector<size_t> simplicial_complex::cell_boundary_index(int d,
-                                                            size_t cell) {
+std::vector< size_t > simplicial_complex::cell_boundary_index(int d,
+                                                              size_t cell) {
     impl::simp_handle simp = p_impl->index_to_handle(d, cell);
     auto c_boundary = p_impl->simplices.boundary_simplex_range(simp);
-    std::vector<size_t> s_boundary;
+    std::vector< size_t > s_boundary;
     for (auto c : c_boundary) s_boundary.push_back(p_impl->handle_to_index(c));
     return s_boundary;
 }
 
-std::vector<cell_t> simplicial_complex::cell_boundary(cell_t cell) {
+std::vector< cell_t > simplicial_complex::cell_boundary(cell_t cell) {
     impl::simp_handle simp = p_impl->cell_to_handle(cell);
     auto c_boundary = p_impl->simplices.boundary_simplex_range(simp);
-    std::vector<cell_t> s_boundary;
+    std::vector< cell_t > s_boundary;
     for (auto c : c_boundary) s_boundary.push_back(p_impl->handle_to_cell(c));
     return s_boundary;
 }
@@ -278,9 +278,9 @@ int simplicial_complex::boundary_inclusion_index(int d1, size_t s1,    //
                                   p_impl->cell_to_handle(c2));
 };
 
-std::vector<std::pair<int, cell_t>> simplicial_complex::get_cof_and_ind(
+std::vector< std::pair< int, cell_t > > simplicial_complex::get_cof_and_ind(
     cell_t cell) {
-    std::vector<std::pair<int, cell_t>> c_cofaces;
+    std::vector< std::pair< int, cell_t > > c_cofaces;
     for (auto face : get_cofaces(cell))
         c_cofaces.push_back(                                   //
             std::make_pair(                                    //
@@ -288,9 +288,9 @@ std::vector<std::pair<int, cell_t>> simplicial_complex::get_cof_and_ind(
     return c_cofaces;
 }
 
-std::vector<std::pair<int, size_t>> simplicial_complex::get_cof_and_ind_index(
-    int d, size_t c) {
-    std::vector<std::pair<int, size_t>> c_cofaces;
+std::vector< std::pair< int, size_t > >
+simplicial_complex::get_cof_and_ind_index(int d, size_t c) {
+    std::vector< std::pair< int, size_t > > c_cofaces;
     for (auto face : get_cofaces_index(d, c))
         c_cofaces.push_back(                                          //
             std::make_pair(                                           //
@@ -302,9 +302,14 @@ int simplicial_complex::get_level_size(int level) {
     return p_impl->get_level_size(level);
 }
 
-simplicial_complex::simplicial_complex(std::vector<point_t>& arg_points,
-                                       std::vector<cell_t>& arg_tris) {
-    p_impl = std::shared_ptr<impl>(new impl(arg_points, arg_tris));
+simplicial_complex::simplicial_complex(std::vector< cell_t >& arg_tris) {
+    std::vector<point_t>points = {};
+    p_impl = std::shared_ptr< impl >(new impl(points, arg_tris));
+}
+
+simplicial_complex::simplicial_complex(std::vector< point_t >& arg_points,
+                                       std::vector< cell_t >& arg_tris) {
+    p_impl = std::shared_ptr< impl >(new impl(arg_points, arg_tris));
 }
 
 simplicial_complex::simplicial_complex(const simplicial_complex& other) {
@@ -319,13 +324,15 @@ simplicial_complex& simplicial_complex::operator=(
 
 simplicial_complex::~simplicial_complex() {}
 
-std::vector<point_t> simplicial_complex::get_points() { return p_impl->points; }
+std::vector< point_t > simplicial_complex::get_points() {
+    return p_impl->points;
+}
 
 point_t simplicial_complex::get_point(size_t index) {
     return p_impl->points[index];
 }
 
-std::vector<cell_t> simplicial_complex::get_level(int level) {
+std::vector< cell_t > simplicial_complex::get_level(int level) {
     return p_impl->get_level(level);
 }
 
@@ -352,7 +359,8 @@ size_t simplicial_complex::cell_to_index(cell_t simp) {
     return p_impl->simplices.key(sh);
 }
 
-std::vector<size_t> simplicial_complex::get_cofaces_index(int d, size_t face) {
+std::vector< size_t > simplicial_complex::get_cofaces_index(int d,
+                                                            size_t face) {
     // codimension 1 faces
     if (!p_impl->has_hasse) {
         calculate_hasse();
@@ -362,12 +370,12 @@ std::vector<size_t> simplicial_complex::get_cofaces_index(int d, size_t face) {
     return s_cofaces;
 }
 
-std::vector<cell_t> simplicial_complex::get_cofaces(cell_t face) {
+std::vector< cell_t > simplicial_complex::get_cofaces(cell_t face) {
     if (!p_impl->has_hasse) {
         calculate_hasse();
         p_impl->has_hasse = true;
     }
-    std::vector<cell_t> s_cofaces;
+    std::vector< cell_t > s_cofaces;
     auto face_i = cell_to_index(face);
     int d = face.size() - 1;
     // codimension 1 faces
@@ -380,9 +388,8 @@ std::vector<cell_t> simplicial_complex::get_cofaces(cell_t face) {
 }
 
 chain_v simplicial_complex::new_v_chain(int d) {
-    std::vector<double> v(get_level_size(d),0);
-    return chain_v(d,v);
-
+    std::vector< double > v(get_level_size(d), 0);
+    return chain_v(d, v);
 }
 chain_t simplicial_complex::new_chain(int d) {
     vector_t v(get_level_size(d));
@@ -393,4 +400,4 @@ void simplicial_complex::calculate_hasse() {
     p_impl->has_hasse = true;
     p_impl->incidence = hasse_diag(*this);
 }
-};
+};  // namespace gsimp

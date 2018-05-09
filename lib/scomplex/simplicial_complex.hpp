@@ -20,6 +20,7 @@ class simplicial_complex {
     void calculate_hasse();
 
     // constructor (no default)
+    simplicial_complex(std::vector<cell_t>&);
     simplicial_complex(std::vector<point_t>&, std::vector<cell_t>&);
     simplicial_complex(const simplicial_complex&);
     simplicial_complex& operator=(const simplicial_complex&);
