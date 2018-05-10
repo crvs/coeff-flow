@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 project(coefficient-flow CXX)
 
 # requirements:
@@ -29,9 +29,10 @@ project(coefficient-flow CXX)
 # rather strange, but it is a thing.
 #
 
-find_package(Boost REQUIRED QUIET)
-message(STATUS "Boost version: ${BOOST_VERSION}")
-message(STATUS "Boost directory: ${BOOST_INCLUDE_DIRS}")
+find_package(Boost COMPONENTS python3 REQUIRED QUIET)
+message(STATUS "Boost version: ${Boost_VERSION}")
+message(STATUS "Boost directory: ${Boost_INCLUDE_DIRS}")
+message(STATUS "boost libraries: ${Boost_LIBRARIES}")
 
 find_package(Eigen3 3.1.2 REQUIRED QUIET)
 message(STATUS "Eigen3 version: ${EIGEN3_VERSION}")
@@ -103,11 +104,14 @@ add_custom_target(timing_test
 
 
 
-find_package( PythonLibs 2.7 REQUIRED)
+find_package( PythonLibs 2 REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
+message(STATUS "python version: ${PYTHON_VERSION} ")
+message(STATUS "python dirs: ${PYTHON_INCLUDE_DIRS}")
+message(STATUS "python libs: ${PYTHON_LIBRARIES}")
 
 add_library(coeffflow SHARED "python/bindings.cpp")
-target_link_libraries(coeffflow ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} scomplex yaml-cpp scomplex pathsnap ${PCL_LIBRARIES})
+target_link_libraries(coeffflow ${PYTHON_LIBRARIES} ${Boost_LIBRARIES} scomplex yaml-cpp scomplex pathsnap ${PCL_LIBRARIES})
 
 
 
