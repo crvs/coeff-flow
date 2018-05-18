@@ -119,8 +119,8 @@ add_custom_target(timing_test
 find_package(pybind11 REQUIRED)
 add_library(coeffflow MODULE python/bindings.cpp)
 target_link_libraries(coeffflow PRIVATE scomplex pybind11::module)
-set_target_properties(coeffflow PROPERTIES SUFFIX .so)
-set_target_properties(coeffflow PROPERTIES PREFIX "")
+
+set_target_properties(coeffflow PROPERTIES PREFIX "" SUFFIX .so)
 
 #set_target_properties(coeffflow PROPERTIES SUFFIX .so)
 #set_target_properties(coeffflow PROPERTIES PREFIX "")
