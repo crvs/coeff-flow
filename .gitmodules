@@ -1,0 +1,3 @@
+[submodule "KDTree"]
+	path = KDTree
+	url = git@github.com:crvs/KDTree.git

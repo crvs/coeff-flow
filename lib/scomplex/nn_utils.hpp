@@ -2,16 +2,16 @@
 
 #include <scomplex/types.hpp>
 
-#include <vector>
-#include <iostream>
 #include <algorithm>
+#include <iostream>
+#include <tuple>
+#include <vector>
 
 #include <CGAL/Search_traits_d.h>
 #include <CGAL/Search_traits_adapter.h>
 #include <CGAL/Cartesian_d.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
 
-#include <boost/tuple/tuple.hpp>
 
 namespace gsimp {
 
@@ -32,10 +32,10 @@ typedef CGAL::Cartesian_d<double>::Point_d point_d;
 typedef CGAL::Search_traits_d<CGAL::Cartesian_d<double>> cartesian_traits;
 
 typedef CGAL::Search_traits_adapter<     // define the search tratis
-    boost::tuple<point_d, size_t>,       // pairing d-point with its index
+    std::tuple<point_d, size_t>,       // pairing d-point with its index
     CGAL::Nth_of_tuple_property_map<     // custom kernel
         0,                               // position of the points to compare
-        boost::tuple<point_d, size_t>>,  // type tha will be used
+        std::tuple<point_d, size_t>>,  // type tha will be used
     cartesian_traits>                    // traits to use
     traits;                              // name
 
@@ -49,7 +49,7 @@ void make_tree(tree_t& tree, std::vector<point_t>& point_list) {
     size_t ind = 0;
     for (auto pt : point_list){
         point_d pt_d(pt.size(), pt.begin(), pt.end());
-        tree.insert(boost::make_tuple(pt_d, ind));
+        tree.insert(std::make_tuple(pt_d, ind));
         ++ind;
     }
 }
@@ -61,7 +61,7 @@ point_t nearest_neighbor(tree_t& tree, point_t point) {
     neighbor_search_t search(tree, pt, 1);
     point_d result_pt;
     size_t ind;
-    boost::tie<point_d, size_t>(result_pt, ind) = search.begin()->first;
+    std::tie<point_d, size_t>(result_pt, ind) = search.begin()->first;
     point_t point_vec(result_pt.cartesian_begin(), result_pt.cartesian_end());
     return point_vec;
 }
@@ -81,7 +81,7 @@ size_t nearest_neighbor_index(tree_t& tree, point_t point) {
     neighbor_search_t search(tree, pt, 1);
     point_d result_pt;
     size_t ind;
-    boost::tie<point_d, size_t>(result_pt, ind) = search.begin()->first;
+    std::tie<point_d, size_t>(result_pt, ind) = search.begin()->first;
     return ind;
 }
 
