@@ -26,15 +26,14 @@ struct path_snapper::impl {
     };
 
     impl(simplicial_complex& sc) {
-        s_comp.reset(new simplicial_complex(sc));
+        s_comp = std::make_shared< simplicial_complex >(sc);
         auto points = s_comp->get_points();
         point_tree = KDTree(points);
         vertex_graph = calculate_one_skelleton_graph(*s_comp);
     }
 
     impl(std::vector< point_t >& pts, std::vector< cell_t >& cells) {
-        s_comp = std::shared_ptr< simplicial_complex >(
-            new simplicial_complex(pts, cells));
+        s_comp = std::make_shared< simplicial_complex >(pts, cells);
         point_tree = KDTree(pts);
         vertex_graph = calculate_one_skelleton_graph(*s_comp);
     }
@@ -83,16 +82,16 @@ struct path_snapper::impl {
 };
 
 path_snapper::path_snapper(std::shared_ptr< simplicial_complex > sc) {
-    p_impl = std::shared_ptr< impl >(new impl(sc));
+    p_impl = std::make_shared< impl >(sc);
 };
 
 path_snapper::path_snapper(simplicial_complex& sc) {
-    p_impl = std::shared_ptr< impl >(new impl(sc));
+    p_impl = std::make_shared< impl >(sc);
 }
 
 path_snapper::path_snapper(std::vector< point_t >& pts,
                            std::vector< cell_t >& cells) {
-    p_impl = std::shared_ptr< impl >(new impl(pts, cells));
+    p_impl = std::make_shared< impl >(pts, cells);
 }
 
 path_snapper::~path_snapper() {}
