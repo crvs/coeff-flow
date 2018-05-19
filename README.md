@@ -14,7 +14,6 @@ In order to compile this repository you will need the following packages:
 - `clang (v == 3.8)`
 - `Eigen (v == 3.3.2)`
 - `Boost (v >= 1.54.0)`
-- `CGAL  (v >= 4.9.1)`
 - `Gudhi (v >= 1.3.1)`
 - `pcl   (v >= 1.8.0)`
 - `libyaml`
