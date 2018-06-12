@@ -26,7 +26,7 @@ project(coefficient-flow CXX)
 # rather strange, but it is a thing.
 #
 
-# TODO remove CGAL
+# TODO remove
 add_subdirectory(KDTree)
 
 # TOD remove PCL
@@ -81,7 +81,11 @@ set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
 set(CMAKE_BUILD_TYPE Release)
 
-include_directories("./lib") # where all the library files are
+include_directories(
+    "./lib" # where all the library files are
+    "KDTree" # for the KDTree library
+    )
+
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
 add_library(pathsnap SHARED "./lib/scomplex/path_snapper.cpp")

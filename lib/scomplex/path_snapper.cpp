@@ -7,7 +7,7 @@
 #include "scomplex/simplicial_complex.hpp"
 #include "scomplex/types.hpp"
 
-#include "KDTree/KDTree.hpp"
+#include "KDTree.hpp"
 
 namespace gsimp {
 
@@ -154,7 +154,7 @@ std::vector< size_t > path_snapper::point_sequence_to_index(
     std::vector< point_t > pt_path) {
     std::vector< size_t > ind_path;
     for (point_t pt : pt_path) {
-        ind_path.push_back(p_impl->point_tree.nearest(pt));
+        ind_path.push_back(p_impl->point_tree.nearest_index(pt));
     }
     return ind_path;
 }
