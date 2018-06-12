@@ -73,8 +73,8 @@ struct hasse_diag {
         else {
             if (building) cells_c[d][face_i] = true;
 
-            cells[d][face_i] = std::shared_ptr< hasse_node >(
-                new hasse_node(std::pair< int, size_t >(d, face_i)));
+            cells[d][face_i] = std::make_shared< hasse_node >(
+                std::pair< int, size_t >(d, face_i));
             face = cells[d][face_i];
         }
         return face;
@@ -303,13 +303,13 @@ int simplicial_complex::get_level_size(int level) {
 }
 
 simplicial_complex::simplicial_complex(std::vector< cell_t >& arg_tris) {
-    std::vector<point_t>points = {};
-    p_impl = std::shared_ptr< impl >(new impl(points, arg_tris));
+    std::vector< point_t > points = {};
+    p_impl = std::make_shared< impl >(points, arg_tris);
 }
 
 simplicial_complex::simplicial_complex(std::vector< point_t >& arg_points,
                                        std::vector< cell_t >& arg_tris) {
-    p_impl = std::shared_ptr< impl >(new impl(arg_points, arg_tris));
+    p_impl = std::make_shared< impl >(arg_points, arg_tris);
 }
 
 simplicial_complex::simplicial_complex(const simplicial_complex& other) {

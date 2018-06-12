@@ -5,18 +5,15 @@ project(coefficient-flow CXX)
 #   * Gudhi under /usr/include/gudhi
 #   * Eigen3 under /usr/include/eigen3
 #   * boost under /usr/include/boost
-#   * CGAL under /usr/include/CGAL
 #   * libyaml under /usr/local/include/libyaml
 #   * pcl 1.8 under /usr/include/pcl-1.8
 #
 
-# in case Eigen, and/or CGAL, and/or GUDHI are not found by find_package
+# in case Eigen, and/or GUDHI are not found by find_package
 # try setting the paths to them manually
 #
 # set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen3")
 # include_directories(${EIGEN3_INCLUDE_DIR})
-# set(CGAL_INCLUDE_DIR "/usr/local/include/eigen3")
-# include_directories(${CGAL_INCLUDE_DIR})
 #
 
 # GUDHI version should be 1.3 or higher, provided they don't break the
@@ -45,10 +42,6 @@ find_package(Eigen3 3.1.2 REQUIRED QUIET)
 message(STATUS "Eigen3 version: ${EIGEN3_VERSION}")
 message(STATUS "Eigen3 directory: ${EIGEN3_INCLUDE_DIR}")
 include_directories(${EIGEN3_INCLUDE_DIR})
-
-find_package(CGAL REQUIRED QUIET)
-message(STATUS "CGAL version: ${CGAL_VERSION}")
-message(STATUS "CGAL directory: ${CGAL_INCLUDE_DIRS}")
 
 find_package(yaml-cpp REQUIRED QUIET)
 message(STATUS "yaml-cpp version: ${YAML_CPP_VERSION}")
@@ -92,6 +85,7 @@ include_directories("./lib") # where all the library files are
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
 add_library(pathsnap SHARED "./lib/scomplex/path_snapper.cpp")
+target_link_libraries(pathsnap KDTree)
 
 add_executable(qhull2ply "src/make_mesh.cpp")
 
