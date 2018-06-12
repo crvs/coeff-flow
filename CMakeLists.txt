@@ -29,6 +29,13 @@ project(coefficient-flow CXX)
 # rather strange, but it is a thing.
 #
 
+# TODO remove CGAL
+add_subdirectory(KDTree)
+
+# TOD remove PCL
+add_subdirectory(tinyobjloader)
+add_subdirectory(tinyply)
+
 find_package(Boost REQUIRED)
 message(STATUS "Boost version: ${Boost_VERSION}")
 message(STATUS "Boost directory: ${Boost_INCLUDE_DIRS}")

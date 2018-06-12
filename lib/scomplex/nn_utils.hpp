@@ -3,9 +3,9 @@
 #include <scomplex/types.hpp>
 
 #include <algorithm>
+#include <vector>
 #include <iostream>
 #include <tuple>
-#include <vector>
 
 #include <CGAL/Search_traits_d.h>
 #include <CGAL/Search_traits_adapter.h>
