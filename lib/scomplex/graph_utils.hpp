@@ -110,7 +110,7 @@ std::vector<vertex_t> shortest_path(graph_t& g, vertex_t s, vertex_t t) {
 
 std::vector<vertex_t> complete_path(graph_t& g,
                                     std::vector<vertex_t> vec) {
-    std::vector<vertex_t>::iterator s{vec.begin()};
+    std::vector<vertex_t>::iterator s = vec.begin();
     std::vector<vertex_t>::iterator t = std::next(s);
 
     // start calculatinng the full path

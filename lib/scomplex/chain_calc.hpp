@@ -41,13 +41,13 @@ bounding_chain::bounding_chain(std::shared_ptr<simplicial_complex> sc) {
 }
 
 bounding_chain::bounding_chain(simplicial_complex& sc) {
-    s_comp.reset(new simplicial_complex(sc));
+    s_comp = std::make_shared<simplicial_complex>(sc);
     populate_matrices();
 }
 
 bounding_chain::bounding_chain(std::vector<point_t>& points,
                                std::vector<cell_t>& tris) {
-    s_comp.reset(new simplicial_complex(points, tris));
+    s_comp = std::make_shared<simplicial_complex>(points,tris);
     populate_matrices();
 }
 
