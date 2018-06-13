@@ -32,6 +32,8 @@ add_subdirectory(KDTree)
 # TOD remove PCL
 add_subdirectory(tinyobjloader)
 add_subdirectory(tinyply)
+# find_package(tinyply REQUIRED HINTS "./tinyply/cmake")
+include_directories("./tinyply/source/")
 
 find_package(Boost REQUIRED)
 message(STATUS "Boost version: ${Boost_VERSION}")
@@ -94,7 +96,7 @@ target_link_libraries(pathsnap KDTree)
 add_executable(qhull2ply "src/make_mesh.cpp")
 
 add_executable(yamltest "src/testing_facility.cpp")
-target_link_libraries(yamltest yaml-cpp scomplex pathsnap ${PCL_LIBRARIES})
+target_link_libraries(yamltest yaml-cpp scomplex pathsnap tinyply ${PCL_LIBRARIES})
 
 message(INFO ${CMAKE_CURRENT_SOURCE_DIR})
 message(INFO ${CMAKE_CURRENT_BINARY_DIR})

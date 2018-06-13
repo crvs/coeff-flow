@@ -1,5 +1,4 @@
 #include <pcl/io/obj_io.h>
-#include <pcl/io/ply_io.h>
 
 #include <iostream>
 #include <vector>
@@ -8,13 +7,15 @@
 #include <fstream>
 
 #include <algorithm>
-#include <scomplex/chain_calc.hpp>
-#include <scomplex/coeff_flow.hpp>
-#include <scomplex/path_snapper.hpp>
-#include <scomplex/plywriter.hpp>
-#include <scomplex/qhull_parsing.hpp>
-#include <scomplex/simplicial_complex.hpp>
-#include <scomplex/types.hpp>
+#include "scomplex/chain_calc.hpp"
+#include "scomplex/coeff_flow.hpp"
+#include "scomplex/path_snapper.hpp"
+#include "scomplex/plywriter.hpp"
+#include "scomplex/qhull_parsing.hpp"
+#include "scomplex/simplicial_complex.hpp"
+#include "scomplex/types.hpp"
+
+#include "tinyply.h"
 
 #include <time.h>
 
@@ -46,10 +47,11 @@ int main(int argc, char* argv[]) {
         in_plane = input["single_cycle_test"]["in_plane"].as< bool >();
 
         size_t null_face;
-        if (!in_plane)
+        if (!in_plane) {
             null_face = input["single_cycle_test"]["null_face"].as< size_t >();
-        else
+        } else {
             null_face = 0;
+        }
         if (input["single_cycle_test"]["cycle_index_points"]) {
             cycle_index_points =
                 input["single_cycle_test"]["cycle_index_points"]
@@ -91,6 +93,27 @@ void call_single_cycle_test(std::string complex_file,
     call_single_cycle_test(complex_file, cycle_indices, {}, null_face, false);
 }
 
+template <typename T>
+struct vec3 {
+    T x, y, z;
+
+    std::vector<double> point() {
+        std::vector< double > vec_;
+        vec_.push_back(double(x));
+        vec_.push_back(double(y));
+        vec_.push_back(double(z));
+        return vec_;
+    }
+
+    std::vector<size_t> simp() {
+        std::vector< size_t > vec_;
+        vec_.push_back(size_t(x));
+        vec_.push_back(size_t(y));
+        vec_.push_back(size_t(z));
+        return vec_;
+    }
+};
+
 //
 // mother of all single_cycle_tests
 //
@@ -116,34 +139,66 @@ void call_single_cycle_test(std::string complex_file,
 
     clock_t t0, t1;
     t0 = clock();
-    // PCL shenanigans
-
-    pcl::PolygonMesh::Ptr mesh(new pcl::PolygonMesh{});
 
     std::ifstream file(complex_file);
+
     std::string meshtype;
     std::getline(file, meshtype);
+
+
     if (meshtype == "ply") {
-        pcl::PLYReader Reader;
-        Reader.read(complex_file, *mesh);
+        tinyply::PlyFile plyMeshFile;
+        plyMeshFile.parse_header(file);
+
+        std::shared_ptr< tinyply::PlyData > vertices, faces;
+        try {
+            vertices = plyMeshFile.request_properties_from_element(
+                "vertex", {"x", "y", "z"});
+            faces = plyMeshFile.request_properties_from_element(
+                "face", {"vertex_indices"});
+        } catch (const std::exception& e) {
+            std::cerr << "tinyply exception: " << e.what() << std::endl;
+        }
+
+        plyMeshFile.read(file);
+
+        {
+            const size_t numVerticesBytes = vertices->buffer.size_bytes();
+            std::vector<vec3<float>> verts(vertices->count);
+            std::memcpy(verts.data(), vertices->buffer.get() , numVerticesBytes);
+            for (vec3<float> v : verts){
+                points_v.push_back(v.point());
+            }
+        }
+
+        {
+            const size_t numFacesBytes = faces->buffer.size_bytes();
+            std::vector<vec3<uint32_t>> faces_(faces->count);
+            std::memcpy(faces_.data(), faces->buffer.get() , numFacesBytes);
+            for (vec3<uint32_t> f : faces_){
+                cells_v.push_back(f.simp());
+            }
+        }
+
     } else {
+        // PCL shenanigans
+        pcl::PolygonMesh::Ptr mesh(new pcl::PolygonMesh{});
         pcl::OBJReader Reader;
         Reader.read(complex_file, *mesh);
+
+        pcl::PointCloud< pcl::PointXYZ >::Ptr cloud(
+            new pcl::PointCloud< pcl::PointXYZ >{});
+        pcl::fromPCLPointCloud2(mesh->cloud, *cloud);
+
+        for (auto poly : mesh->polygons) {
+            cells_v.push_back(
+                {poly.vertices[0], poly.vertices[1], poly.vertices[2]});
+        }
+
+        for (auto pt : cloud->points) {
+            points_v.push_back({pt.x, pt.y, pt.z});
+        }
     }
-
-    pcl::PointCloud< pcl::PointXYZ >::Ptr cloud(
-        new pcl::PointCloud< pcl::PointXYZ >{});
-    pcl::fromPCLPointCloud2(mesh->cloud, *cloud);
-
-    for (auto poly : mesh->polygons) {
-        cells_v.push_back(
-            {poly.vertices[0], poly.vertices[1], poly.vertices[2]});
-    }
-
-    for (auto pt : cloud->points) {
-        points_v.push_back({pt.x, pt.y, pt.z});
-    }
-
     // end PCL shenanigans
     t1 = clock();
     std::cout << "mesh has " << points_v.size() << " vertices and "
