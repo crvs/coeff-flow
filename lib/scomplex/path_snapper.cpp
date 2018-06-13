@@ -43,7 +43,8 @@ struct path_snapper::impl {
     std::vector< size_t > snap_path(std::vector< point_t > path) {
         std::vector< size_t > way_points;
         for (point_t pt : path) {
-            point_tree.nearest_index(pt);
+            size_t pti = point_tree.nearest_index(pt);
+            way_points.push_back(pti);
         }
 
         // std::cout << "processed path: \n";
