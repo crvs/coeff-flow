@@ -6,7 +6,6 @@ project(coefficient-flow CXX)
 #   * Eigen3 under /usr/include/eigen3
 #   * boost under /usr/include/boost
 #   * libyaml under /usr/local/include/libyaml
-#   * pcl 1.8 under /usr/include/pcl-1.8
 #
 
 # in case Eigen, and/or GUDHI are not found by find_package
@@ -22,18 +21,16 @@ project(coefficient-flow CXX)
 # libyaml-cpp this should actually be found in "/usr/include" so there is no
 # real need for the find_package, but it's always nice to make sure
 #
-# pcl-1.8 version 1.7 doesn't let one read ply files into meshes which is
-# rather strange, but it is a thing.
-#
 
 # TODO remove
 add_subdirectory(KDTree)
 
-# TOD remove PCL
-add_subdirectory(tinyobjloader)
+
 add_subdirectory(tinyply)
-# find_package(tinyply REQUIRED HINTS "./tinyply/cmake")
 include_directories("./tinyply/source/")
+
+add_subdirectory(tinyobjloader)
+include_directories("./tinyobjloader")
 
 find_package(Boost REQUIRED)
 message(STATUS "Boost version: ${Boost_VERSION}")
@@ -49,11 +46,6 @@ find_package(yaml-cpp REQUIRED QUIET)
 message(STATUS "yaml-cpp version: ${YAML_CPP_VERSION}")
 message(STATUS "yaml-cpp directory: ${YAML_CPP_INCLUDE_DIR}")
 include_directories(${YAML_CPP_INCLUDE_DIR})
-
-find_package(PCL 1.8 REQUIRED QUIET COMPONENTS io)
-message(STATUS "PCL version: ${PCL_VERSION}")
-message(STATUS "PCL directory: ${PCL_INCLUDE_DIRS}")
-include_directories(${PCL_INCLUDE_DIRS})
 
 find_package(GUDHI 1.3 REQUIRED QUIET)
 message(STATUS "Gudhi version: ${GUDHI_VERSION}")
@@ -81,7 +73,8 @@ set(CMAKE_NM      "/usr/bin/llvm-nm")
 set(CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
 set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
+# set(CMAKE_BUILD_TYPE Debug)
 
 include_directories(
     "./lib" # where all the library files are
@@ -96,7 +89,7 @@ target_link_libraries(pathsnap KDTree)
 add_executable(qhull2ply "src/make_mesh.cpp")
 
 add_executable(yamltest "src/testing_facility.cpp")
-target_link_libraries(yamltest yaml-cpp scomplex pathsnap tinyply ${PCL_LIBRARIES})
+target_link_libraries(yamltest yaml-cpp scomplex pathsnap tinyply tinyobjloader)
 
 message(INFO ${CMAKE_CURRENT_SOURCE_DIR})
 message(INFO ${CMAKE_CURRENT_BINARY_DIR})

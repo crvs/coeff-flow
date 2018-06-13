@@ -1,5 +1,3 @@
-#include <pcl/io/obj_io.h>
-
 #include <iostream>
 #include <vector>
 
@@ -15,6 +13,7 @@
 #include "scomplex/simplicial_complex.hpp"
 #include "scomplex/types.hpp"
 
+#include "tiny_obj_loader.h"
 #include "tinyply.h"
 
 #include <time.h>
@@ -93,11 +92,11 @@ void call_single_cycle_test(std::string complex_file,
     call_single_cycle_test(complex_file, cycle_indices, {}, null_face, false);
 }
 
-template <typename T>
+template < typename T >
 struct vec3 {
     T x, y, z;
 
-    std::vector<double> point() {
+    std::vector< double > point() {
         std::vector< double > vec_;
         vec_.push_back(double(x));
         vec_.push_back(double(y));
@@ -105,7 +104,7 @@ struct vec3 {
         return vec_;
     }
 
-    std::vector<size_t> simp() {
+    std::vector< size_t > simp() {
         std::vector< size_t > vec_;
         vec_.push_back(size_t(x));
         vec_.push_back(size_t(y));
@@ -141,10 +140,8 @@ void call_single_cycle_test(std::string complex_file,
     t0 = clock();
 
     std::ifstream file(complex_file);
-
     std::string meshtype;
     std::getline(file, meshtype);
-
 
     if (meshtype == "ply") {
         tinyply::PlyFile plyMeshFile;
@@ -164,42 +161,56 @@ void call_single_cycle_test(std::string complex_file,
 
         {
             const size_t numVerticesBytes = vertices->buffer.size_bytes();
-            std::vector<vec3<float>> verts(vertices->count);
-            std::memcpy(verts.data(), vertices->buffer.get() , numVerticesBytes);
-            for (vec3<float> v : verts){
+            std::vector< vec3< float > > verts(vertices->count);
+            std::memcpy(verts.data(), vertices->buffer.get(), numVerticesBytes);
+            for (vec3< float > v : verts) {
                 points_v.push_back(v.point());
             }
         }
 
         {
             const size_t numFacesBytes = faces->buffer.size_bytes();
-            std::vector<vec3<uint32_t>> faces_(faces->count);
-            std::memcpy(faces_.data(), faces->buffer.get() , numFacesBytes);
-            for (vec3<uint32_t> f : faces_){
+            std::vector< vec3< uint32_t > > faces_(faces->count);
+            std::memcpy(faces_.data(), faces->buffer.get(), numFacesBytes);
+            for (vec3< uint32_t > f : faces_) {
                 cells_v.push_back(f.simp());
             }
         }
 
     } else {
-        // PCL shenanigans
-        pcl::PolygonMesh::Ptr mesh(new pcl::PolygonMesh{});
-        pcl::OBJReader Reader;
-        Reader.read(complex_file, *mesh);
+        tinyobj::attrib_t attrib;
+        std::vector< tinyobj::shape_t > shapes;
+        std::vector< tinyobj::material_t > materials;
+        const char* basepath = {};//= std::string("").c_str();
+        std::string err;
+        const char* filename = complex_file.c_str();
 
-        pcl::PointCloud< pcl::PointXYZ >::Ptr cloud(
-            new pcl::PointCloud< pcl::PointXYZ >{});
-        pcl::fromPCLPointCloud2(mesh->cloud, *cloud);
+        bool triangulate = false;
 
-        for (auto poly : mesh->polygons) {
-            cells_v.push_back(
-                {poly.vertices[0], poly.vertices[1], poly.vertices[2]});
+        tinyobj::LoadObj(&attrib, &shapes, &materials, &err, filename, basepath,
+                         triangulate);
+
+        std::vector< double > vert;
+        for (size_t i = 0; i < attrib.vertices.size(); i++) {
+            vert.push_back(attrib.vertices.at(i));
+            if (i % 3 == 2) {
+                points_v.push_back(vert);
+                vert.clear();
+            }
         }
 
-        for (auto pt : cloud->points) {
-            points_v.push_back({pt.x, pt.y, pt.z});
+        std::vector< size_t > face;
+        tinyobj::shape_t shape = shapes.at(0);
+        for (size_t i = 0; i < shape.mesh.indices.size(); i++) {
+            tinyobj::index_t idx = shape.mesh.indices.at(i);
+            face.push_back(idx.vertex_index);
+            if (i % 3 == 2) {
+                cells_v.push_back(face);
+                face.clear();
+            }
         }
     }
-    // end PCL shenanigans
+
     t1 = clock();
     std::cout << "mesh has " << points_v.size() << " vertices and "
               << cells_v.size() << " faces\n";
@@ -323,6 +334,7 @@ void call_single_cycle_test(std::string complex_file,
 
     make_ply(my_ply, s_comp->get_points(), cells_v, colors, edges, edge_colors);
     my_ply.close();
+
 
     gsimp::cell_t null_cell;
     if (!in_plane) {
