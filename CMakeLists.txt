@@ -5,7 +5,6 @@ project(coefficient-flow CXX)
 #   * Gudhi under /usr/include/gudhi
 #   * Eigen3 under /usr/include/eigen3
 #   * boost under /usr/include/boost
-#
 
 # in case Eigen, and/or GUDHI are not found by find_package
 # try setting the paths to them manually
@@ -55,7 +54,6 @@ set(CMAKE_BUILD_TYPE Release)
 # set(CMAKE_BUILD_TYPE Debug)
 
 include_directories( "./lib" )
-
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
 add_library(pathsnap SHARED "./lib/scomplex/path_snapper.cpp")
