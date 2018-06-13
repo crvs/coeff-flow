@@ -1,6 +1,9 @@
 # ignore all files
 *
 
+# tags file
+tags
+
 # unignore directories
 !*/
 
