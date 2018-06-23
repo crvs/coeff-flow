@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 RUN apt-get update && apt-get install -y \
     zsh \
@@ -34,9 +34,10 @@ RUN git clone https://github.com/crvs/coeff-flow && \
     git submodule update --init --recursive && \
     mkdir build && \
     cd build && \
-    cmake -DCMAKE_MODULE_PATH="/eigen-git-mirror-3.1.2/cmake" .. && \
-    make
+    cmake -DCMAKE_MODULE_PATH="/eigen-git-mirror-3.1.2/cmake" ..
 
+# RUN cd coeff-flow/build && \
+    # make
 
 CMD ["zsh"]
 
