@@ -32,10 +32,10 @@ include_directories("./tinyobjloader")
 
 find_package(Boost REQUIRED)
 
-find_package(Eigen3 3.1.2 REQUIRED QUIET)
+find_package(Eigen3 3.1.2 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-find_package(GUDHI 1.3 REQUIRED QUIET)
+find_package(GUDHI 1.3 REQUIRED)
 include_directories(${GUDHI_INCLUDE_DIRS})
 
 set(CMAKE_CXX_COMPILER             "/usr/bin/clang++")
