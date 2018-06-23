@@ -31,27 +31,13 @@ add_subdirectory(tinyobjloader)
 include_directories("./tinyobjloader")
 
 find_package(Boost REQUIRED)
-message(STATUS "Boost version: ${Boost_VERSION}")
-message(STATUS "Boost directory: ${Boost_INCLUDE_DIRS}")
-message(STATUS "boost libraries: ${Boost_LIBRARIES}")
 
 find_package(Eigen3 3.1.2 REQUIRED QUIET)
-message(STATUS "Eigen3 version: ${EIGEN3_VERSION}")
-message(STATUS "Eigen3 directory: ${EIGEN3_INCLUDE_DIR}")
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 find_package(GUDHI 1.3 REQUIRED QUIET)
-message(STATUS "Gudhi version: ${GUDHI_VERSION}")
-string(REGEX MATCH "^/home/" LOCAL_INSTALLED "${GUDHI_DIR}")
-string(COMPARE EQUAL ${LOCAL_INSTALLED} "/home/" LOCAL_INSTALLED)
-if(${LOCAL_INSTALLED})
-    set(GUDHI_INCLUDE_DIR "${GUDHI_DIR}/include")
-    message(STATUS "Gudhi directory: ${GUDHI_INCLUDE_DIR}")
-    include_directories(${GUDHI_INCLUDE_DIR})
-else()
-    message(STATUS "Gudhi directory: ${GUDHI_INCLUDE_DIRS}")
-    include_directories(${GUDHI_INCLUDE_DIRS})
-endif()
+include_directories(${GUDHI_INCLUDE_DIR})
+include_directories(${GUDHI_INCLUDE_DIRS})
 
 set(CMAKE_CXX_COMPILER             "/usr/bin/clang++")
 set(CMAKE_CXX_FLAGS                "-Wall -std=c++11")
@@ -69,10 +55,7 @@ set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 set(CMAKE_BUILD_TYPE Release)
 # set(CMAKE_BUILD_TYPE Debug)
 
-include_directories(
-    "./lib" # where all the library files are
-    "KDTree" # for the KDTree library
-    )
+include_directories("./lib")
 
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
@@ -84,8 +67,6 @@ add_executable(qhull2ply "src/make_mesh.cpp")
 add_executable(yamltest "src/testing_facility.cpp")
 target_link_libraries(yamltest yaml-cpp scomplex pathsnap tinyply tinyobjloader)
 
-message(INFO ${CMAKE_CURRENT_SOURCE_DIR})
-message(INFO ${CMAKE_CURRENT_BINARY_DIR})
 # TEST target
 add_custom_target(timing_test
     COMMAND "cp" "${CMAKE_CURRENT_SOURCE_DIR}/test/run_dumb_tests.sh" "${CMAKE_CURRENT_BINARY_DIR}"
