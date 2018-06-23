@@ -54,10 +54,7 @@ set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 set(CMAKE_BUILD_TYPE Release)
 # set(CMAKE_BUILD_TYPE Debug)
 
-include_directories(
-    "./lib" # where all the library files are
-    "KDTree" # for the KDTree library
-    )
+include_directories( "./lib" )
 
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
