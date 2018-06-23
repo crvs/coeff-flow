@@ -32,7 +32,7 @@ include_directories("./tinyobjloader")
 
 find_package(Boost REQUIRED)
 
-find_package(Eigen3 3.1.2 REQUIRED)
+find_package(Eigen3 3.3.4 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 find_package(GUDHI 1.3 REQUIRED)
@@ -54,10 +54,7 @@ set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 set(CMAKE_BUILD_TYPE Release)
 # set(CMAKE_BUILD_TYPE Debug)
 
-include_directories(
-    "./lib" # where all the library files are
-    "KDTree" # for the KDTree library
-    )
+include_directories( "./lib" )
 
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
