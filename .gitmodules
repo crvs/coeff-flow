@@ -7,3 +7,6 @@
 [submodule "tinyobjloader"]
 	path = tinyobjloader
 	url = https://github.com/syoyo/tinyobjloader
+[submodule "yaml-cpp"]
+	path = yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp

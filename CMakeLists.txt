@@ -5,7 +5,6 @@ project(coefficient-flow CXX)
 #   * Gudhi under /usr/include/gudhi
 #   * Eigen3 under /usr/include/eigen3
 #   * boost under /usr/include/boost
-#   * libyaml under /usr/local/include/libyaml
 #
 
 # in case Eigen, and/or GUDHI are not found by find_package
@@ -18,13 +17,12 @@ project(coefficient-flow CXX)
 # GUDHI version should be 1.3 or higher, provided they don't break the
 # SimplexTree interface
 #
-# libyaml-cpp this should actually be found in "/usr/include" so there is no
-# real need for the find_package, but it's always nice to make sure
-#
 
-# TODO remove
+add_subdirectory(yaml-cpp)
+include_directories("./yaml-cpp/include/")
+
 add_subdirectory(KDTree)
-
+include_directories("./KDTree")
 
 add_subdirectory(tinyply)
 include_directories("./tinyply/source/")
@@ -41,11 +39,6 @@ find_package(Eigen3 3.1.2 REQUIRED QUIET)
 message(STATUS "Eigen3 version: ${EIGEN3_VERSION}")
 message(STATUS "Eigen3 directory: ${EIGEN3_INCLUDE_DIR}")
 include_directories(${EIGEN3_INCLUDE_DIR})
-
-find_package(yaml-cpp REQUIRED QUIET)
-message(STATUS "yaml-cpp version: ${YAML_CPP_VERSION}")
-message(STATUS "yaml-cpp directory: ${YAML_CPP_INCLUDE_DIR}")
-include_directories(${YAML_CPP_INCLUDE_DIR})
 
 find_package(GUDHI 1.3 REQUIRED QUIET)
 message(STATUS "Gudhi version: ${GUDHI_VERSION}")
