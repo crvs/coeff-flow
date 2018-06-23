@@ -1,6 +1,6 @@
 [submodule "KDTree"]
 	path = KDTree
-	url = git@github.com:crvs/KDTree.git
+	url = https://github.com/crvs/KDTree.git
 [submodule "tinyply"]
 	path = tinyply
 	url = https://github.com/ddiakopoulos/tinyply
