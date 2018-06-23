@@ -19,10 +19,10 @@ RUN tar -xzf 2016-09-12-16-12-33_GUDHI_1.3.1.tar.gz && \
     make && \
     make install
 
-# getting eigen 3.1.2
-RUN wget https://github.com/eigenteam/eigen-git-mirror/archive/3.1.2.tar.gz && \
-    tar -xzf /3.1.2.tar.gz && \
-    cd eigen-git-mirror-3.1.2 && \
+# getting eigen 3.3.4
+RUN wget https://bitbucket.org/eigen/eigen/get/3.3.4.tar.gz && \
+    tar -xzf /3.3.4.tar.gz && \
+    cd eigen-eigen-5a0156e40feb && \
     mkdir build && \
     cd build && \
     cmake .. && \
@@ -36,8 +36,8 @@ RUN git clone https://github.com/crvs/coeff-flow && \
     cd build && \
     cmake -DCMAKE_MODULE_PATH="/eigen-git-mirror-3.1.2/cmake" ..
 
-# RUN cd coeff-flow/build && \
-    # make
+RUN cd coeff-flow/build && \
+    make
 
 CMD ["zsh"]
 

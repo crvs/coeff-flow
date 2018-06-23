@@ -32,7 +32,7 @@ include_directories("./tinyobjloader")
 
 find_package(Boost REQUIRED)
 
-find_package(Eigen3 3.1.2 REQUIRED)
+find_package(Eigen3 3.3.4 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 find_package(GUDHI 1.3 REQUIRED)

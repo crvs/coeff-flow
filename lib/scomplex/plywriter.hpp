@@ -22,7 +22,7 @@ void make_ply(std::ofstream& outfile,               //
     outfile << "property float z\n";
 
     outfile << "element face " + to_string(faces.size()) + "\n";
-    outfile << "property list uchar int vertex_index\n";
+    outfile << "property list uchar int vertex_indices\n";
 
     outfile << "end_header\n";
 
