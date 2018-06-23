@@ -36,7 +36,6 @@ find_package(Eigen3 3.1.2 REQUIRED QUIET)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 find_package(GUDHI 1.3 REQUIRED QUIET)
-include_directories(${GUDHI_INCLUDE_DIR})
 include_directories(${GUDHI_INCLUDE_DIRS})
 
 set(CMAKE_CXX_COMPILER             "/usr/bin/clang++")
@@ -55,7 +54,10 @@ set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 set(CMAKE_BUILD_TYPE Release)
 # set(CMAKE_BUILD_TYPE Debug)
 
-include_directories("./lib")
+include_directories(
+    "./lib" # where all the library files are
+    "KDTree" # for the KDTree library
+    )
 
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
@@ -67,6 +69,8 @@ add_executable(qhull2ply "src/make_mesh.cpp")
 add_executable(yamltest "src/testing_facility.cpp")
 target_link_libraries(yamltest yaml-cpp scomplex pathsnap tinyply tinyobjloader)
 
+message(INFO ${CMAKE_CURRENT_SOURCE_DIR})
+message(INFO ${CMAKE_CURRENT_BINARY_DIR})
 # TEST target
 add_custom_target(timing_test
     COMMAND "cp" "${CMAKE_CURRENT_SOURCE_DIR}/test/run_dumb_tests.sh" "${CMAKE_CURRENT_BINARY_DIR}"
