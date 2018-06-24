@@ -12,7 +12,9 @@ build:
   #    - apt update && apt-get install -y make autoconf cmake clang libboost-all-dev wget g++
     
   script: 
-    - cd /coeff-flow/build && make
+    - cd /coeff-flow && git pull # update code
+    - cd /coeff/flow/build && cmake .. && make # remake if it needs to be remade
+    
   #artifacts:
   #  paths:
   #    - mybinary
