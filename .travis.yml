@@ -8,3 +8,6 @@ before_install:
 
 install:
   - echo "success!"
+
+script:
+  - echo "success!"
