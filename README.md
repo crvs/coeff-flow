@@ -17,9 +17,6 @@ In order to compile this repository you will need the following packages:
 - `Boost (v >= 1.54.0)`
 - `Gudhi (v >= 1.3.1)`
 
-**Note:**
-- In case you are using a different version of `clang`, everything should still compile without problems, but you will need to change the appropriate lines in `CMakeLists.txt`.
-
 ## Running
 
 The timing tests presented in [1] can be run easily by simply performing
@@ -39,6 +36,18 @@ cp ../test/bunny2.yaml .
 ```
 
 This will output two `ply` files which contain a copy of the mesh `bunzipper.ply` and the bounding chain to the cycle specified by the path contained in the yaml file. One of them was computed by solving a large linear system using least squares conjugate gradient descent, whereas the other was computed by employing `coefficient_flow`.
+
+### Running with docker
+
+A docker file is provided in the `Docker` folder, and can be built by simply running `docker build -t coeff-flow .` from the `Docker` folder. Alternative an image of the same file can be downloaded from docker hub via `docker pull crvsf/coeff-flow` and there you can run the tests by:
+
+```{bash}
+docker run -it crvs/coeff-flow
+cd /coeff-flow build
+make timing-test
+```
+
+to run the timing tests, the files for the other tests, are still not provided.
 
 ### References/links
 
