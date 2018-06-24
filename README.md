@@ -42,7 +42,7 @@ This will output two `ply` files which contain a copy of the mesh `bunzipper.ply
 A docker file is provided in the `Docker` folder, and can be built by simply running `docker build -t coeff-flow .` from the `Docker` folder. Alternative an image of the same file can be downloaded from docker hub via `docker pull crvsf/coeff-flow` and there you can run the tests by:
 
 ```{bash}
-docker run -it crvs/coeff-flow
+docker run -it crvsf/coeff-flow
 cd /coeff-flow build
 make timing-test
 ```
