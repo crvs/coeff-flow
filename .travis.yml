@@ -1,2 +1,13 @@
 language: c++
-sudo: false
+sudo: required
+services: docker
+
+before_install:
+  - cd Docker
+  - docker build -t coeff-flow .
+
+install:
+  - echo "success!"
+
+script:
+  - echo "success!"
