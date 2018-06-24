@@ -13,7 +13,7 @@ build:
     
   script: 
     - cd /coeff-flow && git pull # update code
-    - cd /coeff/flow/build && cmake .. && make # remake if it needs to be remade
+    - cd /coeff-flow/build && cmake .. && make # remake if it needs to be remade
     
   #artifacts:
   #  paths:
