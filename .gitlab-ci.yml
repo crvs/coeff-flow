@@ -24,8 +24,8 @@ build:
   #     - "*.o"
 
 # run tests using the binary built before
-test:
-  stage: test
-  script:
-    - cd /coeff-flow/build
-    - make timing_test
+#test:
+#  stage: test
+#  script:
+#    - cd /coeff-flow/build
+#    - make timing_test
