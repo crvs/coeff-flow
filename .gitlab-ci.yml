@@ -27,4 +27,5 @@ build:
 test:
   stage: test
   script:
-    - echo success
+    - cd /coeff-flow/build
+    - make timing_test
