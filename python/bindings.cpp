@@ -12,11 +12,12 @@ using namespace gsimp;
 namespace py = pybind11;
 
 PYBIND11_MODULE(coeffflow, m) {
-    py::class_< simplicial_complex >(m, "simplicial_complex")  //
-        .def(py::init< std::vector< cell_t >& >())             //
-        .def("cell_to_index", &simplicial_complex::cell_to_index);
+    py::class_< simplicial_complex >(m, "simplicial_complex")      //
+        .def(py::init< std::vector< cell_t >& >())                 //
+        .def("cell_to_index", &simplicial_complex::cell_to_index)  //
+        .def("index_to_cell", &simplicial_complex::index_to_cell);
 
     m.def("coeff_flow", coeff_flow);
 
-    m.def("coeff_flow_embedded",coeff_flow_embedded);
+    m.def("coeff_flow_embedded", coeff_flow_embedded);
 };

@@ -49,6 +49,23 @@ make timing-test
 
 to run the timing tests, the files for the other tests, are still not provided.
 
+### Using Python bindings
+
+In the python bindings we provide bindings for the `simplicial_complex` which uses only cells to for construction, and provides also bindings for the functions `cell_to_index` and `index_to_cell`. Furthermore we provide bindings for `coeff_flow` and `coeff_flow_embedded`. Below is a toy example run:
+
+```{python}
+>>> import coeffflow
+>>> a = coeffflow.simplicial_complex([[0,1,2]])
+>>> a.cell_to_index([0,2])
+1
+>>> a.index_to_cell(0,1)
+[1]
+>>> a.index_to_cell(1,2)
+[2, 1]
+>>> coeffflow.coeff_flow_embedded(a ,(1, [1,-1,1]))
+(2, [1.0])
+```
+
 ### References/links
 
 [1]: Carvalho JF, Vejdemo-Johansson M, Kragic D, Pokorny FT. _An algorithm for calculating top-dimensional bounding chains._ 2017 [PeerJ Preprints 5:e3151v1](https://doi.org/10.7287/peerj.preprints.3151v1)
