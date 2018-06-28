@@ -49,6 +49,10 @@ make timing-test
 
 to run the timing tests, the files for the other tests, are still not provided.
 
+### Compiling python bindings
+
+Python bindings will (to the best of my knowledge) be compiled to be compatible with whichever version of python is set as default in the current system, that is if `/usr/bin/python` points to version `2.7` then `python2` bindings will be created, and if it points to version `3.6` `python3` bindings will be created. This, to the best of my knowledge is the default behaviour of `pybind11`.
+
 ### Using Python bindings
 
 In the python bindings we provide bindings for the `simplicial_complex` which uses only cells to for construction, and provides also bindings for the functions `cell_to_index` and `index_to_cell`. Furthermore we provide bindings for `coeff_flow` and `coeff_flow_embedded`. Below is a toy example run:
