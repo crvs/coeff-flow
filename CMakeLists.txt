@@ -5,7 +5,6 @@ project(coefficient-flow CXX)
 #   * Gudhi under /usr/include/gudhi
 #   * Eigen3 under /usr/include/eigen3
 #   * boost under /usr/include/boost
-#
 
 # in case Eigen, and/or GUDHI are not found by find_package
 # try setting the paths to them manually
@@ -20,6 +19,9 @@ project(coefficient-flow CXX)
 
 add_subdirectory(yaml-cpp)
 include_directories("./yaml-cpp/include/")
+
+add_subdirectory(pybind11)
+include_directories("./pybind11/include/")
 
 add_subdirectory(KDTree)
 include_directories("./KDTree")
@@ -56,7 +58,6 @@ set(CMAKE_BUILD_TYPE Release)
 
 include_directories( "./lib" )
 
-
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
 add_library(pathsnap SHARED "./lib/scomplex/path_snapper.cpp")
 target_link_libraries(pathsnap KDTree)
@@ -75,3 +76,7 @@ add_custom_target(timing_test
     COMMAND "${CMAKE_CURRENT_BINARY_DIR}/run_dumb_tests.sh" "1"
     DEPENDS yamltest qhull2ply "test/run_dumb_tests.sh" "test/dumbexample.yaml")
 
+#Python bindings:
+add_library(coeffflow MODULE python/bindings.cpp)
+target_link_libraries(coeffflow PRIVATE scomplex pybind11::module)
+set_target_properties(coeffflow PROPERTIES PREFIX "" SUFFIX .so)
