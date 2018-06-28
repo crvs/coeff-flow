@@ -17,4 +17,6 @@ PYBIND11_MODULE(coeffflow, m) {
         .def("cell_to_index", &simplicial_complex::cell_to_index);
 
     m.def("coeff_flow", coeff_flow);
-}
+
+    m.def("coeff_flow_embedded",coeff_flow_embedded);
+};
