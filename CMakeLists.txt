@@ -18,6 +18,7 @@ project(coefficient-flow CXX)
 #
 
 add_subdirectory(yaml-cpp)
+set(YAML_CPP_ENABLE_TESTING OFF)
 include_directories("./yaml-cpp/include/")
 
 add_subdirectory(pybind11)
@@ -59,6 +60,10 @@ set(CMAKE_BUILD_TYPE Release)
 include_directories( "./lib" )
 
 add_library(scomplex SHARED "./lib/scomplex/simplicial_complex.cpp")
+
+add_library(smap SHARED "./lib/scomplex/simplicial_map.cpp")
+target_link_libraries(smap scomplex)
+
 add_library(pathsnap SHARED "./lib/scomplex/path_snapper.cpp")
 target_link_libraries(pathsnap KDTree)
 
@@ -76,7 +81,16 @@ add_custom_target(timing_test
     COMMAND "${CMAKE_CURRENT_BINARY_DIR}/run_dumb_tests.sh" "1"
     DEPENDS yamltest qhull2ply "test/run_dumb_tests.sh" "test/dumbexample.yaml")
 
-#Python bindings:
+#Python3 bindings:
+set(PYBIND11_PYTHON_VERSION 3)
 add_library(coeffflow MODULE python/bindings.cpp)
 target_link_libraries(coeffflow PRIVATE scomplex pybind11::module)
 set_target_properties(coeffflow PROPERTIES PREFIX "" SUFFIX .so)
+unset(PYBIND11_PYTHON_VERSION)
+
+#Python2 bindings:
+set(PYBIND11_PYTHON_VERSION 2.7)
+add_library(coeffflow2 MODULE python/bindings.cpp)
+target_link_libraries(coeffflow2 PRIVATE scomplex pybind11::module)
+set_target_properties(coeffflow2 PROPERTIES PREFIX "" SUFFIX .so)
+

@@ -1,5 +1,3 @@
-#include <scomplex/simplicial_complex.hpp>
-#include <scomplex/types.hpp>
 
 #include <iterator>  // for debuging purposes
 
@@ -14,6 +12,10 @@
 #include <tuple>
 
 #include <iostream>
+
+#include "scomplex/simplicial_complex.hpp"
+#include "scomplex/types.hpp"
+
 namespace gsimp {
 
 // hasse diagram structures
