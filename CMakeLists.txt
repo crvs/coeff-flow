@@ -54,8 +54,8 @@ set(CMAKE_NM      "/usr/bin/llvm-nm")
 set(CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
 set(CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
-set(CMAKE_BUILD_TYPE Release)
-# set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
 include_directories( "./lib" )
 
@@ -84,7 +84,7 @@ add_custom_target(timing_test
 #Python3 bindings:
 set(PYBIND11_PYTHON_VERSION 3)
 add_library(coeffflow MODULE python/bindings.cpp)
-target_link_libraries(coeffflow PRIVATE scomplex pybind11::module)
+target_link_libraries(coeffflow PRIVATE scomplex pathsnap pybind11::module)
 set_target_properties(coeffflow PROPERTIES PREFIX "" SUFFIX .so)
 unset(PYBIND11_PYTHON_VERSION)
 
