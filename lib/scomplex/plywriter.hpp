@@ -28,9 +28,9 @@ void make_ply(std::ofstream& outfile,               //
 
     // insert point list
     for (size_t i = 0; i < points.size() ; i++) {
-        for (auto c : points[i]) outfile << to_string(c) + " ";
-        if (points[i].size() < 3) {
-        for (int t = 0;t<3-points[i].size();++t)
+        for (auto c : points.at(i)) outfile << to_string(c) + " ";
+        if (points.at(i).size() < 3) {
+        for (int t = 0;t<3-points.at(i).size();++t)
         outfile << "0.0 ";}
         outfile << "\n";
     }
@@ -81,35 +81,35 @@ void make_ply(std::ofstream& outfile,               //
     vector<vector<int>> v_colors(points.size(),{150,150,150});
     for(size_t i = 0; i < edges.size() ; i++)
     {
-        size_t v1 = edges[i][0];
-        size_t v2 = edges[i][1];
-        v_colors[v1] = edge_colors[i];
-        v_colors[v2] = edge_colors[i];
+        size_t v1 = edges.at(i).at(0);
+        size_t v2 = edges.at(i).at(1);
+        v_colors.at(v1) = edge_colors.at(i);
+        v_colors.at(v2) = edge_colors.at(i);
     }
     // insert point list
     for (size_t i = 0; i < points.size() ; i++) {
-        for (auto c : points[i]) outfile << to_string(c) + " ";
-        if (points[i].size() < 3) {
-        for (int t = 0;t<3-points[i].size();++t)
+        for (auto c : points.at(i)) outfile << to_string(c) + " ";
+        if (points.at(i).size() < 3) {
+        for (int t = 0;t<3-points.at(i).size();++t)
         outfile << "0.0 ";}
-        for (int k : v_colors[i]) outfile << to_string(k) + " ";
+        for (int k : v_colors.at(i)) outfile << to_string(k) + " ";
         outfile << "\n";
     }
     // insert face list
     for (size_t i = 0; i < faces.size(); ++i) {
         outfile << "3 ";
         // face vertex index
-        for (size_t j : faces[i]) outfile << to_string(j) + " ";
+        for (size_t j : faces.at(i)) outfile << to_string(j) + " ";
         // face color
-        for (int k : face_colors[i]) outfile << to_string(k) + " ";
+        for (int k : face_colors.at(i)) outfile << to_string(k) + " ";
         outfile << "\n";
     }
     // insert edge list
     for (size_t i = 0; i < edges.size(); ++i) {
         // edge vertex index
-        for (size_t j : edges[i]) outfile << to_string(j) + " ";
+        for (size_t j : edges.at(i)) outfile << to_string(j) + " ";
         // edge color
-        for (int k : edge_colors[i]) outfile << to_string(k) + " ";
+        for (int k : edge_colors.at(i)) outfile << to_string(k) + " ";
         outfile << "\n";
     }
 }

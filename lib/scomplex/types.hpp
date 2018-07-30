@@ -31,7 +31,7 @@ size_t chain_size(chain_t& p) {return std::get<1>(p).size();}
 
 int& chain_dim(chain_v& p) { return std::get<0>(p); }
 std::vector<double>& chain_rep_v(chain_v& p) { return std::get<1>(p); }
-double& chain_val(chain_v& p, size_t i) { return std::get<1>(p)[i]; }
+double& chain_val(chain_v& p, size_t i) { return std::get<1>(p).at(i); }
 size_t chain_size(chain_v& p) {return std::get<1>(p).size();}
 
 chain_t create_chain(int d,std::vector<double>& vec) {
@@ -43,7 +43,7 @@ chain_t create_chain(int d,std::vector<double>& vec) {
     chain_t c(d,v);
     std::cout << "made the pair starting conversion\n";
     for (size_t i = 0 ; i < vec.size(); ++i)
-    {if (vec[i] != 0) chain_val(c,i) = vec[i];}
+    {if (vec.at(i) != 0) chain_val(c,i) = vec.at(i);}
     return c;
 }
 
@@ -89,7 +89,7 @@ void prod_to(double coef, chain_t chain) { std::get<1>(chain) *= coef; }
 
 Eigen::VectorXd point_to_eigen(point_t pt) {
     Eigen::VectorXd v0(pt.size());
-    for (int j = 0; j < pt.size(); ++j) v0(j) = pt[j];
+    for (int j = 0; j < pt.size(); ++j) v0(j) = pt.at(j);
     return v0;
 }
 

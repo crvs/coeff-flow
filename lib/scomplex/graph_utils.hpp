@@ -96,13 +96,13 @@ std::vector<vertex_t> shortest_path(graph_t& g, vertex_t s, vertex_t t) {
     // property_map<graph_t, edge_weight_t>::type weight_map = get(edge_weight, g);
     std::vector<vertex_t> predecessors(num_vertices(g));
     std::vector<double> distances(num_vertices(g));
-    dijkstra_shortest_paths(g, s, predecessor_map(&predecessors[0]).distance_map(&distances[0]));
+    dijkstra_shortest_paths(g, s, predecessor_map(&predecessors.at(0)).distance_map(&distances.at(0)));
     // construct the path (going backwards from the target to the source)
     vertex_t it = t;
     std::vector<vertex_t> s_t_path{};
     do {
         s_t_path.push_back(it);
-        it = predecessors[it];
+        it = predecessors.at(it);
     } while (it != s);
     std::reverse(s_t_path.begin(), s_t_path.end());
     return s_t_path;

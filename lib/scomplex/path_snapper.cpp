@@ -49,8 +49,8 @@ struct path_snapper::impl {
 
         // std::cout << "processed path: \n";
         // for (size_t i = 0 ; i < way_points.size() ; ++i ) {
-        //     for (auto c : path[i] ) std::cout << c << " ";
-        //     auto pt = s_comp->get_point( way_points[i] );
+        //     for (auto c : path.at(i) ) std::cout << c << " ";
+        //     auto pt = s_comp->get_point( way_points.at(i) );
         //     std::cout << " -> ";
         //     for (auto c : pt ) std::cout << c << " ";
         //     std::cout << "\n";
@@ -123,7 +123,7 @@ chain_v path_snapper::snap_path_to_v_chain(std::vector< point_t > path) {
     chain_v rep = p_impl->s_comp->new_v_chain(1);
     for (auto pair : pair_seq) {
         auto cell = std::get< 0 >(pair);
-        if (cell[0] != cell[1]) {
+        if (cell.at(0) != cell.at(1)) {
             size_t index = p_impl->s_comp->cell_to_index(std::get< 0 >(pair));
             chain_val(rep, index) += std::get< 1 >(pair);
         }
@@ -135,7 +135,7 @@ chain_t path_snapper::snap_path_to_chain(std::vector< point_t > path) {
     chain_t rep = p_impl->s_comp->new_chain(1);
     for (auto pair : pair_seq) {
         auto cell = std::get< 0 >(pair);
-        if (cell[0] != cell[1]) {
+        if (cell.at(0) != cell.at(1)) {
             size_t index = p_impl->s_comp->cell_to_index(std::get< 0 >(pair));
             chain_val(rep, index) += std::get< 1 >(pair);
         }

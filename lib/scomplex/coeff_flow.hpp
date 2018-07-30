@@ -17,10 +17,10 @@ typedef queue<q_elem_t> queue_t;
 class out_of_context : exception {};
 class no_bounding_chain : exception {};
 
-chain_v coeff_flow(simplicial_complex& s_comp,  //
+chain_v coeff_flow(simplicial_complex s_comp,  //
                    chain_v p,                   //
-                   cell_t sigma_0,              //
-                   double c_0) {                //
+                   const cell_t& sigma_0,              //
+                   const double& c_0) {                //
 
     if (chain_dim(p) != s_comp.dimension() - 1) throw out_of_context();
     // 01
@@ -32,8 +32,8 @@ chain_v coeff_flow(simplicial_complex& s_comp,  //
                           false);
 
     size_t seen_taus = 0;
-    seen_sigma[s_comp.cell_to_index(sigma_0)] = true;
-    c_vec[s_comp.cell_to_index(sigma_0)] = c_0;
+    seen_sigma.at(s_comp.cell_to_index(sigma_0)) = true;
+    c_vec.at(s_comp.cell_to_index(sigma_0)) = c_0;
     size_t seen_sigmas = 1;
 
     queue_t queue;
@@ -68,17 +68,17 @@ chain_v coeff_flow(simplicial_complex& s_comp,  //
         size_t sigma_i = s_comp.cell_to_index(sigma);
         size_t tau_i = s_comp.cell_to_index(tau);
 
-        if (seen_sigma[sigma_i]) {
+        if (seen_sigma.at(sigma_i)) {
             // found local incoherence
-            if (c_vec[sigma_i] != c) throw no_bounding_chain();
+            if (c_vec.at(sigma_i) != c) throw no_bounding_chain();
         } else {
-            seen_sigma[sigma_i] = true;
-            c_vec[sigma_i] = c;
+            seen_sigma.at(sigma_i) = true;
+            c_vec.at(sigma_i) = c;
             seen_sigmas++;
         }
 
-        if (seen_tau[tau_i]) continue;
-        seen_tau[tau_i] = true;
+        if (seen_tau.at(tau_i)) continue;
+        seen_tau.at(tau_i) = true;
         seen_taus++;
 
         cell_t sigma_p;
@@ -106,7 +106,7 @@ chain_v coeff_flow(simplicial_complex& s_comp,  //
                           s_comp.boundary_inclusion_index(tau, sigma) * c);
             for (cell_t tau_p : s_comp.cell_boundary(sigma_p)) {
                 size_t tau_p_i = s_comp.cell_to_index(tau_p);
-                if (not seen_tau[tau_p_i]) {
+                if (not seen_tau.at(tau_p_i)) {
                     // each tau only needs to be processed once
                     queue.emplace(sigma_p, tau_p, c_p);
                 }
@@ -125,7 +125,7 @@ chain_v coeff_flow(simplicial_complex& s_comp,  //
     return c_chain;
 }
 
-chain_v coeff_flow_embedded(simplicial_complex& s_comp, chain_v p) {
+chain_v coeff_flow_embedded(simplicial_complex s_comp, chain_v p) {
     if (chain_dim(p) != s_comp.dimension() - 1) throw out_of_context();
 
     cell_t sigma;
@@ -134,7 +134,7 @@ chain_v coeff_flow_embedded(simplicial_complex& s_comp, chain_v p) {
         if (s_comp.get_cofaces(tau).size() < 2) {
             int sigma_ind;
             size_t tau_i = s_comp.cell_to_index(tau);
-            tie(sigma_ind, sigma) = s_comp.get_cof_and_ind(tau)[0];
+            tie(sigma_ind, sigma) = s_comp.get_cof_and_ind(tau).at(0);
             c = sigma_ind * chain_val(p, tau_i);
             chain_v sol = coeff_flow(s_comp, p, sigma, c);
             return sol;

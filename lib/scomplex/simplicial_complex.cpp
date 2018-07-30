@@ -1,3 +1,5 @@
+#include "scomplex/simplicial_complex.hpp"
+#include "scomplex/types.hpp"
 
 #include <iterator>  // for debuging purposes
 
@@ -12,9 +14,6 @@
 #include <tuple>
 
 #include <iostream>
-
-#include "scomplex/simplicial_complex.hpp"
-#include "scomplex/types.hpp"
 
 namespace gsimp {
 
@@ -70,20 +69,20 @@ struct hasse_diag {
     std::shared_ptr< hasse_node > get_face(int d, size_t face_i,
                                            bool building = false) {
         std::shared_ptr< hasse_node > face;
-        if (building && cells_c[d][face_i])
-            face = cells[d][face_i];
+        if (building && cells_c.at(d).at(face_i))
+            face = cells.at(d).at(face_i);
         else {
-            if (building) cells_c[d][face_i] = true;
+            if (building) cells_c.at(d).at(face_i) = true;
 
-            cells[d][face_i] = std::make_shared< hasse_node >(
+            cells.at(d).at(face_i) = std::make_shared< hasse_node >(
                 std::pair< int, size_t >(d, face_i));
-            face = cells[d][face_i];
+            face = cells.at(d).at(face_i);
         }
         return face;
     }
 
     std::vector< size_t > get_coface_i(int d, size_t face_i) {
-        auto node = cells[d][face_i];
+        auto node = cells.at(d).at(face_i);
         std::vector< size_t > cofaces;
         for (auto v : node->cofaces)
             cofaces.push_back(std::get< 1 >(v->handle));
@@ -111,7 +110,9 @@ struct simplicial_complex::impl {
     bool has_hasse;
     hasse_diag incidence;
 
-    impl(std::vector< point_t >& arg_points, std::vector< cell_t >& arg_tris)
+    impl() = default;
+
+    impl(const std::vector< point_t >& arg_points, const std::vector< cell_t >& arg_tris)
         : points(arg_points) {
         // create the simplex tree
         for (auto tri : arg_tris) {
@@ -132,17 +133,17 @@ struct simplicial_complex::impl {
         auto simplex_range = simplices.complex_simplex_range();
         for (auto s : simplex_range) {
             int d = simplices.dimension(s);
-            simplices.assign_key(s, count[d]++);
-            levels[d]->push_back(new simp_handle(s));
+            simplices.assign_key(s, count.at(d)++);
+            levels.at(d)->push_back(new simp_handle(s));
         }
     }
 
     ~impl() {
         // get rid of the levels so they won't dangle
-        for (int i = levels.size(); i <= 0; --i) levels[i].reset();
+        for (int i = levels.size(); i <= 0; --i) levels.at(i).reset();
     };
 
-    size_t get_level_size(int level) { return levels[level]->size(); }
+    size_t get_level_size(int level) { return levels.at(level)->size(); }
 
     // calculate the index of s_1 in the boundary of s_2
     int boundary_index(simp_handle s_1, simp_handle s_2) {
@@ -189,14 +190,14 @@ struct simplicial_complex::impl {
             for (auto bs : simplices.boundary_simplex_range(s)) {
                 int i = simplices.key(bs);
                 int k = simplices.dimension(bs);
-                boundary_matrices[k].coeffRef(i, j) = boundary_index(bs, s);
+                boundary_matrices.at(k).coeffRef(i, j) = boundary_index(bs, s);
             }
         }
     }
 
     std::vector< cell_t > get_level(int level) {
         std::vector< cell_t > level_cells;
-        for (auto simp : *levels[level]) {
+        for (auto simp : *levels.at(level)) {
             cell_t v_simp;
             for (auto v : simplices.simplex_vertex_range(*simp)) {
                 v_simp.push_back(v);
@@ -207,9 +208,10 @@ struct simplicial_complex::impl {
     }
 
     simp_handle index_to_handle(int d, size_t tau) {
-        return *(*(levels[d]))[tau];
+        return *(*(levels.at(d))).at(tau);
     }
 
+    
     size_t handle_to_index(simp_handle tau) { return simplices.key(tau); }
 
     simp_handle cell_to_handle(cell_t tau) {
@@ -304,13 +306,19 @@ int simplicial_complex::get_level_size(int level) {
     return p_impl->get_level_size(level);
 }
 
-simplicial_complex::simplicial_complex(std::vector< cell_t >& arg_tris) {
+simplicial_complex::simplicial_complex() {
+    std::vector<point_t> points = {};
+    std::vector<cell_t> cells = {};
+    p_impl = std::make_shared<impl> (points, cells);
+}
+
+simplicial_complex::simplicial_complex(const std::vector< cell_t >& arg_tris) {
     std::vector< point_t > points = {};
     p_impl = std::make_shared< impl >(points, arg_tris);
 }
 
-simplicial_complex::simplicial_complex(std::vector< point_t >& arg_points,
-                                       std::vector< cell_t >& arg_tris) {
+simplicial_complex::simplicial_complex(const std::vector< point_t >& arg_points,
+                                       const std::vector< cell_t >& arg_tris) {
     p_impl = std::make_shared< impl >(arg_points, arg_tris);
 }
 
@@ -331,7 +339,7 @@ std::vector< point_t > simplicial_complex::get_points() {
 }
 
 point_t simplicial_complex::get_point(size_t index) {
-    return p_impl->points[index];
+    return p_impl->points.at(index);
 }
 
 std::vector< cell_t > simplicial_complex::get_level(int level) {
@@ -344,7 +352,7 @@ matrix_t simplicial_complex::get_boundary_matrix(int d) {
 
     // now they have to be instantiated, get them
     if (0 <= d && d < p_impl->boundary_matrices.size())
-        return p_impl->boundary_matrices[d];
+        return p_impl->boundary_matrices.at(d);
     else
         throw No_Boundary();
 }
@@ -352,7 +360,7 @@ matrix_t simplicial_complex::get_boundary_matrix(int d) {
 int simplicial_complex::dimension() { return p_impl->simplices.dimension(); }
 
 cell_t simplicial_complex::index_to_cell(int d, size_t ind) {
-    auto sh = (*(p_impl->levels[d]))[ind];
+    auto sh = (*(p_impl->levels.at(d))).at(ind);
     return p_impl->handle_to_cell(*sh);
 }
 
@@ -383,7 +391,7 @@ std::vector< cell_t > simplicial_complex::get_cofaces(cell_t face) {
     // codimension 1 faces
     auto coface_i_v = p_impl->incidence.get_coface_i(d, face_i);
     for (auto v : coface_i_v) {
-        auto face_h = (*(p_impl->levels[d + 1]))[v];
+        auto face_h = (*(p_impl->levels.at(d + 1))).at(v);
         s_cofaces.push_back(p_impl->handle_to_cell(*face_h));
     }
     return s_cofaces;
